@@ -11,6 +11,8 @@ int main(){
 	const BitSet b(456);
 	std::cout << "b:" << b << std::endl;
 	std::cout << "a+b:" << a + b << std::endl;
+	const BitSet c("100", 10);
+	std::cout << "c:" << c.GetString(2).c_str() << std::endl;
 	getchar();
 	return 0;
 }

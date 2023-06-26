@@ -13,21 +13,20 @@ BitSet::BitSet(uint64_t value) {
 		m_bits.push_back('0');
 	}
 }
+BitSet::BitSet(const std::string &value, uint8_t base):
+	BitSet(std::vector<char>(value.crbegin(), value.crend()), base){
+
+}
 BitSet::BitSet() {
 
 }
-BitSet::BitSet(const std::vector<char> &bits) {
-	for (auto bit = bits.crbegin(); bit != bits.crend(); bit++) {
-		assert('0' <= *bit && *bit <= '1');
-		if ('1' == *bit) {
-			m_bits.insert(m_bits.cbegin(), '1');
-		}
-		else {
-			if (!m_bits.empty()) {
-				m_bits.insert(m_bits.cbegin(), '0');
-			}
-		}
-	}
+BitSet::BitSet(const std::vector<char> &bits, uint8_t base) {
+	std::vector<char> quotient = bits;
+	char remainder = '0';
+	do{
+		Div2(base, quotient, remainder);
+		m_bits.push_back(remainder);
+	} while (quotient.size() > 1 || '0' != quotient.front());
 	if (m_bits.empty()) {
 		m_bits.push_back('0');
 	}
@@ -251,3 +250,56 @@ std::ostream& operator<<(std::ostream& out, const BitSet &bits) {
 	out << bits.GetString().c_str();
 	return out;
 }
+
+uint16_t BitSet::ToBuilt(char a, char b, uint8_t base) {
+	if (10 > base) {
+		assert(('0' <= a && a <= '9') || ('A' <= a && a <= 'A' + base - 11));
+		assert(('0' <= b && b <= '9') || ('A' <= b && b <= 'A' + base - 11));
+	}
+	else {
+		assert('0' <= a && a <= '0' + base - 1);
+		assert('0' <= b && b <= '0' + base - 1);
+	}
+	uint16_t result = 0;
+	if ('0' <= a && a <= '9') {
+		result += (a - '0') * base;
+	}
+	else {
+		result += (a - 'A' + 10) * base;
+	}
+	if ('0' <= b && b <= '9') {
+		result += (b - '0');
+	}
+	else {
+		result += (b - 'A' + 10);
+	}
+	return result;
+}
+
+char BitSet::ToChar(uint16_t value, uint8_t base) {
+	if (0 <= value && value <= 9) {
+		return '0' + value;
+	}
+	else {
+		return 'A' + value - 10;
+	}
+}
+
+void BitSet::Div2(uint8_t base, std::vector<char> &bits, char &remainder) {
+	std::vector<char> quotient;
+	char pre = '0';
+	for (auto bit = bits.crbegin(); bit != bits.crend(); bit++) {
+		uint16_t built = ToBuilt(pre, *bit, base);
+		uint16_t q = built / 2;
+		uint16_t r = built % 2;
+		quotient.insert(quotient.cbegin(), ToChar(q, base));
+		pre = '0' + r;
+	}
+	remainder = pre;
+	while (quotient.size() > 1 && '0' == quotient.back()) {
+		quotient.pop_back();
+	}
+	bits = quotient;
+
+}
+

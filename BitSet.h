@@ -8,7 +8,7 @@
 class BitSet {
 public:
 	BitSet(uint64_t value);
-	BitSet(const std::vector<char> &bits);
+	BitSet(const std::string &value, uint8_t base = 10);
 	operator bool() const;
 	bool operator==(const BitSet &other) const;
 	bool operator>(const BitSet &other) const;
@@ -32,8 +32,12 @@ public:
 	friend std::ostream& operator<<(std::ostream& out, const BitSet &bits);
 private:
 	BitSet();
+	BitSet(const std::vector<char> &bits, uint8_t base = 2);
 	uint8_t GetBuilt()const;
 	BitSet &Format();
+	static uint16_t ToBuilt(char a, char b, uint8_t base);
+	static char ToChar(uint16_t value, uint8_t base);
+	static void Div2(uint8_t base, std::vector<char> &bits, char &remainder);
 	std::vector<char> m_bits;
 };
 
