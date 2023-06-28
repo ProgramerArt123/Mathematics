@@ -170,6 +170,10 @@ BitSet BitSet::operator*(const BitSet &multiplier) const {
 	return result.Format();
 }
 BitSet BitSet::operator/(const BitSet &divisor) const {
+	if (divisor == BitSet(0)) {
+		throw "undefined";
+	}
+
 	if (*this < divisor) {
 		return BitSet(0);
 	}

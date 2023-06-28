@@ -13,6 +13,12 @@ int main(){
 	std::cout << "a+b:" << a + b << std::endl;
 	const BitSet c("100", 10);
 	std::cout << "c:" << c.GetString(2).c_str() << std::endl;
+	const BitSet d("10000000000000000000000000000000000000000000000000", 10);
+	const BitSet e("3", 10);
+	const BitSet &f = d / e;
+	std::cout << "d / e:" << f << std::endl;
+	std::cout << "f:" << f * e << std::endl;
+	std::cout << "d % e:" << d % e << std::endl;
 	getchar();
 	return 0;
 }
