@@ -5,7 +5,9 @@
 #include <vector>
 #include <ostream>
 
-class BitSet {
+#include "Number.h"
+
+class BitSet : public Number {
 public:
 	BitSet(uint64_t value);
 	BitSet(const std::string &value, uint8_t base = 10);
@@ -28,8 +30,6 @@ public:
 	BitSet &operator++();
 
 	const std::string GetString(uint8_t base = 10) const;
-
-	friend std::ostream& operator<<(std::ostream& out, const BitSet &bits);
 private:
 	BitSet();
 	BitSet(const std::vector<char> &bits, uint8_t base = 2);

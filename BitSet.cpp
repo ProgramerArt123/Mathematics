@@ -250,11 +250,6 @@ BitSet &BitSet::Format() {
 	return *this;
 }
 
-std::ostream& operator<<(std::ostream& out, const BitSet &bits) {
-	out << bits.GetString().c_str();
-	return out;
-}
-
 uint16_t BitSet::ToBuilt(char a, char b, uint8_t base) {
 	if (10 > base) {
 		assert(('0' <= a && a <= '9') || ('A' <= a && a <= 'A' + base - 11));
