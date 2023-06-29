@@ -2,6 +2,7 @@
 
 #include "BitSet.h"
 #include "Integer.h"
+#include "Fraction.h"
 
 int main(){
 	std::cout << "calculating" << std::endl;
@@ -26,6 +27,14 @@ int main(){
 		const Integer a(BitSet("1"), false);
 		const Integer b(BitSet("10000000000000000000000000000000000000000000000000"));
 		std::cout << "a + b:" << a + b << std::endl;
+	}
+	{
+		const Fraction a(BitSet("1"), BitSet("3"));
+		const Integer b(3);
+		std::cout << "a, b:" << a << "," << b << std::endl;
+		std::cout << "a + b:" << a + b << std::endl;
+		std::cout << "b + a:" << b + a << std::endl;
+		std::cout << "a - b:" << a - b << std::endl;
 	}
 	getchar();
 	return 0;

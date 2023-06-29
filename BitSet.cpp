@@ -32,7 +32,7 @@ BitSet::BitSet(const std::vector<char> &bits, uint8_t base) {
 	}
 }
 BitSet::operator bool() const {
-	return !m_bits.empty();
+	return !(1 == m_bits.size() && '0' == m_bits.front());
 }
 bool BitSet::operator==(const BitSet &other) const {
 	return m_bits == other.m_bits;

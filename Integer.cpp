@@ -49,15 +49,15 @@ Integer Integer::operator*(const Integer &multiplier) const {
 	product.m_positive = m_positive == multiplier.m_positive;
 	return product;
 }
-Integer Integer::operator%(const Integer &divisor) const {
-	Integer remainder = m_value % divisor.m_value;
-	remainder.m_positive = m_positive == divisor.m_positive;
-	return remainder;
-}
 Integer Integer::operator/(const Integer &divisor) const {
 	Integer quotient = m_value / divisor.m_value;
 	quotient.m_positive = m_positive == divisor.m_positive;
 	return quotient;
+}
+Integer Integer::operator%(const Integer &divisor) const {
+	Integer remainder = m_value % divisor.m_value;
+	remainder.m_positive = m_positive == divisor.m_positive;
+	return remainder;
 }
 Integer &Integer::operator+=(const Integer &addition) {
 	*this = *this + addition;
