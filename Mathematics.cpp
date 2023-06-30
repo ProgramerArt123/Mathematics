@@ -31,10 +31,15 @@ int main(){
 	{
 		const Fraction a(BitSet("1"), BitSet("3"));
 		const Integer b(3);
-		std::cout << "a, b:" << a << "," << b << std::endl;
-		std::cout << "a + b:" << a + b << std::endl;
-		std::cout << "b + a:" << b + a << std::endl;
-		std::cout << "a - b:" << a - b << std::endl;
+		std::cout << "a, b = " << a << "," << b << std::endl;
+		std::cout << "a + b = " << a + b << std::endl;
+		std::cout << "b + a = " << b + a << std::endl;
+		std::cout << "a - b = " << a - b << std::endl;
+		std::cout << "a = " << a.GetDecimal(10, 100) << std::endl;
+		std::cout << "a = " << a.GetDecimal(2, 10) << std::endl;
+		std::cout << "1 / 30 = " << Fraction(BitSet("1"), BitSet("30")).GetDecimal(10, 10) << std::endl;
+		std::cout << "3 / 1 = " << Fraction(BitSet("3"), BitSet("1")).GetDecimal(10, 10) << std::endl;
+		std::cout << "5 / 4 = " << Fraction(BitSet("5"), BitSet("4")).GetDecimal(10, 10) << std::endl;
 	}
 	getchar();
 	return 0;

@@ -11,7 +11,7 @@ public:
 	Fraction(const Integer &integer);
 	Fraction(const Integer &numerator, const Integer &denominator);
 	const std::string GetString(uint8_t base = 10) const override;
-
+	const std::string GetDecimal(uint8_t base, size_t decimalLength) const;
 	bool IsPositive() const;
 	Fraction operator-() const;
 	bool operator<(const Fraction &other) const;
