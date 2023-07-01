@@ -40,6 +40,7 @@ int main(){
 		std::cout << "1 / 30 = " << Fraction(BitSet("1"), BitSet("30")).GetDecimal(10, 10) << std::endl;
 		std::cout << "3 / 1 = " << Fraction(BitSet("3"), BitSet("1")).GetDecimal(10, 10) << std::endl;
 		std::cout << "5 / 4 = " << Fraction(BitSet("5"), BitSet("4")).GetDecimal(10, 10) << std::endl;
+		std::cout << "0 / 1 = " << Fraction(BitSet("0"), BitSet("1")).GetDecimal(10, 10) << std::endl;
 	}
 	getchar();
 	return 0;

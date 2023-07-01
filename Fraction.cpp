@@ -26,14 +26,23 @@ const std::string Fraction::GetString(uint8_t base) const {
 const std::string Fraction::GetDecimal(uint8_t base, size_t decimalLength) const {
 	const BitSet &integer = m_numerator.m_value / m_denominator.m_value;
 	const BitSet &remainder = m_numerator.m_value % m_denominator.m_value;
+	if (!remainder) {
+		return m_numerator.m_positive == m_denominator.m_positive ?
+			integer.GetString(base) : "-" + integer.GetString(base);
+	}
 	std::string remainderStr = (m_numerator.m_value % m_denominator.m_value).GetString(base);
 	remainderStr.append(decimalLength, '0');
 	const BitSet &decimal = BitSet(remainderStr, base) / m_denominator.m_value;
-	const std::string &decimalStr = decimal.GetString(base);
+	std::string decimalStr = decimal.GetString(base);
 	const std::string fill(decimalLength - decimalStr.size(), '0');
+	if (!(BitSet(remainderStr, base) % m_denominator.m_value)) {
+		while ('0' == decimalStr.back()){
+			decimalStr.pop_back();
+		}
+	}
 	return m_numerator.m_positive == m_denominator.m_positive ?
-		integer.GetString(base) + "." + fill + decimal.GetString(base) : "-" +
-		integer.GetString(base) + "." + fill + decimal.GetString(base);
+		integer.GetString(base) + "." + fill + decimalStr : "-" +
+		integer.GetString(base) + "." + fill + decimalStr;
 }
 bool Fraction::IsPositive() const {
 	return m_numerator.m_positive == m_denominator.m_positive;
