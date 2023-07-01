@@ -48,6 +48,9 @@ int main(){
 		std::cout << "c = " << c.GetDecimal(10, 10) << std::endl;
 		std::cout << "c = " << c.GetDecimal(10, 5) << std::endl;
 		std::cout << "c = " << c.GetDecimal(10, 5, [](char last) {return last >= '5'; }) << std::endl;
+		Fraction d(BitSet("888888"));
+		d.SetPointPos(6);
+		std::cout << "d = " << d.GetDecimal(10, 5, [](char last) {return last >= '5'; }) << std::endl;
 	}
 	getchar();
 	return 0;

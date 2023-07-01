@@ -28,19 +28,20 @@ const std::string Fraction::GetString(uint8_t base) const {
 }
 const std::string Fraction::GetDecimal(uint8_t base, size_t decimalLength, 
 	std::function<bool(char)> round) const {
-	const BitSet &integer = m_numerator.m_value / m_denominator.m_value;
+	BitSet integer(0), remainder(0);
+	m_numerator.m_value.Div(m_denominator.m_value, integer, remainder);
 	const std::string &integerStr = integer.GetString(base);
-	const BitSet &remainder = m_numerator.m_value % m_denominator.m_value;
 	if (!remainder) {
 		return m_numerator.m_positive == m_denominator.m_positive ?
 			integerStr : "-" + integerStr;
 	}
-	std::string remainderStr = (m_numerator.m_value % m_denominator.m_value).GetString(base);
+	std::string remainderStr = remainder.GetString(base);
 	remainderStr.append(decimalLength + 1, '0');
-	const BitSet &decimal = BitSet(remainderStr, base) / m_denominator.m_value;
+	BitSet decimal(0), decimalRemainder(0);
+	BitSet(remainderStr, base).Div(m_denominator.m_value, decimal, decimalRemainder);
 	std::string decimalStr = decimal.GetString(base);
 	const std::string fill(decimalLength + 1 - decimalStr.size(), '0');
-	if (!(BitSet(remainderStr, base) % m_denominator.m_value)) {
+	if (!decimalRemainder) {
 		while ('0' == decimalStr.back()){
 			decimalStr.pop_back();
 		}

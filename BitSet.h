@@ -2,7 +2,7 @@
 #define __BIT_SET_H__
 
 #include <cstdint>
-#include <vector>
+#include <list>
 #include <ostream>
 
 #include "Number.h"
@@ -29,18 +29,20 @@ public:
 
 	BitSet &operator++();
 
+	void Div(const BitSet &divisor, BitSet &quotient, BitSet &remainder) const;
+
 	const std::string GetString(uint8_t base = 10) const;
 
 	uint8_t GetBase() const;
 private:
 	BitSet();
-	BitSet(const std::vector<char> &bits, uint8_t base = 2);
+	BitSet(const std::list<char> &bits, uint8_t base = 2);
 	uint8_t GetBuilt()const;
 	BitSet &Format();
 	static uint16_t ToBuilt(char a, char b, uint8_t base);
 	static char ToChar(uint16_t value, uint8_t base);
-	static void Div2(uint8_t base, std::vector<char> &bits, char &remainder);
-	std::vector<char> m_bits;
+	static void Div2(uint8_t base, std::list<char> &bits, char &remainder);
+	std::list<char> m_bits;
 	uint8_t m_base = 2;
 };
 

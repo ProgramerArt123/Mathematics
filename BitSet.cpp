@@ -14,15 +14,15 @@ BitSet::BitSet(uint64_t value) {
 	}
 }
 BitSet::BitSet(const std::string &value, uint8_t base):
-	BitSet(std::vector<char>(value.crbegin(), value.crend()), base){
+	BitSet(std::list<char>(value.crbegin(), value.crend()), base){
 
 }
 BitSet::BitSet() {
 
 }
-BitSet::BitSet(const std::vector<char> &bits, uint8_t base):
+BitSet::BitSet(const std::list<char> &bits, uint8_t base):
 	m_base(base) {
-	std::vector<char> quotient = bits;
+	std::list<char> quotient = bits;
 	char remainder = '0';
 	do{
 		Div2(base, quotient, remainder);
@@ -46,13 +46,14 @@ bool BitSet::operator>(const BitSet &other) const {
 		return true;
 	}
 	else {
-		for (size_t index = 0; index < m_bits.size(); index++) {
-			size_t j = m_bits.size() - 1 - index;
-			if (m_bits[j] == other.m_bits[j]) {
+		for (auto bit = m_bits.crbegin(), oBit = other.m_bits.crbegin();
+			bit != m_bits.crend() && oBit != other.m_bits.crend();
+			bit ++, oBit++) {
+			if (*bit == *oBit) {
 				continue;
 			}
 			else {
-				return m_bits[j] > other.m_bits[j];
+				return *bit > *oBit;
 			}
 		}
 		return false;
@@ -69,20 +70,18 @@ bool BitSet::operator<=(const BitSet &other) const {
 }
 BitSet BitSet::operator+(const BitSet &addition) const {
 	BitSet result;
-
-	size_t count = m_bits.size() >= addition.m_bits.size() ?
-		m_bits.size() : addition.m_bits.size();
 	bool isCarray = false;
-	for (size_t index = 0; index < count; index++) {
-		unsigned char bit = 0;
-		if (index < m_bits.size()) {
-			bit = m_bits[index] - '0';
+	for (auto bit = m_bits.cbegin(), aBit = addition.m_bits.cbegin();
+		bit != m_bits.cend() || aBit != addition.m_bits.cend();) {
+		unsigned char bitValue = 0;
+		if (bit != m_bits.cend()) {
+			bitValue = *bit - '0';
 		}
-		unsigned char aBit = 0;
-		if (index < addition.m_bits.size()) {
-			aBit = addition.m_bits[index] - '0';
+		unsigned char aBitValue = 0;
+		if (aBit != addition.m_bits.cend()) {
+			aBitValue = *aBit - '0';
 		}
-		switch (bit + aBit + isCarray)
+		switch (bitValue + aBitValue + isCarray)
 		{
 		case 0:
 			result.m_bits.push_back('0');
@@ -103,6 +102,10 @@ BitSet BitSet::operator+(const BitSet &addition) const {
 		default:
 			break;
 		}
+		if (bit != m_bits.cend())
+			bit++;
+		if (aBit != addition.m_bits.cend())
+			aBit++;
 	}
 	if (isCarray) {
 		result.m_bits.push_back('1');
@@ -115,18 +118,16 @@ BitSet &BitSet::operator+=(const BitSet &addition) {
 }
 BitSet BitSet::operator-(const BitSet &subtrahend) const {
 	assert(*this >= subtrahend);
-
 	BitSet result;
-
-	size_t count = m_bits.size();
 	bool isCarray = false;
-	for (size_t index = 0; index < count; index++) {
-		unsigned char bit = m_bits[index] - '0';
-		unsigned char sBit = 0;
-		if (index < subtrahend.m_bits.size()) {
-			sBit = subtrahend.m_bits[index] - '0';
+	for (auto bit = m_bits.cbegin(), sBit = subtrahend.m_bits.cbegin();
+		bit != m_bits.cend(); bit++) {
+		unsigned char bitValue = *bit - '0';
+		unsigned char sBitValue = 0;
+		if (sBit != subtrahend.m_bits.cend()) {
+			sBitValue = *sBit - '0';
 		}
-		switch (bit - sBit - isCarray)
+		switch (bitValue - sBitValue - isCarray)
 		{
 		case -2:
 			result.m_bits.push_back('0');
@@ -147,6 +148,8 @@ BitSet BitSet::operator-(const BitSet &subtrahend) const {
 		default:
 			break;
 		}
+		if(sBit != subtrahend.m_bits.cend())
+			sBit++;
 	}
 	assert(!isCarray);
 	return result.Format();
@@ -157,35 +160,62 @@ BitSet &BitSet::operator-=(const BitSet &subtrahend) {
 }
 BitSet BitSet::operator*(const BitSet &multiplier) const {
 	BitSet result;
-
-	for (size_t index = 0; index < multiplier.m_bits.size(); index++) {
-		if ('1' == multiplier.m_bits[index]) {
+	size_t count = 0;
+	for (auto mBit = multiplier.m_bits.cbegin();
+		mBit != multiplier.m_bits.cend(); mBit++, count ++) {
+		if ('1' == *mBit) {
 			BitSet item(*this);
-			for (size_t count = 0; count < index; count++) {
-				item.m_bits.insert(item.m_bits.cbegin(), '0');
-			}
+			item.m_bits.insert(item.m_bits.cbegin(), count, '0');
 			result += item;
 		}
 	}
-
 	return result.Format();
 }
 BitSet BitSet::operator/(const BitSet &divisor) const {
+	BitSet quotient, remainder;
+	Div(divisor, quotient, remainder);
+	return quotient;
+}
+BitSet &BitSet::operator/=(const BitSet &divisor) {
+	*this = *this / divisor;
+	return *this;
+}
+BitSet BitSet::operator%(const BitSet &divisor) const {
+	BitSet quotient, remainder;
+	Div(divisor, quotient, remainder);
+	return remainder;
+}
+BitSet &BitSet::operator++() {
+	*this = *this + BitSet(1);
+	return *this;
+}
+void BitSet::Div(const BitSet &divisor, BitSet &quotient, BitSet &remainder) const {
 	if (divisor == BitSet(0)) {
 		throw "undefined";
 	}
 
 	if (*this < divisor) {
-		return BitSet(0);
+		remainder = *this;
+		quotient = BitSet(0);
+		return;
 	}
 
 	BitSet result;
 
 	size_t times = m_bits.size() - divisor.m_bits.size() + 1;
 
-	BitSet remaining(std::vector<char>(m_bits.cend() -
-		divisor.m_bits.size(), m_bits.cend()));
+	auto begin = m_bits.cbegin();
+	{
+		size_t count = m_bits.size() - divisor.m_bits.size();
+		for (size_t index = 0; index < count; index++) {
+			begin++;
+		}
+	}
+	BitSet remaining(std::list<char>(begin, m_bits.cend()));
+
 	for (size_t index = 0; index < times; index++) {
+		if (begin != m_bits.cbegin())
+			begin--;
 		if (remaining >= divisor) {
 			result.m_bits.insert(result.m_bits.cbegin(), '1');
 			remaining -= divisor;
@@ -194,24 +224,14 @@ BitSet BitSet::operator/(const BitSet &divisor) const {
 			result.m_bits.insert(result.m_bits.cbegin(), '0');
 		}
 		if (index < times - 1) {
-			remaining.m_bits.insert(remaining.m_bits.cbegin(),
-				m_bits[m_bits.size() - 1 - (divisor.m_bits.size() + index)]);
+			remaining.m_bits.push_front(*begin);
 			remaining.Format();
 		}
 	}
 
-	return result.Format();
-}
-BitSet &BitSet::operator/=(const BitSet &divisor) {
-	*this = *this / divisor;
-	return *this;
-}
-BitSet BitSet::operator%(const BitSet &divisor) const {
-	return *this - *this / divisor * divisor;
-}
-BitSet &BitSet::operator++() {
-	*this = *this + BitSet(1);
-	return *this;
+	remainder = remaining;
+
+	quotient = result.Format();
 }
 const std::string BitSet::GetString(uint8_t base) const {
 	assert(2 <= base && base <= (11 + ('Z' - 'A')));
@@ -220,15 +240,16 @@ const std::string BitSet::GetString(uint8_t base) const {
 	std::list<char> result;
 	BitSet remaining(*this);
 	do {
-		const BitSet &mod = remaining % bitBase;
-		uint8_t built = mod.GetBuilt();
+		BitSet quotient, remainde;
+		remaining.Div(bitBase, quotient, remainde);
+		uint8_t built = remainde.GetBuilt();
 		if (0 <= built && built <= 9) {
 			result.push_front('0' + built);
 		}
 		else {
 			result.push_front('A' + (built - 10));
 		}
-		remaining /= bitBase;
+		remaining = quotient;
 	} while (remaining > bitZero);
 	return std::string(result.cbegin(), result.cend());
 }
@@ -237,9 +258,10 @@ uint8_t BitSet::GetBase() const {
 }
 uint8_t BitSet::GetBuilt()const {
 	uint8_t built = 0;
-	for (size_t index = 0; index < m_bits.size(); index++) {
-		if ('1' == m_bits[index]) {
-			built += (1 << index);
+	size_t count = 0;
+	for (auto bit = m_bits.cbegin(); bit != m_bits.cend(); bit++, count++) {
+		if ('1' == *bit) {
+			built += (1 << count);
 		}
 	}
 	return built;
@@ -288,8 +310,8 @@ char BitSet::ToChar(uint16_t value, uint8_t base) {
 	}
 }
 
-void BitSet::Div2(uint8_t base, std::vector<char> &bits, char &remainder) {
-	std::vector<char> quotient;
+void BitSet::Div2(uint8_t base, std::list<char> &bits, char &remainder) {
+	std::list<char> quotient;
 	char pre = '0';
 	for (auto bit = bits.crbegin(); bit != bits.crend(); bit++) {
 		uint16_t built = ToBuilt(pre, *bit, base);
