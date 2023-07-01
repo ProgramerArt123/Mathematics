@@ -2,6 +2,7 @@
 #define __FRACTION_H__
 
 #include <cstdint>
+#include <functional>
 #include "Number.h"
 #include "Integer.h"
 
@@ -11,7 +12,8 @@ public:
 	Fraction(const Integer &numerator, const Integer &denominator);
 	Fraction &SetPointPos(size_t point);
 	const std::string GetString(uint8_t base = 10) const override;
-	const std::string GetDecimal(uint8_t base, size_t decimalLength) const;
+	const std::string GetDecimal(uint8_t base, size_t decimalLength,
+		std::function<bool(char)> round = [](char last) {return false; }) const;
 	bool IsPositive() const;
 	Fraction operator-() const;
 	bool operator<(const Fraction &other) const;

@@ -26,26 +26,45 @@ const std::string Fraction::GetString(uint8_t base) const {
 		m_numerator.m_value.GetString(base) + "/" + m_denominator.m_value.GetString(base) : "-" +
 		m_numerator.m_value.GetString(base) + "/" + m_denominator.m_value.GetString(base);
 }
-const std::string Fraction::GetDecimal(uint8_t base, size_t decimalLength) const {
+const std::string Fraction::GetDecimal(uint8_t base, size_t decimalLength, 
+	std::function<bool(char)> round) const {
 	const BitSet &integer = m_numerator.m_value / m_denominator.m_value;
+	const std::string &integerStr = integer.GetString(base);
 	const BitSet &remainder = m_numerator.m_value % m_denominator.m_value;
 	if (!remainder) {
 		return m_numerator.m_positive == m_denominator.m_positive ?
-			integer.GetString(base) : "-" + integer.GetString(base);
+			integerStr : "-" + integerStr;
 	}
 	std::string remainderStr = (m_numerator.m_value % m_denominator.m_value).GetString(base);
-	remainderStr.append(decimalLength, '0');
+	remainderStr.append(decimalLength + 1, '0');
 	const BitSet &decimal = BitSet(remainderStr, base) / m_denominator.m_value;
 	std::string decimalStr = decimal.GetString(base);
-	const std::string fill(decimalLength - decimalStr.size(), '0');
+	const std::string fill(decimalLength + 1 - decimalStr.size(), '0');
 	if (!(BitSet(remainderStr, base) % m_denominator.m_value)) {
 		while ('0' == decimalStr.back()){
 			decimalStr.pop_back();
 		}
 	}
-	return m_numerator.m_positive == m_denominator.m_positive ?
-		integer.GetString(base) + "." + fill + decimalStr : "-" +
-		integer.GetString(base) + "." + fill + decimalStr;
+	if (decimalStr.size() > decimalLength) {
+		const char last = decimalStr.back();
+		decimalStr.pop_back();
+		if (!round(decimalStr.back())) {
+			return m_numerator.m_positive == m_denominator.m_positive ?
+				integerStr + "." + fill + decimalStr : "-" +
+				integerStr + "." + fill + decimalStr;
+		}
+		else {
+			std::string denominator = "1";
+			denominator.append((fill + decimalStr).length(), '0');
+			return ((Fraction(Integer(BitSet(integerStr + fill + decimalStr, base), IsPositive()))
+				+ BitSet(1)) / BitSet(denominator, base)).GetDecimal(base, decimalLength, round);
+		}
+	}
+	else {
+		return m_numerator.m_positive == m_denominator.m_positive ?
+			integerStr + "." + fill + decimalStr : "-" +
+			integerStr + "." + fill + decimalStr;
+	}
 }
 bool Fraction::IsPositive() const {
 	return m_numerator.m_positive == m_denominator.m_positive;

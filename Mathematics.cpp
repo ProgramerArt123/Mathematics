@@ -43,6 +43,11 @@ int main(){
 		std::cout << "0 / 1 = " << Fraction(BitSet("0"), BitSet("1")).GetDecimal(10, 10) << std::endl;
 		std::cout << Fraction(BitSet("123456789")).SetPointPos(0).GetDecimal(10, 10) << std::endl;
 		std::cout << Fraction(BitSet("123456789")).SetPointPos(18).GetDecimal(10, 32) << std::endl;
+		Fraction c(BitSet("999999"));
+		c.SetPointPos(6);
+		std::cout << "c = " << c.GetDecimal(10, 10) << std::endl;
+		std::cout << "c = " << c.GetDecimal(10, 5) << std::endl;
+		std::cout << "c = " << c.GetDecimal(10, 5, [](char last) {return last >= '5'; }) << std::endl;
 	}
 	getchar();
 	return 0;
