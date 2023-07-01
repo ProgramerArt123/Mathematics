@@ -7,9 +7,9 @@
 
 class Fraction : public Number {
 public:
-	Fraction(int64_t value = 0);
-	Fraction(const Integer &integer);
+	Fraction(const Integer &significant);
 	Fraction(const Integer &numerator, const Integer &denominator);
+	Fraction &SetPointPos(size_t point);
 	const std::string GetString(uint8_t base = 10) const override;
 	const std::string GetDecimal(uint8_t base, size_t decimalLength) const;
 	bool IsPositive() const;
@@ -25,8 +25,7 @@ public:
 	Fraction &operator+=(const Fraction &addition);
 	Fraction &operator*=(const Fraction &multiplier);
 
-	friend bool operator==(int number, const Fraction &rational);
-	friend Fraction operator-(int number, const Fraction &rational);
+	friend bool operator==(const Integer &number, const Fraction &rational);
 
 	friend Fraction operator+(const Integer &number, const Fraction &addition);
 	friend Fraction operator-(const Integer &number, const Fraction &subtrahend);

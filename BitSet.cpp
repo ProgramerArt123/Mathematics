@@ -20,7 +20,8 @@ BitSet::BitSet(const std::string &value, uint8_t base):
 BitSet::BitSet() {
 
 }
-BitSet::BitSet(const std::vector<char> &bits, uint8_t base) {
+BitSet::BitSet(const std::vector<char> &bits, uint8_t base):
+	m_base(base) {
 	std::vector<char> quotient = bits;
 	char remainder = '0';
 	do{
@@ -230,6 +231,9 @@ const std::string BitSet::GetString(uint8_t base) const {
 		remaining /= bitBase;
 	} while (remaining > bitZero);
 	return std::string(result.cbegin(), result.cend());
+}
+uint8_t BitSet::GetBase() const {
+	return m_base;
 }
 uint8_t BitSet::GetBuilt()const {
 	uint8_t built = 0;

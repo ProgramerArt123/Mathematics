@@ -1,7 +1,7 @@
 #include <cassert>
 #include "Integer.h"
 
-Integer::Integer(BitSet value, bool positive) :
+Integer::Integer(const BitSet &value, bool positive) :
 	m_value(value), m_positive(positive) {
 	if (0 == m_value) {
 		m_positive = true;

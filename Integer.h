@@ -8,7 +8,7 @@
 
 class Integer : public Number {
 public:
-	Integer(BitSet value = 0, bool positive = true);
+	Integer(const BitSet &value = 0, bool positive = true);
 	const std::string GetString(uint8_t base = 10) const override;
 	Integer GreatestCommonDivisor(const Integer &other) const;
 	operator bool() const;

@@ -2,11 +2,8 @@
 #include "Integer.h"
 #include "Fraction.h"
 
-Fraction::Fraction(int64_t value) :
-	Fraction(Integer(value >= 0 ? value : -value, value >= 0)) {
-}
-Fraction::Fraction(const Integer &integer) :
-	m_numerator(integer), m_denominator(1) {
+Fraction::Fraction(const Integer &significant) :
+	m_numerator(significant), m_denominator(1) {
 }
 Fraction::Fraction(const Integer &numerator, const Integer &denominator) :
 	m_numerator(numerator), m_denominator(denominator) {
@@ -17,6 +14,12 @@ Fraction::Fraction(const Integer &numerator, const Integer &denominator) :
 	if (Integer(0) == m_numerator) {
 		m_denominator.m_positive = true;
 	}
+}
+Fraction &Fraction::SetPointPos(size_t point) {
+	std::string denominator = "1";
+	denominator.append(point, '0');
+	m_denominator = BitSet(denominator, m_numerator.m_value.GetBase());
+	return *this;
 }
 const std::string Fraction::GetString(uint8_t base) const {
 	return m_numerator.m_positive == m_denominator.m_positive ?
@@ -102,33 +105,31 @@ Fraction Fraction::operator/(const Fraction &divisor) const {
 	assert(0 != divisor.m_numerator);
 	return *this * Fraction(divisor.m_denominator, divisor.m_numerator);
 }
-bool operator==(int number, const Fraction &rational) {
+bool operator==(const Integer &number, const Fraction &rational) {
 	return Fraction(number) == rational;
 }
-Fraction operator-(int number, const Fraction &rational) {
-	return Fraction(number) - rational;
-}
+
 Fraction operator+(const Integer &number, const Fraction &addition) {
-	return Fraction(number, Integer(1)) + addition;
+	return Fraction(number) + addition;
 }
 Fraction operator-(const Integer &number, const Fraction &subtrahend) {
-	return Fraction(number, Integer(1)) - subtrahend;
+	return Fraction(number) - subtrahend;
 }
 Fraction operator*(const Integer &number, const Fraction &multiplier) {
-	return Fraction(number, Integer(1)) * multiplier;
+	return Fraction(number) * multiplier;
 }
 Fraction operator/(const Integer &number, const Fraction &divisor) {
-	return Fraction(number, Integer(1)) / divisor;
+	return Fraction(number) / divisor;
 }
 Fraction operator+(const Fraction &number, const Integer &addition) {
-	return number + Fraction(addition, Integer(1));
+	return number + Fraction(addition);
 }
 Fraction operator-(const Fraction &number, const Integer &subtrahend) {
-	return number - Fraction(subtrahend, Integer(1));
+	return number - Fraction(subtrahend);
 }
 Fraction operator*(const Fraction &number, const Integer &multiplier) {
-	return number * Fraction(multiplier, Integer(1));
+	return number * Fraction(multiplier);
 }
 Fraction operator/(const Fraction &number, const Integer &divisor) {
-	return number / Fraction(divisor, Integer(1));
+	return number / Fraction(divisor);
 }

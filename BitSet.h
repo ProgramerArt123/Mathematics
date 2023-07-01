@@ -30,6 +30,8 @@ public:
 	BitSet &operator++();
 
 	const std::string GetString(uint8_t base = 10) const;
+
+	uint8_t GetBase() const;
 private:
 	BitSet();
 	BitSet(const std::vector<char> &bits, uint8_t base = 2);
@@ -39,6 +41,7 @@ private:
 	static char ToChar(uint16_t value, uint8_t base);
 	static void Div2(uint8_t base, std::vector<char> &bits, char &remainder);
 	std::vector<char> m_bits;
+	uint8_t m_base = 2;
 };
 
 #endif

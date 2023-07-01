@@ -30,7 +30,7 @@ int main(){
 	}
 	{
 		const Fraction a(BitSet("1"), BitSet("3"));
-		const Integer b(3);
+		const Integer b(BitSet(3));
 		std::cout << "a, b = " << a << "," << b << std::endl;
 		std::cout << "a + b = " << a + b << std::endl;
 		std::cout << "b + a = " << b + a << std::endl;
@@ -41,6 +41,8 @@ int main(){
 		std::cout << "3 / 1 = " << Fraction(BitSet("3"), BitSet("1")).GetDecimal(10, 10) << std::endl;
 		std::cout << "5 / 4 = " << Fraction(BitSet("5"), BitSet("4")).GetDecimal(10, 10) << std::endl;
 		std::cout << "0 / 1 = " << Fraction(BitSet("0"), BitSet("1")).GetDecimal(10, 10) << std::endl;
+		std::cout << Fraction(BitSet("123456789")).SetPointPos(0).GetDecimal(10, 10) << std::endl;
+		std::cout << Fraction(BitSet("123456789")).SetPointPos(18).GetDecimal(10, 32) << std::endl;
 	}
 	getchar();
 	return 0;
