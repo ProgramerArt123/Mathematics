@@ -2,6 +2,9 @@
 #include "Integer.h"
 #include "Fraction.h"
 
+Fraction::Fraction() {
+
+}
 Fraction::Fraction(const Integer &significant) :
 	m_numerator(significant), m_denominator(1) {
 }

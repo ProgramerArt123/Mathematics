@@ -3,6 +3,7 @@
 #include "BitSet.h"
 #include "Integer.h"
 #include "Fraction.h"
+#include "Series.hpp"
 
 int main(){
 	std::cout << "calculating" << std::endl;
@@ -51,6 +52,12 @@ int main(){
 		Fraction d(BitSet("888888"));
 		d.SetPointPos(6);
 		std::cout << "d = " << d.GetDecimal(10, 5, [](char last) {return last >= '5'; }) << std::endl;
+	}
+	{
+		std::cout << "e = " << Series<Fraction>(
+			[](const uint64_t index) {
+			return Fraction(BitSet(1), !Integer(index - 1));
+		}).Summation(20).GetMonomial().GetDecimal(10, 20) << std::endl;
 	}
 	getchar();
 	return 0;

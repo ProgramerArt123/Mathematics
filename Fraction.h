@@ -8,6 +8,7 @@
 
 class Fraction : public Number {
 public:
+	Fraction();
 	Fraction(const Integer &significant);
 	Fraction(const Integer &numerator, const Integer &denominator);
 	Fraction &SetPointPos(size_t point);
