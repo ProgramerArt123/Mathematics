@@ -25,38 +25,38 @@ int main(){
 		std::cout << "d % e:" << d % e << std::endl;
 	}
 	{
-		const Integer a(BitSet("1"), false);
-		const Integer b(BitSet("10000000000000000000000000000000000000000000000000"));
+		const Integer a(NDecimal("1"), false);
+		const Integer b(NDecimal("10000000000000000000000000000000000000000000000000"));
 		std::cout << "a + b:" << a + b << std::endl;
 	}
 	{
-		const Fraction a(BitSet("1"), BitSet("3"));
-		const Integer b(BitSet(3));
+		const Fraction a(NDecimal("1"), NDecimal("3"));
+		const Integer b(NDecimal(3));
 		std::cout << "a, b = " << a << "," << b << std::endl;
 		std::cout << "a + b = " << a + b << std::endl;
 		std::cout << "b + a = " << b + a << std::endl;
 		std::cout << "a - b = " << a - b << std::endl;
 		std::cout << "a = " << a.GetDecimal(10, 100) << std::endl;
 		std::cout << "a = " << a.GetDecimal(2, 10) << std::endl;
-		std::cout << "1 / 30 = " << Fraction(BitSet("1"), BitSet("30")).GetDecimal(10, 10) << std::endl;
-		std::cout << "3 / 1 = " << Fraction(BitSet("3"), BitSet("1")).GetDecimal(10, 10) << std::endl;
-		std::cout << "5 / 4 = " << Fraction(BitSet("5"), BitSet("4")).GetDecimal(10, 10) << std::endl;
-		std::cout << "0 / 1 = " << Fraction(BitSet("0"), BitSet("1")).GetDecimal(10, 10) << std::endl;
-		std::cout << Fraction(BitSet("123456789")).SetPointPos(0).GetDecimal(10, 10) << std::endl;
-		std::cout << Fraction(BitSet("123456789")).SetPointPos(18).GetDecimal(10, 32) << std::endl;
-		Fraction c(BitSet("999999"));
+		std::cout << "1 / 30 = " << Fraction(NDecimal("1"), NDecimal("30")).GetDecimal(10, 10) << std::endl;
+		std::cout << "3 / 1 = " << Fraction(NDecimal("3"), NDecimal("1")).GetDecimal(10, 10) << std::endl;
+		std::cout << "5 / 4 = " << Fraction(NDecimal("5"), NDecimal("4")).GetDecimal(10, 10) << std::endl;
+		std::cout << "0 / 1 = " << Fraction(NDecimal("0"), NDecimal("1")).GetDecimal(10, 10) << std::endl;
+		std::cout << Fraction(NDecimal("123456789")).SetPointPos(0).GetDecimal(10, 10) << std::endl;
+		std::cout << Fraction(NDecimal("123456789")).SetPointPos(18).GetDecimal(10, 32) << std::endl;
+		Fraction c(NDecimal("999999"));
 		c.SetPointPos(6);
 		std::cout << "c = " << c.GetDecimal(10, 10) << std::endl;
 		std::cout << "c = " << c.GetDecimal(10, 5) << std::endl;
 		std::cout << "c = " << c.GetDecimal(10, 5, [](char last) {return last >= '5'; }) << std::endl;
-		Fraction d(BitSet("888888"));
+		Fraction d(NDecimal("888888"));
 		d.SetPointPos(6);
 		std::cout << "d = " << d.GetDecimal(10, 5, [](char last) {return last >= '5'; }) << std::endl;
 	}
 	{
 		std::cout << "e = " << Series<Fraction>(
 			[](const uint64_t index) {
-			return Fraction(BitSet(1), !Integer(index - 1));
+			return Fraction(NDecimal(1), !Integer(index - 1));
 		}).Summation(20).GetMonomial().GetDecimal(10, 20) << std::endl;
 	}
 	getchar();

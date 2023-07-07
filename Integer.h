@@ -4,11 +4,11 @@
 #include <cstdint>
 #include <vector>
 #include "Number.h"
-#include "BitSet.h"
+#include "NDecimal.h"
 
 class Integer : public Number {
 public:
-	Integer(const BitSet &value = 0, bool positive = true);
+	Integer(const NDecimal &value = 0, bool positive = true);
 	const std::string GetString(uint8_t base = 10) const override;
 	Integer GreatestCommonDivisor(const Integer &other) const;
 	operator bool() const;
@@ -23,7 +23,7 @@ public:
 	Integer &operator*=(const Integer &multiplier);
 	Integer &operator/=(const Integer &divisor);
 	bool operator==(const Integer &other)const;
-	BitSet m_value;
+	NDecimal m_value;
 	bool m_positive = true;
 private:
 	Integer PositiveAdd(const Integer &addition) const;

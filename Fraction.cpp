@@ -11,6 +11,7 @@ Fraction::Fraction(const Integer &significant) :
 Fraction::Fraction(const Integer &numerator, const Integer &denominator) :
 	m_numerator(numerator), m_denominator(denominator) {
 	assert(0 != m_denominator);
+	m_numerator.m_value = m_numerator.m_value.GetNDecimal(m_denominator.m_value.GetBase());
 	const Integer &common = m_numerator.GreatestCommonDivisor(m_denominator);
 	m_numerator /= common;
 	m_denominator /= common;
@@ -21,7 +22,7 @@ Fraction::Fraction(const Integer &numerator, const Integer &denominator) :
 Fraction &Fraction::SetPointPos(size_t point) {
 	std::string denominator = "1";
 	denominator.append(point, '0');
-	m_denominator = BitSet(denominator, m_numerator.m_value.GetBase());
+	m_denominator = NDecimal(denominator, m_numerator.m_value.GetBase());
 	return *this;
 }
 const std::string Fraction::GetString(uint8_t base) const {
@@ -31,17 +32,17 @@ const std::string Fraction::GetString(uint8_t base) const {
 }
 const std::string Fraction::GetDecimal(uint8_t base, size_t decimalLength, 
 	std::function<bool(char)> round) const {
-	BitSet integer(0), remainder(0);
-	m_numerator.m_value.Div(m_denominator.m_value, integer, remainder);
+	NDecimal integer(0), integerRemainder(0);
+	m_numerator.m_value.Div(m_denominator.m_value, integer, integerRemainder);
 	const std::string &integerStr = integer.GetString(base);
-	if (!remainder) {
+	if (!integerRemainder) {
 		return m_numerator.m_positive == m_denominator.m_positive ?
 			integerStr : "-" + integerStr;
 	}
-	std::string remainderStr = remainder.GetString(base);
-	remainderStr.append(decimalLength + 1, '0');
-	BitSet decimal(0), decimalRemainder(0);
-	BitSet(remainderStr, base).Div(m_denominator.m_value, decimal, decimalRemainder);
+	std::string integerRemainderStr = integerRemainder.GetString(base);
+	integerRemainderStr.append(decimalLength + 1, '0');
+	NDecimal decimal(0), decimalRemainder(0);
+	NDecimal(integerRemainderStr, base).Div(m_denominator.m_value, decimal, decimalRemainder);
 	std::string decimalStr = decimal.GetString(base);
 	const std::string fill(decimalLength + 1 - decimalStr.size(), '0');
 	if (!decimalRemainder) {
@@ -60,13 +61,13 @@ const std::string Fraction::GetDecimal(uint8_t base, size_t decimalLength,
 		else {
 			std::string denominator = "1";
 			denominator.append((fill + decimalStr).length(), '0');
-			return ((Fraction(Integer(BitSet(integerStr + fill + decimalStr, base), IsPositive()))
-				+ BitSet(1)) / BitSet(denominator, base)).GetDecimal(base, decimalLength, round);
+			return ((Fraction(Integer(NDecimal(integerStr + fill + decimalStr, base), IsPositive()))
+				+ NDecimal(1)) / NDecimal(denominator, base)).GetDecimal(base, decimalLength, round);
 		}
 	}
 	else {
 		return m_numerator.m_positive == m_denominator.m_positive ?
-			integerStr + "." + fill + decimalStr : "-" +
+			integerStr + "." + fill + decimalStr: "-" +
 			integerStr + "." + fill + decimalStr;
 	}
 }
@@ -101,10 +102,10 @@ Fraction Fraction::operator-(const Fraction &subtrahend) const {
 	return *this + (-subtrahend);
 }
 Fraction Fraction::operator*(const Fraction &multiplier) const {
-	Integer selfNumerator = BitSet(0);
-	Integer otherNumerator = BitSet(0);
-	Integer selfDenominator = BitSet(UINT64_MAX);
-	Integer otherDenominator = BitSet(UINT64_MAX);
+	Integer selfNumerator = NDecimal(0);
+	Integer otherNumerator = NDecimal(0);
+	Integer selfDenominator = NDecimal(UINT64_MAX);
+	Integer otherDenominator = NDecimal(UINT64_MAX);
 	{
 		const Integer &common = m_numerator.GreatestCommonDivisor(multiplier.m_denominator);
 		selfNumerator = m_numerator / common;

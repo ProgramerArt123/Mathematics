@@ -1,5 +1,6 @@
 #include <cassert>
 #include <list>
+#include <map>
 #include "BitSet.h"
 
 BitSet::BitSet(uint64_t value) {
@@ -200,7 +201,8 @@ void BitSet::Div(const BitSet &divisor, BitSet &quotient, BitSet &remainder) con
 		return;
 	}
 
-	BitSet result;
+	quotient.m_bits.clear();
+	remainder.m_bits.clear();
 
 	size_t times = m_bits.size() - divisor.m_bits.size() + 1;
 
@@ -211,27 +213,24 @@ void BitSet::Div(const BitSet &divisor, BitSet &quotient, BitSet &remainder) con
 			begin++;
 		}
 	}
-	BitSet remaining(std::list<char>(begin, m_bits.cend()));
-
+	
+	remainder.m_bits = std::list<char>(begin, m_bits.cend());
+	
 	for (size_t index = 0; index < times; index++) {
-		if (begin != m_bits.cbegin())
-			begin--;
-		if (remaining >= divisor) {
-			result.m_bits.insert(result.m_bits.cbegin(), '1');
-			remaining -= divisor;
+		if (remainder >= divisor) {
+			quotient.m_bits.push_front('1');
+			remainder -= divisor;
 		}
 		else {
-			result.m_bits.insert(result.m_bits.cbegin(), '0');
+			quotient.m_bits.push_front('0');
 		}
 		if (index < times - 1) {
-			remaining.m_bits.push_front(*begin);
-			remaining.Format();
+			begin--;
+			remainder.m_bits.push_front(*begin);
+			remainder.Format();
 		}
 	}
-
-	remainder = remaining;
-
-	quotient = result.Format();
+	quotient.Format();
 }
 const std::string BitSet::GetString(uint8_t base) const {
 	assert(2 <= base && base <= (11 + ('Z' - 'A')));
@@ -317,7 +316,7 @@ void BitSet::Div2(uint8_t base, std::list<char> &bits, char &remainder) {
 		uint16_t built = ToBuilt(pre, *bit, base);
 		uint16_t q = built / 2;
 		uint16_t r = built % 2;
-		quotient.insert(quotient.cbegin(), ToChar(q, base));
+		quotient.push_front(ToChar(q, base));
 		pre = '0' + r;
 	}
 	remainder = pre;
@@ -327,4 +326,3 @@ void BitSet::Div2(uint8_t base, std::list<char> &bits, char &remainder) {
 	bits = quotient;
 
 }
-

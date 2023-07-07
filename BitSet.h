@@ -11,6 +11,7 @@ class BitSet : public Number {
 public:
 	BitSet(uint64_t value);
 	BitSet(const std::string &value, uint8_t base = 10);
+
 	operator bool() const;
 	bool operator==(const BitSet &other) const;
 	bool operator>(const BitSet &other) const;
@@ -34,6 +35,7 @@ public:
 	const std::string GetString(uint8_t base = 10) const;
 
 	uint8_t GetBase() const;
+
 private:
 	BitSet();
 	BitSet(const std::list<char> &bits, uint8_t base = 2);

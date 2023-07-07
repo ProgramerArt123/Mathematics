@@ -1,7 +1,7 @@
 #include <cassert>
 #include "Integer.h"
 
-Integer::Integer(const BitSet &value, bool positive) :
+Integer::Integer(const NDecimal &value, bool positive) :
 	m_value(value), m_positive(positive) {
 	if (0 == m_value) {
 		m_positive = true;
@@ -17,8 +17,8 @@ Integer Integer::operator-() const {
 	return Integer(m_value, !m_positive);
 }
 Integer Integer::operator!() const {
-	Integer product(BitSet(1));
-	for (BitSet index = 1; index <= m_value; ++index) {
+	Integer product(NDecimal(1));
+	for (NDecimal index = 1; index <= m_value; ++index) {
 		product *= Integer(index);
 	}
 	return product;
