@@ -9,7 +9,7 @@
 
 class NDecimal : public Number {
 public:
-	NDecimal(uint64_t value, uint8_t base = 10);
+	NDecimal(uint64_t value, uint8_t base);
 	NDecimal(const std::string &value, uint8_t base = 10);
 
 	operator bool() const;
@@ -38,8 +38,10 @@ public:
 
 	NDecimal GetNDecimal(uint8_t base) const;
 
+	NDecimal &SetCheckLoop();
+	std::string GetLoop() const;
 private:
-	NDecimal();
+	NDecimal(uint8_t base);
 	NDecimal(const std::list<char> &bits, uint8_t base = 10);
 	uint8_t GetBuilt()const;
 	NDecimal &Format();
@@ -47,6 +49,10 @@ private:
 	static void DivN(uint8_t from, uint8_t to, std::list<char> &bits, char &remainder);
 	std::list<char> m_singles;
 	uint8_t m_base = 10;
+
+	bool m_is_check_loop = false;
+	size_t m_loop_begin = -1;
+	size_t m_loop_end = -1;
 };
 
 #endif

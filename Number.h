@@ -6,7 +6,8 @@
 class Number {
 public:
 	virtual const std::string GetString(uint8_t base = 10) const = 0;
-
+	const std::string GetStringBase(uint8_t base = 10) const;
+	
 	friend std::ostream& operator<<(std::ostream& out, const Number &number);
 };
 

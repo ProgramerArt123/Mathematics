@@ -1,6 +1,11 @@
 #include <cassert>
 #include "Integer.h"
 
+Integer::Integer(uint64_t value, bool positive):
+	Integer(NDecimal(value, 10), positive) {
+
+}
+
 Integer::Integer(const NDecimal &value, bool positive) :
 	m_value(value), m_positive(positive) {
 	if (0 == m_value) {
@@ -17,8 +22,8 @@ Integer Integer::operator-() const {
 	return Integer(m_value, !m_positive);
 }
 Integer Integer::operator!() const {
-	Integer product(NDecimal(1));
-	for (NDecimal index = 1; index <= m_value; ++index) {
+	Integer product(1);
+	for (NDecimal index(1, m_value.GetBase()); index <= m_value; ++index) {
 		product *= Integer(index);
 	}
 	return product;

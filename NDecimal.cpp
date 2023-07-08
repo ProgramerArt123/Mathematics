@@ -29,7 +29,7 @@ static uint8_t GetValue(char c) {
 	}
 }
 
-NDecimal::NDecimal(uint64_t value, uint8_t base) {
+NDecimal::NDecimal(uint64_t value, uint8_t base):m_base(base) {
 	if (value) {
 		while (value) {
 			m_singles.push_back(GetChar(value % base));
@@ -44,7 +44,7 @@ NDecimal::NDecimal(const std::string &value, uint8_t base):
 	NDecimal(std::list<char>(value.crbegin(), value.crend()), base){
 
 }
-NDecimal::NDecimal() {
+NDecimal::NDecimal(uint8_t base):m_base(base) {
 
 }
 NDecimal::NDecimal(const std::list<char> &bits, uint8_t base):
@@ -93,8 +93,7 @@ bool NDecimal::operator<=(const NDecimal &other) const {
 }
 NDecimal NDecimal::operator+(const NDecimal &addition) const {
 	const NDecimal &baseAddition = addition.GetNDecimal(m_base);
-	NDecimal result;
-	result.m_base = m_base;
+	NDecimal result(m_base);
 	bool isCarray = false;
 	for (auto bit = m_singles.cbegin(), aBit = baseAddition.m_singles.cbegin();
 		bit != m_singles.cend() || aBit != baseAddition.m_singles.cend();) {
@@ -133,8 +132,7 @@ NDecimal &NDecimal::operator+=(const NDecimal &addition) {
 NDecimal NDecimal::operator-(const NDecimal &subtrahend) const {
 	assert(*this >= subtrahend);
 	const NDecimal &baseSubtrahend = subtrahend.GetNDecimal(m_base);
-	NDecimal result;
-	result.m_base = m_base;
+	NDecimal result(m_base);
 	bool isCarray = false;
 	for (auto bit = m_singles.cbegin(), sBit = baseSubtrahend.m_singles.cbegin();
 		bit != m_singles.cend(); bit++) {
@@ -165,13 +163,12 @@ NDecimal &NDecimal::operator-=(const NDecimal &subtrahend) {
 }
 NDecimal NDecimal::operator*(const NDecimal &multiplier) const {
 	const NDecimal &baseMultiplier = multiplier.GetNDecimal(m_base);
-	NDecimal result;
-	result.m_base = m_base;
+	NDecimal result(m_base);
 	size_t count = 0;
 	for (auto mBit = baseMultiplier.m_singles.cbegin();
 		mBit != baseMultiplier.m_singles.cend(); mBit++, count ++) {
 		if ('0' != *mBit) {
-			NDecimal item(0);
+			NDecimal item(0, GetBase());
 			for (uint8_t index = 0; index < GetValue(*mBit); index ++) {
 				item += *this;
 			}
@@ -182,7 +179,7 @@ NDecimal NDecimal::operator*(const NDecimal &multiplier) const {
 	return result.Format();
 }
 NDecimal NDecimal::operator/(const NDecimal &divisor) const {
-	NDecimal quotient, remainder;
+	NDecimal quotient(m_base), remainder(m_base);
 	Div(divisor, quotient, remainder);
 	return quotient;
 }
@@ -191,16 +188,16 @@ NDecimal &NDecimal::operator/=(const NDecimal &divisor) {
 	return *this;
 }
 NDecimal NDecimal::operator%(const NDecimal &divisor) const {
-	NDecimal quotient, remainder;
+	NDecimal quotient(m_base), remainder(m_base);
 	Div(divisor, quotient, remainder);
 	return remainder;
 }
 NDecimal &NDecimal::operator++() {
-	*this = *this + NDecimal(1);
+	*this = *this + NDecimal(1, GetBase());
 	return *this;
 }
 void NDecimal::Div(const NDecimal &divisor, NDecimal &quotient, NDecimal &remainder) const {
-	if (divisor == NDecimal(0)) {
+	if (divisor == NDecimal(0, GetBase())) {
 		throw "undefined";
 	}
 
@@ -227,8 +224,9 @@ void NDecimal::Div(const NDecimal &divisor, NDecimal &quotient, NDecimal &remain
 		}
 	}
 	
+	std::map<std::string, size_t> loop;
 	remainder.m_singles = std::list<char>(begin, m_singles.cend());
-	
+
 	for (size_t index = 0; index < times; index++) {
 		uint8_t count = 0;
 		while (remainder >= baseDivisor) {
@@ -237,21 +235,34 @@ void NDecimal::Div(const NDecimal &divisor, NDecimal &quotient, NDecimal &remain
 		}
 		quotient.m_singles.push_front(GetChar(count));
 		if (index < times - 1) {
+			if (quotient.m_is_check_loop && -1 == quotient.m_loop_begin && remainder) {
+				const std::string key(remainder.m_singles.cbegin(), remainder.m_singles.cend());
+				if (loop.find(key) != loop.end()) {
+					quotient.m_loop_begin = loop.at(key);
+					quotient.m_loop_end = quotient.m_singles.size();
+				}
+				else {
+					loop.insert(std::make_pair(std::string(
+						remainder.m_singles.cbegin(), remainder.m_singles.cend()), quotient.m_singles.size()));
+				}
+			}
 			begin--;
 			remainder.m_singles.push_front(*begin);
 			remainder.Format();
 		}
 	}
-	quotient.Format();
+	if (!quotient.m_is_check_loop) {
+		quotient.Format();
+	}
 }
 const std::string NDecimal::GetString(uint8_t base) const {
 	assert(2 <= base && base <= (11 + ('Z' - 'A')));
-	const NDecimal &bitBase = NDecimal(base);
-	const NDecimal &bitZero = NDecimal(0);
+	const NDecimal bitBase(base, GetBase());
+	const NDecimal bitZero(0, GetBase());
 	std::list<char> result;
 	NDecimal remaining(*this);
 	do {
-		NDecimal quotient, remainde;
+		NDecimal quotient(m_base), remainde(m_base);
 		remaining.Div(bitBase, quotient, remainde);
 		uint8_t built = remainde.GetBuilt();
 		if (0 <= built && built <= 9) {
@@ -268,8 +279,12 @@ uint8_t NDecimal::GetBase() const {
 	return m_base;
 }
 uint8_t NDecimal::GetBuilt()const {
-	assert(1 == m_singles.size());
-	return GetValue(m_singles.front());
+	uint8_t built = 0;
+	uint8_t weight = 1;
+	for (auto single = m_singles.cbegin(); single != m_singles.cend(); single++, weight*=GetBase()) {
+		built += GetValue(*single) * weight;
+	}
+	return built;
 }
 NDecimal &NDecimal::Format() {
 	while (!m_singles.empty() && '0' == m_singles.back()) {
@@ -306,15 +321,6 @@ uint16_t NDecimal::ToBuilt(char a, char b, uint8_t base) {
 	return result;
 }
 
-//char NDecimal::ToChar(uint16_t value, uint8_t base) {
-//	if (0 <= value && value <= 9) {
-//		return '0' + value;
-//	}
-//	else {
-//		return 'A' + value - 10;
-//	}
-//}
-
 void NDecimal::DivN(uint8_t from, uint8_t to, std::list<char> &bits, char &remainder) {
 	std::list<char> quotient;
 	char pre = '0';
@@ -337,8 +343,7 @@ NDecimal NDecimal::GetNDecimal(uint8_t base) const {
 	if (m_base == base) {
 		return *this;
 	}
-	NDecimal baseDecimal;
-	baseDecimal.m_base = base;
+	NDecimal baseDecimal(base);
 	std::list<char> quotient = m_singles;
 	char remainder = '0';
 	do {
@@ -349,4 +354,18 @@ NDecimal NDecimal::GetNDecimal(uint8_t base) const {
 		baseDecimal.m_singles.push_back('0');
 	}
 	return baseDecimal;
+}
+
+
+NDecimal &NDecimal::SetCheckLoop() {
+	m_is_check_loop = true;
+	return *this;
+}
+
+std::string NDecimal::GetLoop() const {
+	if (!m_is_check_loop || -1 == m_loop_begin) {
+		return "";
+	}
+	const std::string bits(m_singles.crbegin(), m_singles.crend());
+	return "......{" + bits.substr(m_loop_begin + 1, m_loop_end - m_loop_begin) + "}";
 }

@@ -32,17 +32,19 @@ const std::string Fraction::GetString(uint8_t base) const {
 }
 const std::string Fraction::GetDecimal(uint8_t base, size_t decimalLength, 
 	std::function<bool(char)> round) const {
-	NDecimal integer(0), integerRemainder(0);
+	const std::string baseStr = "[base=" + std::to_string(base) + "]";
+	NDecimal integer(0, m_denominator.m_value.GetBase()), integerRemainder(0, m_denominator.m_value.GetBase());
 	m_numerator.m_value.Div(m_denominator.m_value, integer, integerRemainder);
 	const std::string &integerStr = integer.GetString(base);
 	if (!integerRemainder) {
 		return m_numerator.m_positive == m_denominator.m_positive ?
-			integerStr : "-" + integerStr;
+			integerStr + baseStr : "-" + integerStr + baseStr;
 	}
 	std::string integerRemainderStr = integerRemainder.GetString(base);
 	integerRemainderStr.append(decimalLength + 1, '0');
-	NDecimal decimal(0), decimalRemainder(0);
-	NDecimal(integerRemainderStr, base).Div(m_denominator.m_value, decimal, decimalRemainder);
+	NDecimal decimal(0, m_denominator.m_value.GetBase()), decimalRemainder(0, m_denominator.m_value.GetBase());
+	NDecimal(integerRemainderStr, base).Div(m_denominator.m_value, decimal.SetCheckLoop(), decimalRemainder);
+	const std::string &loop = decimal.GetLoop();
 	std::string decimalStr = decimal.GetString(base);
 	const std::string fill(decimalLength + 1 - decimalStr.size(), '0');
 	if (!decimalRemainder) {
@@ -54,21 +56,28 @@ const std::string Fraction::GetDecimal(uint8_t base, size_t decimalLength,
 		const char last = decimalStr.back();
 		decimalStr.pop_back();
 		if (!round(decimalStr.back())) {
-			return m_numerator.m_positive == m_denominator.m_positive ?
-				integerStr + "." + fill + decimalStr : "-" +
-				integerStr + "." + fill + decimalStr;
+			if (!loop.empty()) {
+				return m_numerator.m_positive == m_denominator.m_positive ?
+					integerStr + "." + fill + decimalStr + loop + baseStr : "-" +
+					integerStr + "." + fill + decimalStr + loop + baseStr;
+			}
+			else {
+				return m_numerator.m_positive == m_denominator.m_positive ?
+					integerStr + "." + fill + decimalStr + "..." + baseStr : "-" +
+					integerStr + "." + fill + decimalStr + "..." + baseStr;
+			}
 		}
 		else {
 			std::string denominator = "1";
 			denominator.append((fill + decimalStr).length(), '0');
 			return ((Fraction(Integer(NDecimal(integerStr + fill + decimalStr, base), IsPositive()))
-				+ NDecimal(1)) / NDecimal(denominator, base)).GetDecimal(base, decimalLength, round);
+				+ NDecimal(1, base)) / NDecimal(denominator, base)).GetDecimal(base, decimalLength, round);
 		}
 	}
 	else {
 		return m_numerator.m_positive == m_denominator.m_positive ?
-			integerStr + "." + fill + decimalStr: "-" +
-			integerStr + "." + fill + decimalStr;
+			integerStr + "." + fill + decimalStr + loop + baseStr : "-" +
+			integerStr + "." + fill + decimalStr + loop + baseStr;
 	}
 }
 bool Fraction::IsPositive() const {
@@ -102,10 +111,10 @@ Fraction Fraction::operator-(const Fraction &subtrahend) const {
 	return *this + (-subtrahend);
 }
 Fraction Fraction::operator*(const Fraction &multiplier) const {
-	Integer selfNumerator = NDecimal(0);
-	Integer otherNumerator = NDecimal(0);
-	Integer selfDenominator = NDecimal(UINT64_MAX);
-	Integer otherDenominator = NDecimal(UINT64_MAX);
+	Integer selfNumerator = NDecimal(0, m_denominator.m_value.GetBase());
+	Integer otherNumerator = NDecimal(0, m_denominator.m_value.GetBase());
+	Integer selfDenominator = NDecimal(UINT64_MAX, m_denominator.m_value.GetBase());
+	Integer otherDenominator = NDecimal(UINT64_MAX, m_denominator.m_value.GetBase());
 	{
 		const Integer &common = m_numerator.GreatestCommonDivisor(multiplier.m_denominator);
 		selfNumerator = m_numerator / common;
