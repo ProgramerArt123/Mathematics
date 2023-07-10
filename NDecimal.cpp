@@ -3,32 +3,6 @@
 #include <map>
 #include "NDecimal.h"
 
-static char GetChar(uint8_t value) {
-	if (value <= 9) {
-		return '0' + value;
-	}
-	else if (10 <= value && value <= 10 + ('Z' - 'A')) {
-		return 'A' + (value - 10);
-	}
-	else {
-		assert(0);
-		return '0';
-	}
-}
-
-static uint8_t GetValue(char c) {
-	if ('0' <= c && c <= '9') {
-		return c - '0';
-	}
-	else if ('A' <= c && c <= 'Z') {
-		return 10 + c - 'A';
-	}
-	else {
-		assert(0);
-		return 0;
-	}
-}
-
 NDecimal::NDecimal(uint64_t value, uint8_t base):m_base(base) {
 	if (value) {
 		while (value) {
@@ -191,6 +165,14 @@ NDecimal NDecimal::operator%(const NDecimal &divisor) const {
 	NDecimal quotient(m_base), remainder(m_base);
 	Div(divisor, quotient, remainder);
 	return remainder;
+}
+NDecimal NDecimal::Power(const NDecimal &exponent) const {
+	const NDecimal &baseExponent = exponent.GetNDecimal(m_base);
+	NDecimal result(1, m_base);
+	for (NDecimal count(0, m_base); count < baseExponent; ++count) {
+		result = *this * result;
+	}
+	return result;
 }
 NDecimal &NDecimal::operator++() {
 	*this = *this + NDecimal(1, GetBase());
@@ -368,4 +350,30 @@ std::string NDecimal::GetLoop() const {
 	}
 	const std::string bits(m_singles.crbegin(), m_singles.crend());
 	return "......{" + bits.substr(m_loop_begin + 1, m_loop_end - m_loop_begin) + "}";
+}
+
+char NDecimal::GetChar(uint8_t value) {
+	if (value <= 9) {
+		return '0' + value;
+	}
+	else if (10 <= value && value <= 10 + ('Z' - 'A')) {
+		return 'A' + (value - 10);
+	}
+	else {
+		assert(0);
+		return '0';
+	}
+}
+
+uint8_t NDecimal::GetValue(char c) {
+	if ('0' <= c && c <= '9') {
+		return c - '0';
+	}
+	else if ('A' <= c && c <= 'Z') {
+		return 10 + c - 'A';
+	}
+	else {
+		assert(0);
+		return 0;
+	}
 }

@@ -64,6 +64,11 @@ Integer Integer::operator%(const Integer &divisor) const {
 	remainder.m_positive = m_positive == divisor.m_positive;
 	return remainder;
 }
+Integer Integer::Power(const Integer &exponent) const {
+	Integer product = m_value.Power(exponent.m_value);
+	product.m_positive = m_positive || 0 == exponent % Integer(2);
+	return product;
+}
 Integer &Integer::operator+=(const Integer &addition) {
 	*this = *this + addition;
 	return *this;

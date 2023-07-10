@@ -27,6 +27,7 @@ public:
 	NDecimal operator/(const NDecimal &divisor) const;
 	NDecimal &operator/=(const NDecimal &divisor);
 	NDecimal operator%(const NDecimal &divisor) const;
+	NDecimal Power(const NDecimal &exponent) const;
 
 	NDecimal &operator++();
 
@@ -47,6 +48,9 @@ private:
 	NDecimal &Format();
 	static uint16_t ToBuilt(char a, char b, uint8_t base);
 	static void DivN(uint8_t from, uint8_t to, std::list<char> &bits, char &remainder);
+	static char GetChar(uint8_t value);
+	static uint8_t GetValue(char c);
+
 	std::list<char> m_singles;
 	uint8_t m_base = 10;
 

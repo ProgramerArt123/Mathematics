@@ -20,6 +20,7 @@ public:
 	Integer operator*(const Integer &multiplier) const;
 	Integer operator/(const Integer &divisor) const;
 	Integer operator%(const Integer &divisor) const;
+	Integer Power(const Integer &exponent) const;
 	Integer &operator+=(const Integer &addition);
 	Integer &operator*=(const Integer &multiplier);
 	Integer &operator/=(const Integer &divisor);

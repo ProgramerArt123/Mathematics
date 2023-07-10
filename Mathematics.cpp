@@ -58,6 +58,9 @@ int main(){
 			return Fraction(NDecimal(1, 10), !Integer(index - 1));
 		}).Summation(20).GetMonomial().GetDecimal(10, 20) << std::endl;
 	}
+	{
+		std::cout << "2^256=" << Integer(2).Power(Integer(256)).GetStringBase(10).c_str() << std::endl;
+	}
 	getchar();
 	return 0;
 }
