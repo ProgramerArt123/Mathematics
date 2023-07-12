@@ -3,10 +3,10 @@
 
 #include <vector>
 #include <functional>
-#include "Number.h"
+#include "Real.h"
 
 template<typename MonomialValue>
-class Series : public Number {
+class Series : public Real {
 	static_assert(std::is_base_of_v<Number, MonomialValue>, "Monomial invalid");
 public:
 	Series(std::function<MonomialValue(const uint64_t index)> monomial) :

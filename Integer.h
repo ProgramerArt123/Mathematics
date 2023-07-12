@@ -3,10 +3,11 @@
 
 #include <cstdint>
 #include <vector>
-#include "Number.h"
+#include "Real.h"
 #include "NDecimal.h"
 #include "Fraction.h"
-class Integer : public Number {
+#include "Complex.h"
+class Integer : public Real {
 public:
 	Integer(uint64_t value = 0, bool positive = true);
 	Integer(const NDecimal &value, bool positive = true);
@@ -21,7 +22,7 @@ public:
 	Integer operator/(const Integer &divisor) const;
 	Integer operator%(const Integer &divisor) const;
 	Fraction Power(const Integer &exponent) const;
-	Integer Root(const Integer &exponent) const;
+	Complex Root(const Integer &exponent) const;
 	Integer &operator+=(const Integer &addition);
 	Integer &operator*=(const Integer &multiplier);
 	Integer &operator/=(const Integer &divisor);

@@ -9,9 +9,9 @@ int main(){
 	std::cout << "calculating" << std::endl;
 	{
 		const NDecimal a(123, 10);
-		std::cout << "a:" << a.GetStringBase(10).c_str() << std::endl;
-		std::cout << "a:" << a.GetStringBase(2).c_str() << std::endl;
-		std::cout << "a:" << a.GetStringBase(16).c_str() << std::endl;
+		std::cout << "a:" << a.GetStringBase(10) << std::endl;
+		std::cout << "a:" << a.GetStringBase(2) << std::endl;
+		std::cout << "a:" << a.GetStringBase(16) << std::endl;
 		const NDecimal b(456, 10);
 		std::cout << "b:" << b << std::endl;
 		std::cout << "a+b:" << a + b << std::endl;
@@ -60,7 +60,7 @@ int main(){
 		}).Summation(20).GetMonomial().GetDecimal(10, 20) << std::endl;
 	}
 	{
-		std::cout << "2^256=" << Integer(2).Power(Integer(256)).GetStringBase(10).c_str() << std::endl;
+		std::cout << "2^256=" << Integer(2).Power(Integer(256)).GetStringBase(10) << std::endl;
 	}
 	{
 		std::cout << NDecimal("39135395").Root(NDecimal(5, 10)).GetString() << std::endl;
@@ -70,9 +70,11 @@ int main(){
 		std::cout << NDecimal("25528A3", 16).Root(NDecimal(5, 16)).GetString() << std::endl;
 	}
 	{
-		std::cout << Integer(2).Power(Integer(0)).GetStringBase(10).c_str() << std::endl;
+		std::cout << Integer(2).Power(Integer(0)).GetStringBase(10) << std::endl;
 		std::cout << Integer(3, false).Power(Integer(3, false)) << std::endl;
 		std::cout << Imaginary(Integer(1)) << std::endl;
+		std::cout << Integer(4, false).Root(Integer(2)) << std::endl;
+		std::cout << Integer(8, false).Root(Integer(3)) << std::endl;
 	}
 	getchar();
 	return 0;

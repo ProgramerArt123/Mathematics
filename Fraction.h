@@ -3,11 +3,11 @@
 
 #include <cstdint>
 #include <functional>
-#include "Number.h"
+#include "Real.h"
 
 class Integer;
 
-class Fraction : public Number {
+class Fraction : public Real {
 public:
 	Fraction();
 	Fraction(const Integer &significant);

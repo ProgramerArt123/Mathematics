@@ -1,4 +1,5 @@
 #include <cassert>
+#include "Complex.h"
 #include "Integer.h"
 
 Integer::Integer(uint64_t value, bool positive):
@@ -74,11 +75,13 @@ Fraction Integer::Power(const Integer &exponent) const {
 		return Fraction(1, product);
 	}
 }
-Integer Integer::Root(const Integer &exponent) const {
+Complex Integer::Root(const Integer &exponent) const {
 	if (!m_positive && 0 == exponent % Integer(2)) {
-		throw "undefine";
+		return Complex(0, m_value.Root(exponent.m_value));
 	}
-	return m_value.Root(exponent.m_value);
+	else {
+		return Complex(m_value.Root(exponent.m_value),0);
+	}
 }
 Integer &Integer::operator+=(const Integer &addition) {
 	*this = *this + addition;
