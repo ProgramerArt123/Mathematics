@@ -3,6 +3,7 @@
 #include "Integer.h"
 #include "Fraction.h"
 #include "Series.hpp"
+#include "Imaginary.h"
 
 int main(){
 	std::cout << "calculating" << std::endl;
@@ -70,7 +71,8 @@ int main(){
 	}
 	{
 		std::cout << Integer(2).Power(Integer(0)).GetStringBase(10).c_str() << std::endl;
-		std::cout << Integer(3, false).Power(Integer(3,false)) << std::endl;
+		std::cout << Integer(3, false).Power(Integer(3, false)) << std::endl;
+		std::cout << Imaginary(Integer(1)) << std::endl;
 	}
 	getchar();
 	return 0;
