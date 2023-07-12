@@ -61,6 +61,13 @@ int main(){
 	{
 		std::cout << "2^256=" << Integer(2).Power(Integer(256)).GetStringBase(10).c_str() << std::endl;
 	}
+	{
+		std::cout << NDecimal("39135395").Root(NDecimal(5, 10)).GetString() << std::endl;
+		std::cout << NDecimal("10000000000000000000000000000000000").Root(NDecimal(2, 10)).GetString() << std::endl;
+		std::cout << NDecimal("100000000000000000000000000000000000").Root(NDecimal(2, 10)).GetString() << std::endl;
+		std::cout << NDecimal("10010101010010100010100011", 2).Root(NDecimal(5, 2)).GetString() << std::endl;
+		std::cout << NDecimal("25528A3", 16).Root(NDecimal(5, 16)).GetString() << std::endl;
+	}
 	getchar();
 	return 0;
 }

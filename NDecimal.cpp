@@ -1,6 +1,7 @@
 #include <cassert>
 #include <list>
 #include <map>
+#include <vector>
 #include "NDecimal.h"
 
 NDecimal::NDecimal(uint64_t value, uint8_t base):m_base(base) {
@@ -21,9 +22,9 @@ NDecimal::NDecimal(const std::string &value, uint8_t base):
 NDecimal::NDecimal(uint8_t base):m_base(base) {
 
 }
-NDecimal::NDecimal(const std::list<char> &bits, uint8_t base):
+NDecimal::NDecimal(const std::list<char> &singles, uint8_t base):
 	m_base(base) {
-	m_singles = bits;
+	m_singles = singles;
 	if (m_singles.empty()) {
 		m_singles.push_back('0');
 	}
@@ -174,6 +175,50 @@ NDecimal NDecimal::Power(const NDecimal &exponent) const {
 	}
 	return result;
 }
+
+NDecimal NDecimal::Root(const NDecimal &exponent, std::vector<char> &singles, size_t index, char top, char bottom) const {
+	char c = GetChar((GetValue(top) + GetValue(bottom) + 1)/2);
+	singles[index] = c;
+	NDecimal value(std::list<char>(singles.cbegin(), singles.cend()), m_base);
+	const NDecimal &power = value.Power(exponent);
+	if (power == *this) {
+		return value;
+	}
+	else if (power > *this) {
+		if (c > bottom + 1) {
+			return Root(exponent, singles, index, c, bottom);
+		}
+		else {
+			singles[index] = bottom;
+			if (index) {
+				return Root(exponent, singles, index - 1, GetChar(m_base - 1), '0');
+			}
+			else {
+				return NDecimal(std::list<char>(singles.cbegin(), singles.cend()));
+			}
+		}
+	}
+	else {
+		if (c + 1 < top) {
+			return Root(exponent, singles, index, top, c);
+		}
+		else {
+			if (index) {
+				return Root(exponent, singles, index - 1, GetChar(m_base - 1), '0');
+			}
+			else {
+				return value;
+			}
+		}
+	}
+}
+
+NDecimal NDecimal::Root(const NDecimal &exponent) const {
+	size_t len = strtoull(((NDecimal(m_singles.size(), m_base) +
+		exponent - NDecimal(1, m_base)) / exponent).GetString(m_base).c_str(), NULL, m_base);
+	std::vector<char> singles(len, '0');
+	return Root(exponent, singles, len - 1, GetChar(m_base - 1), '0');
+}
 NDecimal &NDecimal::operator++() {
 	*this = *this + NDecimal(1, GetBase());
 	return *this;
@@ -303,10 +348,10 @@ uint16_t NDecimal::ToBuilt(char a, char b, uint8_t base) {
 	return result;
 }
 
-void NDecimal::DivN(uint8_t from, uint8_t to, std::list<char> &bits, char &remainder) {
+void NDecimal::DivN(uint8_t from, uint8_t to, std::list<char> &singles, char &remainder) {
 	std::list<char> quotient;
 	char pre = '0';
-	for (auto bit = bits.crbegin(); bit != bits.crend(); bit++) {
+	for (auto bit = singles.crbegin(); bit != singles.crend(); bit++) {
 		uint16_t built = ToBuilt(pre, *bit, from);
 		uint8_t q = built / to;
 		uint8_t r = built % to;
@@ -317,7 +362,7 @@ void NDecimal::DivN(uint8_t from, uint8_t to, std::list<char> &bits, char &remai
 	while (quotient.size() > 1 && '0' == quotient.back()) {
 		quotient.pop_back();
 	}
-	bits = quotient;
+	singles = quotient;
 
 }
 
@@ -348,8 +393,8 @@ std::string NDecimal::GetLoop() const {
 	if (!m_is_check_loop || -1 == m_loop_begin) {
 		return "";
 	}
-	const std::string bits(m_singles.crbegin(), m_singles.crend());
-	return "......{" + bits.substr(m_loop_begin + 1, m_loop_end - m_loop_begin) + "}";
+	const std::string singles(m_singles.crbegin(), m_singles.crend());
+	return "......{" + singles.substr(m_loop_begin + 1, m_loop_end - m_loop_begin) + "}";
 }
 
 char NDecimal::GetChar(uint8_t value) {
