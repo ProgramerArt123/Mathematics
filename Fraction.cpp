@@ -2,48 +2,49 @@
 #include "Integer.h"
 #include "Fraction.h"
 
-Fraction::Fraction() {
+Fraction::Fraction():
+	m_numerator(new Integer(0)), m_denominator(new Integer(UINT64_MAX)) {
 
 }
 Fraction::Fraction(const Integer &significant) :
-	m_numerator(significant), m_denominator(1) {
+	m_numerator(new Integer(significant)), m_denominator(new Integer(1)) {
 }
 Fraction::Fraction(const Integer &numerator, const Integer &denominator) :
-	m_numerator(numerator), m_denominator(denominator) {
+	m_numerator(new Integer(numerator)), m_denominator(new Integer(denominator)) {
 	assert(0 != m_denominator);
-	m_numerator.m_value = m_numerator.m_value.GetNDecimal(m_denominator.m_value.GetBase());
-	const Integer &common = m_numerator.GreatestCommonDivisor(m_denominator);
-	m_numerator /= common;
-	m_denominator /= common;
-	if (Integer(0) == m_numerator) {
-		m_denominator.m_positive = true;
+	m_numerator->m_value = m_numerator->m_value.GetNDecimal(m_denominator->m_value.GetBase());
+	const Integer &common = m_numerator->GreatestCommonDivisor(*m_denominator);
+	*m_numerator /= common;
+	*m_denominator /= common;
+	if (Integer(0) == *m_numerator) {
+		m_denominator->m_positive = true;
 	}
 }
 Fraction &Fraction::SetPointPos(size_t point) {
 	std::string denominator = "1";
 	denominator.append(point, '0');
-	m_denominator = NDecimal(denominator, m_numerator.m_value.GetBase());
+	*m_denominator = NDecimal(denominator, m_numerator->m_value.GetBase());
 	return *this;
 }
 const std::string Fraction::GetString(uint8_t base) const {
-	return m_numerator.m_positive == m_denominator.m_positive ?
-		m_numerator.m_value.GetString(base) + "/" + m_denominator.m_value.GetString(base) : "-" +
-		m_numerator.m_value.GetString(base) + "/" + m_denominator.m_value.GetString(base);
+	return m_numerator->m_positive == m_denominator->m_positive ?
+		m_numerator->m_value.GetString(base) + "/" + m_denominator->m_value.GetString(base) : "-" +
+		m_numerator->m_value.GetString(base) + "/" + m_denominator->m_value.GetString(base);
 }
 const std::string Fraction::GetDecimal(uint8_t base, size_t decimalLength, 
 	std::function<bool(char)> round) const {
 	const std::string baseStr = "[base=" + std::to_string(base) + "]";
-	NDecimal integer(0, m_denominator.m_value.GetBase()), integerRemainder(0, m_denominator.m_value.GetBase());
-	m_numerator.m_value.Div(m_denominator.m_value, integer, integerRemainder);
+	NDecimal integer(0, m_denominator->m_value.GetBase()), integerRemainder(0, m_denominator->m_value.GetBase());
+	m_numerator->m_value.Div(m_denominator->m_value, integer, integerRemainder);
 	const std::string &integerStr = integer.GetString(base);
 	if (!integerRemainder) {
-		return m_numerator.m_positive == m_denominator.m_positive ?
+		return m_numerator->m_positive == m_denominator->m_positive ?
 			integerStr + baseStr : "-" + integerStr + baseStr;
 	}
 	std::string integerRemainderStr = integerRemainder.GetString(base);
 	integerRemainderStr.append(decimalLength + 1, '0');
-	NDecimal decimal(0, m_denominator.m_value.GetBase()), decimalRemainder(0, m_denominator.m_value.GetBase());
-	NDecimal(integerRemainderStr, base).Div(m_denominator.m_value, decimal.SetCheckLoop(), decimalRemainder);
+	NDecimal decimal(0, m_denominator->m_value.GetBase()), decimalRemainder(0, m_denominator->m_value.GetBase());
+	NDecimal(integerRemainderStr, base).Div(m_denominator->m_value, decimal.SetCheckLoop(), decimalRemainder);
 	const std::string &loop = decimal.GetLoop();
 	std::string decimalStr = decimal.GetString(base);
 	const std::string fill(decimalLength + 1 - decimalStr.size(), '0');
@@ -57,12 +58,12 @@ const std::string Fraction::GetDecimal(uint8_t base, size_t decimalLength,
 		decimalStr.pop_back();
 		if (!round(decimalStr.back())) {
 			if (!loop.empty()) {
-				return m_numerator.m_positive == m_denominator.m_positive ?
+				return m_numerator->m_positive == m_denominator->m_positive ?
 					integerStr + "." + fill + decimalStr + loop + baseStr : "-" +
 					integerStr + "." + fill + decimalStr + loop + baseStr;
 			}
 			else {
-				return m_numerator.m_positive == m_denominator.m_positive ?
+				return m_numerator->m_positive == m_denominator->m_positive ?
 					integerStr + "." + fill + decimalStr + "..." + baseStr : "-" +
 					integerStr + "." + fill + decimalStr + "..." + baseStr;
 			}
@@ -75,55 +76,55 @@ const std::string Fraction::GetDecimal(uint8_t base, size_t decimalLength,
 		}
 	}
 	else {
-		return m_numerator.m_positive == m_denominator.m_positive ?
+		return m_numerator->m_positive == m_denominator->m_positive ?
 			integerStr + "." + fill + decimalStr + loop + baseStr : "-" +
 			integerStr + "." + fill + decimalStr + loop + baseStr;
 	}
 }
 bool Fraction::IsPositive() const {
-	return m_numerator.m_positive == m_denominator.m_positive;
+	return m_numerator->m_positive == m_denominator->m_positive;
 }
 Fraction Fraction::operator-() const {
-	return Fraction(-m_numerator, m_denominator);
+	return Fraction(-*m_numerator, *m_denominator);
 }
 bool Fraction::operator<(const Fraction &other) const {
-	if (m_numerator.m_positive * m_denominator.m_positive <
-		other.m_numerator.m_positive * other.m_denominator.m_positive) {
+	if (m_numerator->m_positive * m_denominator->m_positive <
+		other.m_numerator->m_positive * other.m_denominator->m_positive) {
 		return true;
 	}
-	return m_numerator.m_positive * m_denominator.m_positive ==
-		m_numerator * other.m_denominator < other.m_numerator * m_denominator;
+	return m_numerator->m_positive * m_denominator->m_positive ==
+		*m_numerator * *other.m_denominator < *other.m_numerator * *m_denominator;
 }
 bool Fraction::operator==(const Fraction &other) const {
 	return m_denominator == other.m_denominator &&
 		m_numerator == other.m_numerator;
 }
 Fraction Fraction::operator+(const Fraction &addition) const {
-	const Integer &common = m_denominator.GreatestCommonDivisor(addition.m_denominator);
-	const Integer &selfNumerator = m_numerator * (addition.m_denominator / common);
-	const Integer &otherNumerator = addition.m_numerator * (m_denominator / common);
+	const Integer &common = m_denominator->GreatestCommonDivisor(*addition.m_denominator);
+	const Integer &selfNumerator =* m_numerator * (*addition.m_denominator / common);
+	const Integer &otherNumerator = *addition.m_numerator * (*m_denominator / common);
 	const Integer &x = selfNumerator + otherNumerator;
-	const Integer &y = m_denominator * (addition.m_denominator / common);
+	const Integer &y = *m_denominator * (*addition.m_denominator / common);
 	return Fraction(selfNumerator + otherNumerator,
-		m_denominator * (addition.m_denominator / common));
+		*m_denominator * (*addition.m_denominator / common));
 }
 Fraction Fraction::operator-(const Fraction &subtrahend) const {
 	return *this + (-subtrahend);
 }
 Fraction Fraction::operator*(const Fraction &multiplier) const {
-	Integer selfNumerator = NDecimal(0, m_denominator.m_value.GetBase());
-	Integer otherNumerator = NDecimal(0, m_denominator.m_value.GetBase());
-	Integer selfDenominator = NDecimal(UINT64_MAX, m_denominator.m_value.GetBase());
-	Integer otherDenominator = NDecimal(UINT64_MAX, m_denominator.m_value.GetBase());
+	Integer selfNumerator = NDecimal(0, m_denominator->m_value.GetBase());
+	Integer otherNumerator = NDecimal(0, m_denominator->m_value.GetBase());
+	Integer selfDenominator = NDecimal(UINT64_MAX, m_denominator->m_value.GetBase());
+	Integer otherDenominator = NDecimal(UINT64_MAX, m_denominator->m_value.GetBase());
 	{
-		const Integer &common = m_numerator.GreatestCommonDivisor(multiplier.m_denominator);
-		selfNumerator = m_numerator / common;
-		otherDenominator = multiplier.m_denominator / common;
+		const Integer &common = m_numerator->GreatestCommonDivisor(*multiplier.m_denominator);
+		selfNumerator = *m_numerator / common;
+		otherDenominator = *multiplier.m_denominator / common;
 	}
 	{
-		const Integer &common = m_denominator.GreatestCommonDivisor(multiplier.m_numerator);
-		selfDenominator = m_denominator / common;
-		otherNumerator = multiplier.m_numerator / common;
+		const Integer &common = m_denominator->GreatestCommonDivisor(*multiplier.m_numerator);
+		selfDenominator = *m_denominator / common;
+		otherNumerator = *multiplier.m_numerator / common;
 	}
 	return Fraction(selfNumerator * otherNumerator,
 		selfDenominator * otherDenominator);
@@ -136,7 +137,7 @@ Fraction &Fraction::operator*=(const Fraction &multiplier) {
 }
 Fraction Fraction::operator/(const Fraction &divisor) const {
 	assert(0 != divisor.m_numerator);
-	return *this * Fraction(divisor.m_denominator, divisor.m_numerator);
+	return *this * Fraction(*divisor.m_denominator, *divisor.m_numerator);
 }
 bool operator==(const Integer &number, const Fraction &rational) {
 	return Fraction(number) == rational;

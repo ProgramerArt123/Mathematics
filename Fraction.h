@@ -4,7 +4,8 @@
 #include <cstdint>
 #include <functional>
 #include "Number.h"
-#include "Integer.h"
+
+class Integer;
 
 class Fraction : public Number {
 public:
@@ -40,8 +41,8 @@ public:
 	friend Fraction operator*(const Fraction &number, const Integer &multiplier);
 	friend Fraction operator/(const Fraction &number, const Integer &divisor);
 
-	Integer m_numerator = 0;
-	Integer m_denominator = UINT64_MAX;
+	std::shared_ptr<Integer> m_numerator;
+	std::shared_ptr <Integer> m_denominator;
 };
 
 

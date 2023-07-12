@@ -68,6 +68,10 @@ int main(){
 		std::cout << NDecimal("10010101010010100010100011", 2).Root(NDecimal(5, 2)).GetString() << std::endl;
 		std::cout << NDecimal("25528A3", 16).Root(NDecimal(5, 16)).GetString() << std::endl;
 	}
+	{
+		std::cout << Integer(2).Power(Integer(0)).GetStringBase(10).c_str() << std::endl;
+		std::cout << Integer(3, false).Power(Integer(3,false)) << std::endl;
+	}
 	getchar();
 	return 0;
 }

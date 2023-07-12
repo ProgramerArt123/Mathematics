@@ -64,10 +64,21 @@ Integer Integer::operator%(const Integer &divisor) const {
 	remainder.m_positive = m_positive == divisor.m_positive;
 	return remainder;
 }
-Integer Integer::Power(const Integer &exponent) const {
+Fraction Integer::Power(const Integer &exponent) const {
 	Integer product = m_value.Power(exponent.m_value);
 	product.m_positive = m_positive || 0 == exponent % Integer(2);
-	return product;
+	if (exponent.m_positive) {
+		return Fraction(product, 1);
+	}
+	else {
+		return Fraction(1, product);
+	}
+}
+Integer Integer::Root(const Integer &exponent) const {
+	if (!m_positive && 0 == exponent % Integer(2)) {
+		throw "undefine";
+	}
+	return m_value.Root(exponent.m_value);
 }
 Integer &Integer::operator+=(const Integer &addition) {
 	*this = *this + addition;
