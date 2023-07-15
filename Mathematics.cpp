@@ -54,10 +54,10 @@ int main(){
 		std::cout << "d = " << d.GetDecimal(10, 5, [](char last) {return last >= '5'; }) << std::endl;
 	}
 	{
-		std::cout << "e = " << Series<Fraction>(
-			[](const uint64_t index) {
-			return Fraction(NDecimal(1, 10), !Integer(index - 1));
-		}).Summation(20).GetMonomial().GetDecimal(10, 20) << std::endl;
+		//std::cout << "e = " << Series<Fraction>(
+		//	[](const uint64_t index) {
+		//	return Fraction(NDecimal(1, 10), !Integer(index - 1));
+		//}).Summation(20).GetMonomial().GetDecimal(10, 20) << std::endl;
 	}
 	{
 		std::cout << "2^256=" << Integer(2).Power(Integer(256)).GetStringBase(10) << std::endl;
@@ -75,6 +75,7 @@ int main(){
 		std::cout << Imaginary(Integer(1)) << std::endl;
 		std::cout << Integer(4, false).Root(Integer(2)) << std::endl;
 		std::cout << Integer(8, false).Root(Integer(3)) << std::endl;
+		std::cout << Fraction(1, 3).Power(Fraction(1, 3)) << std::endl;
 	}
 	getchar();
 	return 0;

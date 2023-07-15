@@ -2,6 +2,7 @@
 #include <list>
 #include <map>
 #include <vector>
+#include <string>
 #include "NDecimal.h"
 
 NDecimal::NDecimal(uint64_t value, uint8_t base):m_base(base) {
@@ -301,6 +302,9 @@ const std::string NDecimal::GetString(uint8_t base) const {
 		remaining = quotient;
 	} while (remaining > bitZero);
 	return std::string(result.cbegin(), result.cend());
+}
+const std::string NDecimal::GetStringBase(uint8_t base) const {
+	return GetString(base) + "[base=" + std::to_string(base) + "]";
 }
 uint8_t NDecimal::GetBase() const {
 	return m_base;

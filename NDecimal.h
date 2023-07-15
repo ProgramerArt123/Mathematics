@@ -5,9 +5,7 @@
 #include <list>
 #include <ostream>
 
-#include "Number.h"
-
-class NDecimal : public Number {
+class NDecimal{
 public:
 	NDecimal(uint64_t value, uint8_t base);
 	NDecimal(const std::string &value, uint8_t base = 10);
@@ -35,6 +33,7 @@ public:
 	void Div(const NDecimal &divisor, NDecimal &quotient, NDecimal &remainder) const;
 
 	const std::string GetString(uint8_t base = 10) const;
+	const std::string GetStringBase(uint8_t base = 10) const;
 
 	uint8_t GetBase() const;
 
@@ -54,6 +53,7 @@ private:
 	NDecimal Root(const NDecimal &exponent, std::vector<char> &singles, size_t index, char top, char bottom) const;
 
 	std::list<char> m_singles;
+
 	uint8_t m_base = 10;
 
 	bool m_is_check_loop = false;
