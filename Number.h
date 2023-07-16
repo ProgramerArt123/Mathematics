@@ -19,6 +19,8 @@ public:
 		std::function<bool(char)> round = [](char last) {return false; }) const = 0;
 
 	const std::string GetStringRadix(uint8_t radix = 10) const;
+	const std::string GetDecimalRadix(uint8_t radix, size_t decimalLength,
+		std::function<bool(char)> round = [](char last) {return false; }) const;
 
 	friend std::ostream& operator<<(std::ostream& out, const Number &number);
 

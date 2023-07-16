@@ -123,14 +123,15 @@ Complex Complex::operator*(const Complex &multiplier) const {
 		std::dynamic_pointer_cast<Real>(image));
 }
 Complex Complex::operator/(const Complex &divisor) const {
-	const std::shared_ptr<Number> real = *(*(*m_real * *divisor.m_real) +
-		*(*m_image->m_value * *divisor.m_image->m_value)) /
-		*(*(*divisor.m_real * *divisor.m_real) + *(*divisor.m_image->m_value * *divisor.m_image->m_value));
-	const std::shared_ptr<Number> image = *(*(*m_image->m_value * *divisor.m_real) +
-		*(*m_real * *divisor.m_image->m_value)) /
-		*(*(*divisor.m_real * *divisor.m_real) + *(*divisor.m_image->m_value * *divisor.m_image->m_value));
-	return Complex(std::dynamic_pointer_cast<Real>(real),
-		std::dynamic_pointer_cast<Real>(image));
+	const Fraction real(*(*m_real * *divisor.m_real) +
+		*(*m_image->m_value * *divisor.m_image->m_value), 
+		*(*divisor.m_real * *divisor.m_real) +
+			*(*divisor.m_image->m_value * *divisor.m_image->m_value));
+	const Fraction image(*(*m_image->m_value * *divisor.m_real) -
+		*(*m_real * *divisor.m_image->m_value),
+		*(*divisor.m_real * *divisor.m_real) + 
+			*(*divisor.m_image->m_value * *divisor.m_image->m_value));
+	return Complex(real, image);
 }
 Complex &Complex::operator+=(const Complex &addition) {
 	return *this = *this + addition;

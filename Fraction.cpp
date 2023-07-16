@@ -191,13 +191,12 @@ bool Fraction::operator<(const Real &other) const {
 }
 const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength, 
 	std::function<bool(char)> round) const {
-	const std::string radixStr = "[radix=" + std::to_string(radix) + "]";
 	Natural integer(0, m_denominator->GetRadix()), integerRemainder(0, m_denominator->GetRadix());
 	m_numerator->GetNatural().Div(m_denominator->GetNatural(), integer, integerRemainder);
 	const std::string &integerStr = integer.GetString(radix);
 	if (!integerRemainder) {
 		return m_numerator->IsPositive() == m_denominator->IsPositive() ?
-			integerStr + radixStr : "-" + integerStr + radixStr;
+			integerStr: "-" + integerStr;
 	}
 	std::string integerRemainderStr = integerRemainder.GetString(radix);
 	integerRemainderStr.append(decimalLength + 1, '0');
@@ -217,13 +216,13 @@ const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength,
 		if (!round(decimalStr.back())) {
 			if (!loop.empty()) {
 				return m_numerator->IsPositive() == m_denominator->IsPositive() ?
-					integerStr + "." + fill + decimalStr + loop + radixStr : "-" +
-					integerStr + "." + fill + decimalStr + loop + radixStr;
+					integerStr + "." + fill + decimalStr + loop : "-" +
+					integerStr + "." + fill + decimalStr + loop;
 			}
 			else {
 				return m_numerator->IsPositive() == m_denominator->IsPositive() ?
-					integerStr + "." + fill + decimalStr + "..." + radixStr : "-" +
-					integerStr + "." + fill + decimalStr + "..." + radixStr;
+					integerStr + "." + fill + decimalStr + "..." : "-" +
+					integerStr + "." + fill + decimalStr + "...";
 			}
 		}
 		else {
@@ -235,8 +234,8 @@ const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength,
 	}
 	else {
 		return m_numerator->IsPositive() == m_denominator->IsPositive() ?
-			integerStr + "." + fill + decimalStr + loop + radixStr : "-" +
-			integerStr + "." + fill + decimalStr + loop + radixStr;
+			integerStr + "." + fill + decimalStr + loop : "-" +
+			integerStr + "." + fill + decimalStr + loop;
 	}
 }
 

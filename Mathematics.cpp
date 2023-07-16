@@ -38,12 +38,12 @@ int main(){
 		std::cout << "a - b = " << a - b << std::endl;
 		std::cout << "a = " << a.GetDecimal(10, 100) << std::endl;
 		std::cout << "a = " << a.GetDecimal(2, 10) << std::endl;
-		std::cout << "1 / 30 = " << Fraction(Natural("1"), Natural("30")).GetDecimal(10, 10) << std::endl;
-		std::cout << "3 / 1 = " << Fraction(Natural("3"), Natural("1")).GetDecimal(10, 10) << std::endl;
-		std::cout << "5 / 4 = " << Fraction(Natural("5"), Natural("4")).GetDecimal(10, 10) << std::endl;
-		std::cout << "0 / 1 = " << Fraction(Natural("0"), Natural("1")).GetDecimal(10, 10) << std::endl;
-		std::cout << Fraction(Natural("123456789")).SetPointPos(0).GetDecimal(10, 10) << std::endl;
-		std::cout << Fraction(Natural("123456789")).SetPointPos(18).GetDecimal(10, 32) << std::endl;
+		std::cout << "1 / 30 = " << Fraction(Natural("1"), Natural("30")).GetDecimalRadix(10, 10) << std::endl;
+		std::cout << "3 / 1 = " << Fraction(Natural("3"), Natural("1")).GetDecimalRadix(10, 10) << std::endl;
+		std::cout << "5 / 4 = " << Fraction(Natural("5"), Natural("4")).GetDecimalRadix(10, 10) << std::endl;
+		std::cout << "0 / 1 = " << Fraction(Natural("0"), Natural("1")).GetDecimalRadix(10, 10) << std::endl;
+		std::cout << Fraction(Natural("123456789")).SetPointPos(0).GetDecimalRadix(10, 10) << std::endl;
+		std::cout << Fraction(Natural("123456789")).SetPointPos(18).GetDecimalRadix(10, 32) << std::endl;
 		Fraction c(Natural("999999"));
 		c.SetPointPos(6);
 		std::cout << "c = " << c.GetDecimal(10, 10) << std::endl;
@@ -87,6 +87,27 @@ int main(){
 		std::cout << Imaginary(Fraction(1, 2)) - Imaginary(Fraction(1, 3)) << std::endl;
 		std::cout << Imaginary(Fraction(1, 2)) * Imaginary(Fraction(1, 3)) << std::endl;
 		std::cout << Imaginary(Fraction(1, 2)) / Imaginary(Fraction(1, 3)) << std::endl;
+
+		std::cout << (Imaginary(Fraction(1, 2)) + Imaginary(Fraction(1, 3))).GetDecimalRadix(10, 2) << std::endl;
+		std::cout << (Imaginary(Fraction(1, 2)) - Imaginary(Fraction(1, 3))).GetDecimalRadix(10, 2) << std::endl;
+		std::cout << (Imaginary(Fraction(1, 2)) * Imaginary(Fraction(1, 3))).GetDecimalRadix(10, 2) << std::endl;
+		std::cout << (Imaginary(Fraction(1, 2)) / Imaginary(Fraction(1, 3))).GetDecimalRadix(10, 2) << std::endl;
+	}
+	{
+		std::cout << Complex(Integer(1), Integer(1)) + Complex(Integer(1), Integer(2)) << std::endl;
+		std::cout << Complex(Integer(1), Integer(1)) - Complex(Integer(1), Integer(2)) << std::endl;
+		std::cout << Complex(Integer(1), Integer(1)) * Complex(Integer(1), Integer(2)) << std::endl;
+		std::cout << Complex(Integer(1), Integer(1)) / Complex(Integer(1), Integer(2)) << std::endl;
+
+		std::cout << Complex(Fraction(1, 2), Fraction(1, 3)) + Complex(Fraction(1, 2), Fraction(1, 3)) << std::endl;
+		std::cout << Complex(Fraction(1, 2), Fraction(1, 3)) - Complex(Fraction(1, 2), Fraction(1, 3)) << std::endl;
+		std::cout << Complex(Fraction(1, 2), Fraction(1, 3)) * Complex(Fraction(1, 2), Fraction(1, 3)) << std::endl;
+		std::cout << Complex(Fraction(1, 2), Fraction(1, 3)) / Complex(Fraction(1, 2), Fraction(1, 3)) << std::endl;
+
+		std::cout << (Complex(Fraction(1, 2), Fraction(1, 3)) + Complex(Fraction(1, 2), Fraction(1, 3))).GetDecimalRadix(10, 2) << std::endl;
+		std::cout << (Complex(Fraction(1, 2), Fraction(1, 3)) - Complex(Fraction(1, 2), Fraction(1, 3))).GetDecimalRadix(10, 2) << std::endl;
+		std::cout << (Complex(Fraction(1, 2), Fraction(1, 3)) * Complex(Fraction(1, 2), Fraction(1, 3))).GetDecimalRadix(10, 2) << std::endl;
+		std::cout << (Complex(Fraction(1, 2), Fraction(1, 3)) / Complex(Fraction(1, 2), Fraction(1, 3))).GetDecimalRadix(10, 2) << std::endl;
 	}
 	getchar();
 	return 0;
