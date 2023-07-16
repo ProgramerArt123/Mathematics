@@ -1,5 +1,6 @@
 #include <cassert>
 #include "Integer.h"
+#include "Complex.h"
 #include "Fraction.h"
 
 Fraction::Fraction():
@@ -13,53 +14,46 @@ Fraction::Fraction(const Integer &numerator, const Integer &denominator) :
 	m_numerator(new Integer(numerator)), m_denominator(new Integer(denominator)) {
 	assert(0 != m_denominator);
 	m_numerator->SetRadix(m_denominator->GetRadix());
+	Reduce();
 	if (m_numerator->EqualZero()) {
+		m_numerator->SetPositive(true);
+	}
+	else if (m_numerator->IsPositive() ==
+		m_denominator->IsPositive()) {
 		m_denominator->SetPositive(true);
+		m_numerator->SetPositive(true);
+	}
+	else if(!m_denominator->IsPositive()){
+		m_denominator->SetPositive(true);
+		m_numerator->SetPositive(false);
 	}
 }
 Fraction::Fraction(const Integer &numerator, const Fraction &denominator) {
 	*this = numerator / denominator;
 }
-Fraction::Fraction(const std::shared_ptr<Real> &numerator, 
-	const std::shared_ptr<Real> &denominator){
-	if (strstr(typeid(*denominator).name(), "Integer")) {
-		if (strstr(typeid(*numerator).name(), "Integer")) {
-			m_numerator = numerator; m_denominator = denominator;
-		}
-		else if (strstr(typeid(*numerator).name(), "Fraction")) {
-			*this = dynamic_cast<const Fraction &>(*numerator) /
-				dynamic_cast<const Integer &>(*denominator);
-		}
-		else {
-			throw "undefine";
-		}
-	}
-	else if (strstr(typeid(*denominator).name(), "Fraction")) {
-		if (strstr(typeid(*numerator).name(), "Integer")) {
-			*this = dynamic_cast<const Integer &>(*numerator) /
-				dynamic_cast<const Fraction &>(*denominator);
-		}
-		else if (strstr(typeid(*numerator).name(), "Fraction")) {
-			*this = dynamic_cast<const Fraction &>(*numerator) /
-				dynamic_cast<const Fraction &>(*denominator);
-		}
-		else {
-			throw "undefine";
-		}
-	}
-	else {
-		throw "undefine";
-	}
+Fraction::Fraction(const Fraction &numerator, const Integer &denominator) {
+	*this = numerator / denominator;
+}
+Fraction::Fraction(const Fraction &numerator, const Fraction &denominator) {
+	*this = numerator / denominator;
 }
 Fraction &Fraction::SetPointPos(size_t point) {
 	std::string denominator = "1";
 	denominator.append(point, '0');
-	m_denominator = std::shared_ptr<Real>(new Integer(Natural(denominator)));
+	m_denominator = std::shared_ptr<Integer>(new Integer(Natural(denominator)));
 	m_denominator->SetRadix(m_numerator->GetRadix());
 	return *this;
 }
 const std::string Fraction::GetString(uint8_t radix) const {
-	return m_numerator->GetString(radix) + "/" + m_denominator->GetString(radix);
+	if (m_numerator->EqualZero()) {
+		return m_numerator->GetString(radix);
+	}
+	else if (Integer(1) == *m_denominator) {
+		return m_numerator->GetString(radix);
+	}
+	else {
+		return m_numerator->GetString(radix) + "/" + m_denominator->GetString(radix);
+	}
 }
 void Fraction::SetRadix(uint8_t radix) {
 	m_numerator->SetRadix(radix);
@@ -239,6 +233,12 @@ const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength,
 	}
 }
 
+void Fraction::Reduce() {
+	const Integer &common = m_denominator->GreatestCommonDivisor(*m_numerator);
+	*m_numerator /= common;
+	*m_denominator /= common;
+}
+
 Fraction Fraction::operator-() const {
 	Fraction negative(*this);
 	negative.SetPositive(!negative.IsPositive());
@@ -259,17 +259,16 @@ bool Fraction::operator==(const Fraction &other) const {
 		*other.m_numerator * *m_denominator;
 }
 Fraction Fraction::operator+(const Fraction &addition) const {
-	return Fraction(std::dynamic_pointer_cast<Real>(
-		*(*m_numerator * *addition.m_denominator) +
-		*(*addition.m_numerator * *m_denominator)),
-		std::dynamic_pointer_cast<Real>(*m_denominator * *addition.m_denominator));
+	return Fraction((*m_numerator * *addition.m_denominator) +
+		(*addition.m_numerator * *m_denominator),
+		*m_denominator * *addition.m_denominator);
 }
 Fraction Fraction::operator-(const Fraction &subtrahend) const {
 	return *this + (-subtrahend);
 }
 Fraction Fraction::operator*(const Fraction &multiplier) const {
-	return Fraction(std::dynamic_pointer_cast<Real>(*m_numerator * *multiplier.m_numerator),
-		std::dynamic_pointer_cast<Real>(*m_denominator * *multiplier.m_denominator));
+	return Fraction(*m_numerator * *multiplier.m_numerator,
+		*m_denominator * *multiplier.m_denominator);
 }
 Fraction &Fraction::operator+=(const Fraction &addition) {
 	return *this = *this + addition;
@@ -277,83 +276,27 @@ Fraction &Fraction::operator+=(const Fraction &addition) {
 Fraction &Fraction::operator*=(const Fraction &multiplier) {
 	return *this = *this * multiplier;
 }
+Fraction &Fraction::operator/=(const Fraction &divisor) {
+	return *this = *this / divisor;
+}
 Fraction Fraction::operator/(const Fraction &divisor) const {
 	assert(0 != divisor.m_numerator);
-	return *this * Fraction(divisor.m_denominator, divisor.m_numerator);
+	return *this * Fraction(*divisor.m_denominator, *divisor.m_numerator);
 }
 Complex Fraction::Power(const Fraction &exponent) const {
-	if (strstr(typeid(*exponent.m_denominator).name(), "Integer") && strstr(typeid(*exponent.m_numerator).name(), "Integer")) {
-		return *std::dynamic_pointer_cast<Complex>(std::dynamic_pointer_cast<Fraction>(m_numerator->Power(*exponent.m_numerator))->Root(*exponent.m_denominator)) /
-			*std::dynamic_pointer_cast<Complex>(std::dynamic_pointer_cast<Fraction>(m_denominator->Power(*exponent.m_numerator))->Root(*exponent.m_denominator));
-	}
-	else {
-		throw "undefine";
-	}
+	return m_numerator->Power(*exponent.m_numerator).Root(*exponent.m_denominator) /
+		m_denominator->Power(*exponent.m_numerator).Root(*exponent.m_denominator);
 }
 Complex Fraction::Root(const Fraction &exponent) const {
-	return Power(Fraction(exponent.m_denominator, exponent.m_numerator));
+	return Power(Fraction(*exponent.m_denominator, *exponent.m_numerator));
 }
 Complex Fraction::Power(const Integer &exponent) const {
-	if (strstr(typeid(*m_denominator).name(), "Integer")) {
-		if (strstr(typeid(*m_numerator).name(), "Integer")) {
-			return Complex(std::dynamic_pointer_cast<Integer>(m_numerator)->Power(exponent), 0) /
-				std::dynamic_pointer_cast<Integer>(m_denominator)->Power(exponent);
-		}
-		else if (strstr(typeid(*m_numerator).name(), "Fraction")) {
-			return std::dynamic_pointer_cast<Fraction>(m_numerator)->Power(exponent) /
-				std::dynamic_pointer_cast<Integer>(m_denominator)->Power(exponent);
-		}
-		else {
-			throw "undefine";
-		}
-	}
-	else if (strstr(typeid(*m_denominator).name(), "Fraction")) {
-		if (strstr(typeid(*m_numerator).name(), "Integer")) {
-			return std::dynamic_pointer_cast<Integer>(m_numerator)->Power(exponent) /
-				std::dynamic_pointer_cast<Fraction>(m_denominator)->Power(exponent);
-		}
-		else if (strstr(typeid(*m_numerator).name(), "Fraction")) {
-			return std::dynamic_pointer_cast<Fraction>(m_numerator)->Power(exponent) /
-				std::dynamic_pointer_cast<Fraction>(m_denominator)->Power(exponent);
-		}
-		else {
-			throw "undefine";
-		}
-	}
-	else {
-		throw "undefine";
-	}
+	return Complex(m_numerator->Power(exponent), 0) /
+		m_denominator->Power(exponent);
 }
 Complex Fraction::Root(const Integer &exponent) const {
-	if (strstr(typeid(*m_denominator).name(), "Integer")) {
-		if (strstr(typeid(*m_numerator).name(), "Integer")) {
-			return std::dynamic_pointer_cast<Integer>(m_numerator)->Root(exponent) /
-				std::dynamic_pointer_cast<Integer>(m_denominator)->Root(exponent);
-		}
-		else if (strstr(typeid(*m_numerator).name(), "Fraction")) {
-			return std::dynamic_pointer_cast<Fraction>(m_numerator)->Root(exponent) /
-				std::dynamic_pointer_cast<Integer>(m_denominator)->Root(exponent);
-		}
-		else {
-			throw "undefine";
-		}
-	}
-	else if (strstr(typeid(*m_denominator).name(), "Fraction")) {
-		if (strstr(typeid(*m_numerator).name(), "Integer")) {
-			return std::dynamic_pointer_cast<Integer>(m_numerator)->Root(exponent) /
-				std::dynamic_pointer_cast<Fraction>(m_denominator)->Root(exponent);
-		}
-		else if (strstr(typeid(*m_numerator).name(), "Fraction")) {
-			return std::dynamic_pointer_cast<Fraction>(m_numerator)->Root(exponent) /
-				std::dynamic_pointer_cast<Fraction>(m_denominator)->Root(exponent);
-		}
-		else {
-			throw "undefine";
-		}
-	}
-	else {
-		throw "undefine";
-	}
+	return m_numerator->Root(exponent) /
+		m_denominator->Root(exponent);
 }
 bool operator==(const Integer &number, const Fraction &rational) {
 	return Fraction(number) == rational;

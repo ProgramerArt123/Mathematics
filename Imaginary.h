@@ -13,7 +13,6 @@ class Imaginary : public Number {
 public:
 	Imaginary(const Integer &value);
 	Imaginary(const Fraction &value);
-	Imaginary(const std::shared_ptr<Real> &value);
 	const std::string GetString(uint8_t radix = 10) const override;
 	void SetRadix(uint8_t radix = 10) override;
 	uint8_t GetRadix() const override;
@@ -58,7 +57,7 @@ public:
 	friend Complex Power(const Imaginary &number, const Fraction &exponent);
 	friend Complex Root(const Imaginary &number, const Fraction &exponent);
 
-	std::shared_ptr<Real> m_value;
+	std::shared_ptr<Fraction> m_value;
 };
 
 #endif

@@ -16,8 +16,6 @@ public:
 	Complex(const Integer &real, const Fraction &image);
 	Complex(const Integer &real, const Imaginary &image);
 	Complex(const Fraction &real, const Imaginary &image);
-	Complex(const std::shared_ptr<Real> &real, const Imaginary &image);
-	Complex(const std::shared_ptr<Real> &real, const std::shared_ptr<Real> &image);
 	const std::string GetString(uint8_t radix = 10) const override;
 	void SetRadix(uint8_t radix = 10) override;
 	uint8_t GetRadix() const override;
@@ -69,7 +67,7 @@ public:
 
 	friend Complex Power(const Complex &number, const Integer &exponent);
 
-	std::shared_ptr<Real> m_real;
+	std::shared_ptr<Fraction> m_real;
 	std::shared_ptr<Imaginary> m_image;
 };
 

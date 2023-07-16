@@ -4,7 +4,7 @@
 #include "Complex.h"
 
 Complex::Complex(const Integer &real, const Integer &image) :
-	m_real(new Integer(real)),m_image(new Imaginary(image)) {
+	m_real(new Fraction(real)),m_image(new Imaginary(image)) {
 
 }
 
@@ -17,24 +17,15 @@ Complex::Complex(const Fraction &real, const Integer &image) :
 
 }
 Complex::Complex(const Integer &real, const Fraction &image) :
-	m_real(new Integer(real)), m_image(new Imaginary(image)) {
+	m_real(new Fraction(real)), m_image(new Imaginary(image)) {
 
 }
 Complex::Complex(const Integer &real, const Imaginary &image):
-	m_real(new Integer(real)), m_image(new Imaginary(image)) {
+	m_real(new Fraction(real)), m_image(new Imaginary(image)) {
 
 }
 Complex::Complex(const Fraction &real, const Imaginary &image) :
 	m_real(new Fraction(real)), m_image(new Imaginary(image)) {
-
-}
-Complex::Complex(const std::shared_ptr<Real> &real, const Imaginary &image) :
-	m_real(real), m_image(new Imaginary(image)) {
-
-}
-
-Complex::Complex(const std::shared_ptr<Real> &real, const std::shared_ptr<Real> &image) :
-	m_real(real), m_image(new Imaginary(image)) {
 
 }
 const std::string Complex::GetString(uint8_t radix) const {
@@ -107,30 +98,29 @@ Complex Complex::operator-() const {
 	return negative;
 }
 Complex Complex::operator+(const Complex &addition) const {
-	const std::shared_ptr<Number> real = *m_real + *addition.m_real;
+	const Fraction &real = *m_real + *addition.m_real;
 	const Imaginary &image = *m_image + *addition.m_image;
-	return Complex(std::dynamic_pointer_cast<Real>(real), image);
+	return Complex(real, image);
 }
 Complex Complex::operator-(const Complex &subtrahend) const {
 	return *this + -subtrahend;
 }
 Complex Complex::operator*(const Complex &multiplier) const {
-	const std::shared_ptr<Number> real = *(*m_real * *multiplier.m_real) -
-		*(*m_image->m_value * *multiplier.m_image->m_value);
-	const std::shared_ptr<Number> image = *(*m_real * *multiplier.m_image->m_value) +
-		*(*m_image->m_value * *multiplier.m_real);
-	return Complex(std::dynamic_pointer_cast<Real>(real), 
-		std::dynamic_pointer_cast<Real>(image));
+	const Fraction &real = (*m_real * *multiplier.m_real) -
+		(*m_image->m_value * *multiplier.m_image->m_value);
+	const Fraction &image = (*m_real * *multiplier.m_image->m_value) +
+		(*m_image->m_value * *multiplier.m_real);
+	return Complex(real, image);
 }
 Complex Complex::operator/(const Complex &divisor) const {
-	const Fraction real(*(*m_real * *divisor.m_real) +
-		*(*m_image->m_value * *divisor.m_image->m_value), 
-		*(*divisor.m_real * *divisor.m_real) +
-			*(*divisor.m_image->m_value * *divisor.m_image->m_value));
-	const Fraction image(*(*m_image->m_value * *divisor.m_real) -
-		*(*m_real * *divisor.m_image->m_value),
-		*(*divisor.m_real * *divisor.m_real) + 
-			*(*divisor.m_image->m_value * *divisor.m_image->m_value));
+	const Fraction real((*m_real * *divisor.m_real) +
+		(*m_image->m_value * *divisor.m_image->m_value), 
+		(*divisor.m_real * *divisor.m_real) +
+			(*divisor.m_image->m_value * *divisor.m_image->m_value));
+	const Fraction image((*m_image->m_value * *divisor.m_real) -
+		(*m_real * *divisor.m_image->m_value),
+		(*divisor.m_real * *divisor.m_real) + 
+			(*divisor.m_image->m_value * *divisor.m_image->m_value));
 	return Complex(real, image);
 }
 Complex &Complex::operator+=(const Complex &addition) {
@@ -215,7 +205,7 @@ Complex Power(const Complex &number, const Integer &exponent) {
 	Complex power(Integer(0), Integer(0));
 	for (Integer index(0); index <= exponent; index+=1) {
 		power += exponent.Composition(exponent, index) * 
-			*std::dynamic_pointer_cast<Complex>(number.m_real->Power(exponent - index)) *
+			(number.m_real->Power(exponent - index)) *
 			Power(*number.m_image, exponent);
 	}
 	return power;

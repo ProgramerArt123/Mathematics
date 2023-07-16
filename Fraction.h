@@ -14,7 +14,8 @@ public:
 	Fraction(const Integer &significant);
 	Fraction(const Integer &numerator, const Integer &denominator);
 	Fraction(const Integer &numerator, const Fraction &denominator);
-	Fraction(const std::shared_ptr<Real> &numerator, const std::shared_ptr<Real> &denominator);
+	Fraction(const Fraction &numerator, const Integer &denominator);
+	Fraction(const Fraction &numerator, const Fraction &denominator);
 	Fraction &SetPointPos(size_t point);
 	const std::string GetString(uint8_t radix = 10) const override;
 	void SetRadix(uint8_t radix = 10) override;
@@ -33,6 +34,9 @@ public:
 	bool operator<(const Real &other) const override;
 	const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round = [](char last) {return false; }) const override;
+	
+	void Reduce();
+	
 	Fraction operator-() const;
 	bool operator<(const Fraction &other) const;
 	bool operator==(const Fraction &other) const;
@@ -47,6 +51,7 @@ public:
 
 	Fraction &operator+=(const Fraction &addition);
 	Fraction &operator*=(const Fraction &multiplier);
+	Fraction &operator/=(const Fraction &divisor);
 
 	Complex Power(const Integer &exponent)const;
 	Complex Root(const Integer &exponent)const;
@@ -58,8 +63,8 @@ public:
 	friend Fraction operator*(const Fraction &number, const Integer &multiplier);
 	friend Fraction operator/(const Fraction &number, const Integer &divisor);
 
-	std::shared_ptr<Real> m_numerator;
-	std::shared_ptr<Real> m_denominator;
+	std::shared_ptr<Integer> m_numerator;
+	std::shared_ptr<Integer> m_denominator;
 };
 
 
