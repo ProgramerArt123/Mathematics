@@ -14,14 +14,15 @@ public:
 	Imaginary(const Integer &value);
 	Imaginary(const Fraction &value);
 	Imaginary(const std::shared_ptr<Real> &value);
-	const std::string GetString(uint8_t base = 10) const override;
-	virtual void SetBase(uint8_t base = 10) override;
-	virtual uint8_t GetBase() const override;
-	virtual bool EqualZero() const override;
-	virtual void SetPositive(bool isPositive) override;
-	virtual bool IsPositive() const override;
-	virtual NDecimal GetNDecimal() const override;
-	
+	const std::string GetString(uint8_t radix = 10) const override;
+	void SetRadix(uint8_t radix = 10) override;
+	uint8_t GetRadix() const override;
+	bool EqualZero() const override;
+	void SetPositive(bool isPositive) override;
+	bool IsPositive() const override;
+	Natural GetNatural() const override;
+	const std::string GetDecimal(uint8_t radix, size_t decimalLength,
+		std::function<bool(char)> round = [](char last) {return false; }) const override;
 
 	Imaginary operator-() const;
 

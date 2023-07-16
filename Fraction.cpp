@@ -12,35 +12,61 @@ Fraction::Fraction(const Integer &significant) :
 Fraction::Fraction(const Integer &numerator, const Integer &denominator) :
 	m_numerator(new Integer(numerator)), m_denominator(new Integer(denominator)) {
 	assert(0 != m_denominator);
-	m_numerator->SetBase(m_denominator->GetBase());
+	m_numerator->SetRadix(m_denominator->GetRadix());
 	if (m_numerator->EqualZero()) {
 		m_denominator->SetPositive(true);
 	}
 }
-Fraction::Fraction(const Integer &numerator, const Fraction &denominator) :
-	m_numerator(new Integer(numerator)), m_denominator(new Fraction(denominator)) {
-
+Fraction::Fraction(const Integer &numerator, const Fraction &denominator) {
+	*this = numerator / denominator;
 }
 Fraction::Fraction(const std::shared_ptr<Real> &numerator, 
-	const std::shared_ptr<Real> &denominator):m_numerator(numerator), m_denominator(denominator) {
-
+	const std::shared_ptr<Real> &denominator){
+	if (strstr(typeid(*denominator).name(), "Integer")) {
+		if (strstr(typeid(*numerator).name(), "Integer")) {
+			m_numerator = numerator; m_denominator = denominator;
+		}
+		else if (strstr(typeid(*numerator).name(), "Fraction")) {
+			*this = dynamic_cast<const Fraction &>(*numerator) /
+				dynamic_cast<const Integer &>(*denominator);
+		}
+		else {
+			throw "undefine";
+		}
+	}
+	else if (strstr(typeid(*denominator).name(), "Fraction")) {
+		if (strstr(typeid(*numerator).name(), "Integer")) {
+			*this = dynamic_cast<const Integer &>(*numerator) /
+				dynamic_cast<const Fraction &>(*denominator);
+		}
+		else if (strstr(typeid(*numerator).name(), "Fraction")) {
+			*this = dynamic_cast<const Fraction &>(*numerator) /
+				dynamic_cast<const Fraction &>(*denominator);
+		}
+		else {
+			throw "undefine";
+		}
+	}
+	else {
+		throw "undefine";
+	}
 }
 Fraction &Fraction::SetPointPos(size_t point) {
 	std::string denominator = "1";
 	denominator.append(point, '0');
-	m_denominator = std::shared_ptr<Real>(new Integer(NDecimal(denominator)));
-	m_denominator->SetBase(m_numerator->GetBase());
+	m_denominator = std::shared_ptr<Real>(new Integer(Natural(denominator)));
+	m_denominator->SetRadix(m_numerator->GetRadix());
 	return *this;
 }
-const std::string Fraction::GetString(uint8_t base) const {
-	return m_numerator->GetString(base) + "/" + m_denominator->GetString(base);
+const std::string Fraction::GetString(uint8_t radix) const {
+	return m_numerator->GetString(radix) + "/" + m_denominator->GetString(radix);
 }
-void Fraction::SetBase(uint8_t base) {
-	m_numerator->SetBase(base);
-	m_denominator->SetBase(base);
+void Fraction::SetRadix(uint8_t radix) {
+	m_numerator->SetRadix(radix);
+	m_denominator->SetRadix(radix);
 }
-uint8_t Fraction::GetBase() const {
-	return m_denominator->GetBase();
+uint8_t Fraction::GetRadix() const {
+	return m_denominator->GetRadix();
 }
 bool Fraction::EqualZero() const {
 	return m_numerator->EqualZero();
@@ -53,9 +79,9 @@ bool Fraction::IsPositive() const {
 	return m_numerator->IsPositive() == 
 		m_denominator->IsPositive();
 }
-NDecimal Fraction::GetNDecimal() const {
-	return m_numerator->GetNDecimal() / 
-		m_denominator->GetNDecimal();
+Natural Fraction::GetNatural() const {
+	return m_numerator->GetNatural() / 
+		m_denominator->GetNatural();
 }
 std::shared_ptr<Real> Fraction::operator+(const Real &addition) const {
 	if (strstr(typeid(addition).name(), "Integer")) {
@@ -163,22 +189,22 @@ bool Fraction::operator<(const Real &other) const {
 		throw "undefine";
 	}
 }
-const std::string Fraction::GetDecimal(uint8_t base, size_t decimalLength, 
+const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength, 
 	std::function<bool(char)> round) const {
-	const std::string baseStr = "[base=" + std::to_string(base) + "]";
-	NDecimal integer(0, m_denominator->GetBase()), integerRemainder(0, m_denominator->GetBase());
-	m_numerator->GetNDecimal().Div(m_denominator->GetNDecimal(), integer, integerRemainder);
-	const std::string &integerStr = integer.GetString(base);
+	const std::string radixStr = "[radix=" + std::to_string(radix) + "]";
+	Natural integer(0, m_denominator->GetRadix()), integerRemainder(0, m_denominator->GetRadix());
+	m_numerator->GetNatural().Div(m_denominator->GetNatural(), integer, integerRemainder);
+	const std::string &integerStr = integer.GetString(radix);
 	if (!integerRemainder) {
 		return m_numerator->IsPositive() == m_denominator->IsPositive() ?
-			integerStr + baseStr : "-" + integerStr + baseStr;
+			integerStr + radixStr : "-" + integerStr + radixStr;
 	}
-	std::string integerRemainderStr = integerRemainder.GetString(base);
+	std::string integerRemainderStr = integerRemainder.GetString(radix);
 	integerRemainderStr.append(decimalLength + 1, '0');
-	NDecimal decimal(0, m_denominator->GetBase()), decimalRemainder(0, m_denominator->GetBase());
-	NDecimal(integerRemainderStr, base).Div(m_denominator->GetNDecimal(), decimal.SetCheckLoop(), decimalRemainder);
+	Natural decimal(0, m_denominator->GetRadix()), decimalRemainder(0, m_denominator->GetRadix());
+	Natural(integerRemainderStr, radix).Div(m_denominator->GetNatural(), decimal.SetCheckLoop(), decimalRemainder);
 	const std::string &loop = decimal.GetLoop();
-	std::string decimalStr = decimal.GetString(base);
+	std::string decimalStr = decimal.GetString(radix);
 	const std::string fill(decimalLength + 1 - decimalStr.size(), '0');
 	if (!decimalRemainder) {
 		while ('0' == decimalStr.back()){
@@ -191,26 +217,26 @@ const std::string Fraction::GetDecimal(uint8_t base, size_t decimalLength,
 		if (!round(decimalStr.back())) {
 			if (!loop.empty()) {
 				return m_numerator->IsPositive() == m_denominator->IsPositive() ?
-					integerStr + "." + fill + decimalStr + loop + baseStr : "-" +
-					integerStr + "." + fill + decimalStr + loop + baseStr;
+					integerStr + "." + fill + decimalStr + loop + radixStr : "-" +
+					integerStr + "." + fill + decimalStr + loop + radixStr;
 			}
 			else {
 				return m_numerator->IsPositive() == m_denominator->IsPositive() ?
-					integerStr + "." + fill + decimalStr + "..." + baseStr : "-" +
-					integerStr + "." + fill + decimalStr + "..." + baseStr;
+					integerStr + "." + fill + decimalStr + "..." + radixStr : "-" +
+					integerStr + "." + fill + decimalStr + "..." + radixStr;
 			}
 		}
 		else {
 			std::string denominator = "1";
 			denominator.append((fill + decimalStr).length(), '0');
-			return ((Fraction(Integer(NDecimal(integerStr + fill + decimalStr, base), IsPositive()))
-				+ NDecimal(1, base)) / NDecimal(denominator, base)).GetDecimal(base, decimalLength, round);
+			return ((Fraction(Integer(Natural(integerStr + fill + decimalStr, radix), IsPositive()))
+				+ Natural(1, radix)) / Natural(denominator, radix)).GetDecimal(radix, decimalLength, round);
 		}
 	}
 	else {
 		return m_numerator->IsPositive() == m_denominator->IsPositive() ?
-			integerStr + "." + fill + decimalStr + loop + baseStr : "-" +
-			integerStr + "." + fill + decimalStr + loop + baseStr;
+			integerStr + "." + fill + decimalStr + loop + radixStr : "-" +
+			integerStr + "." + fill + decimalStr + loop + radixStr;
 	}
 }
 

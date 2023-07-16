@@ -16,13 +16,13 @@ public:
 	Fraction(const Integer &numerator, const Fraction &denominator);
 	Fraction(const std::shared_ptr<Real> &numerator, const std::shared_ptr<Real> &denominator);
 	Fraction &SetPointPos(size_t point);
-	const std::string GetString(uint8_t base = 10) const override;
-	void SetBase(uint8_t base = 10) override;
-	uint8_t GetBase() const override;
+	const std::string GetString(uint8_t radix = 10) const override;
+	void SetRadix(uint8_t radix = 10) override;
+	uint8_t GetRadix() const override;
 	bool EqualZero() const override;
 	void SetPositive(bool isPositive) override;
 	bool IsPositive() const override;
-	NDecimal GetNDecimal() const override;
+	Natural GetNatural() const override;
 	std::shared_ptr<Real> operator+(const Real &addition) const override;
 	std::shared_ptr<Real> operator-(const Real &subtrahend) const override;
 	std::shared_ptr<Real> operator*(const Real &multiplier) const override;
@@ -31,8 +31,8 @@ public:
 	std::shared_ptr<Number> Root(const Real &exponent) const override;
 	bool operator==(const Real &other) const override;
 	bool operator<(const Real &other) const override;
-	const std::string GetDecimal(uint8_t base, size_t decimalLength,
-		std::function<bool(char)> round = [](char last) {return false; }) const;
+	const std::string GetDecimal(uint8_t radix, size_t decimalLength,
+		std::function<bool(char)> round = [](char last) {return false; }) const override;
 	Fraction operator-() const;
 	bool operator<(const Fraction &other) const;
 	bool operator==(const Fraction &other) const;

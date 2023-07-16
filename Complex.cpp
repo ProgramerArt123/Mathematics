@@ -37,9 +37,9 @@ Complex::Complex(const std::shared_ptr<Real> &real, const std::shared_ptr<Real> 
 	m_real(real), m_image(new Imaginary(image)) {
 
 }
-const std::string Complex::GetString(uint8_t base) const {
-	const std::string &realStr = m_real->GetString(base);
-	const std::string &imageStr = m_image->GetString(base);
+const std::string Complex::GetString(uint8_t radix) const {
+	const std::string &realStr = m_real->GetString(radix);
+	const std::string &imageStr = m_image->GetString(radix);
 	if ("0" == realStr && "0i"==imageStr) {
 		return "0";
 	}
@@ -59,12 +59,12 @@ const std::string Complex::GetString(uint8_t base) const {
 	}
 }
 
-void Complex::SetBase(uint8_t base) {
-	m_real->SetBase(base);
-	m_image->SetBase(base);
+void Complex::SetRadix(uint8_t radix) {
+	m_real->SetRadix(radix);
+	m_image->SetRadix(radix);
 }
-uint8_t Complex::GetBase() const {
-	return m_real->GetBase();
+uint8_t Complex::GetRadix() const {
+	return m_real->GetRadix();
 }
 bool Complex::EqualZero() const {
 	return m_real->EqualZero() && m_image->EqualZero();
@@ -76,10 +76,31 @@ void Complex::SetPositive(bool isPositive) {
 bool Complex::IsPositive() const {
 	return m_real->IsPositive() && m_image->IsPositive();
 }
-NDecimal Complex::GetNDecimal() const {
+Natural Complex::GetNatural() const {
 	throw "undefine";
 }
-
+const std::string Complex::GetDecimal(uint8_t radix, size_t decimalLength,
+	std::function<bool(char)> round) const {
+	const std::string &realStr = m_real->GetDecimal(radix, decimalLength, round);
+	const std::string &imageStr = m_image->GetDecimal(radix, decimalLength, round);
+	if ("0" == realStr && "0i" == imageStr) {
+		return "0";
+	}
+	else if ("0" == realStr) {
+		return imageStr;
+	}
+	else if ("0i" == imageStr) {
+		return realStr;
+	}
+	else {
+		if ('-' != imageStr.front()) {
+			return realStr + "+" + imageStr;
+		}
+		else {
+			return realStr + imageStr;
+		}
+	}
+}
 Complex Complex::operator-() const {
 	Complex negative(*this);
 	negative.SetPositive(!negative.IsPositive());

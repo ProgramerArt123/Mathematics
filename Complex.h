@@ -18,14 +18,15 @@ public:
 	Complex(const Fraction &real, const Imaginary &image);
 	Complex(const std::shared_ptr<Real> &real, const Imaginary &image);
 	Complex(const std::shared_ptr<Real> &real, const std::shared_ptr<Real> &image);
-	const std::string GetString(uint8_t base = 10) const override;
-	void SetBase(uint8_t base = 10) override;
-	uint8_t GetBase() const override;
+	const std::string GetString(uint8_t radix = 10) const override;
+	void SetRadix(uint8_t radix = 10) override;
+	uint8_t GetRadix() const override;
 	bool EqualZero() const override;
 	void SetPositive(bool isPositive)override;
 	bool IsPositive() const override;
-	NDecimal GetNDecimal() const override;
-	
+	Natural GetNatural() const override;
+	const std::string GetDecimal(uint8_t radix, size_t decimalLength,
+		std::function<bool(char)> round = [](char last) {return false; }) const override;
 
 	Complex operator-() const;
 

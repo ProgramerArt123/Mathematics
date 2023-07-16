@@ -1,10 +1,10 @@
 #include "Number.h"
 
-const std::string Number::GetStringBase(uint8_t base) const {
-	return GetString(base) +"[base=" + std::to_string(base) + "]";
+const std::string Number::GetStringRadix(uint8_t radix) const {
+	return GetString(radix) +"[radix=" + std::to_string(radix) + "]";
 }
 
 std::ostream& operator<<(std::ostream& out, const Number &number) {
-	out << number.GetStringBase().c_str();
+	out << number.GetStringRadix().c_str();
 	return out;
 }

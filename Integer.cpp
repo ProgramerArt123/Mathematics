@@ -5,24 +5,24 @@
 #include "Integer.h"
 
 Integer::Integer(uint64_t value, bool positive):
-	Integer(NDecimal(value, 10), positive) {
+	Integer(Natural(value, 10), positive) {
 
 }
 
-Integer::Integer(const NDecimal &value, bool positive) :
+Integer::Integer(const Natural &value, bool positive) :
 	m_value(value), m_positive(positive) {
 	if (0 == m_value) {
 		m_positive = true;
 	}
 }
-const std::string Integer::GetString(uint8_t base)const {
-	return m_positive ? m_value.GetString(base) : "-" + m_value.GetString(base);
+const std::string Integer::GetString(uint8_t radix)const {
+	return m_positive ? m_value.GetString(radix) : "-" + m_value.GetString(radix);
 }
-void Integer::SetBase(uint8_t base) {
-	m_value = m_value.GetNDecimal(base);
+void Integer::SetRadix(uint8_t radix) {
+	m_value = m_value.GetNatural(radix);
 }
-uint8_t Integer::GetBase() const {
-	return m_value.GetBase();
+uint8_t Integer::GetRadix() const {
+	return m_value.GetRadix();
 }
 bool Integer::EqualZero() const {
 	return Integer(0) == *this;
@@ -33,8 +33,12 @@ void Integer::SetPositive(bool isPositive) {
 bool Integer::IsPositive() const {
 	return m_positive;
 }
-NDecimal Integer::GetNDecimal() const {
+Natural Integer::GetNatural() const {
 	return m_value;
+}
+const std::string Integer::GetDecimal(uint8_t radix, size_t decimalLength,
+	std::function<bool(char)> round) const {
+	return GetString(radix);
 }
 std::shared_ptr<Real> Integer::operator+(const Real &addition) const {
 	if (strstr(typeid(addition).name(), "Integer")) {
@@ -150,7 +154,7 @@ Integer Integer::operator-() const {
 }
 Integer Integer::operator!() const {
 	Integer product(1);
-	for (NDecimal index(1, m_value.GetBase()); index <= m_value; ++index) {
+	for (Natural index(1, m_value.GetRadix()); index <= m_value; ++index) {
 		product *= Integer(index);
 	}
 	return product;

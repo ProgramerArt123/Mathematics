@@ -4,20 +4,22 @@
 #include <cstdint>
 #include <vector>
 #include "Real.h"
-#include "NDecimal.h"
+#include "Natural.h"
 #include "Fraction.h"
 #include "Complex.h"
 class Integer : public Real {
 public:
 	Integer(uint64_t value = 0, bool positive = true);
-	Integer(const NDecimal &value, bool positive = true);
-	const std::string GetString(uint8_t base = 10) const override;
-	void SetBase(uint8_t base = 10) override;
-	uint8_t GetBase() const override;
+	Integer(const Natural &value, bool positive = true);
+	const std::string GetString(uint8_t radix = 10) const override;
+	void SetRadix(uint8_t radix = 10) override;
+	uint8_t GetRadix() const override;
 	bool EqualZero() const override;
 	void SetPositive(bool isPositive)override;
 	bool IsPositive() const override;
-	NDecimal GetNDecimal() const override;
+	Natural GetNatural() const override;
+	const std::string GetDecimal(uint8_t radix, size_t decimalLength,
+		std::function<bool(char)> round = [](char last) {return false; }) const override;
 	std::shared_ptr<Real> operator+(const Real &addition) const override;
 	std::shared_ptr<Real> operator-(const Real &subtrahend) const override;
 	std::shared_ptr<Real> operator*(const Real &multiplier) const override;
@@ -49,7 +51,7 @@ public:
 	Integer &operator/=(const Integer &divisor);
 	bool operator==(const Integer &other)const;
 	
-	NDecimal m_value;
+	Natural m_value;
 	bool m_positive = true;
 private:
 	Integer PositiveAdd(const Integer &addition) const;
