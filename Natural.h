@@ -18,11 +18,11 @@ public:
 	bool EqualZero() const override;
 	void SetPositive(bool isPositive) override;
 	bool IsPositive() const override;
-	Natural GetNatural() const override;
 	const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round = [](char last) {return false; }) const override;
 
 	operator bool() const;
+	Natural operator!() const;
 	bool operator==(const Natural &other) const;
 	bool operator>(const Natural &other) const;
 	bool operator<(const Natural &other) const;
@@ -34,13 +34,17 @@ public:
 	Natural operator-(const Natural &subtrahend) const;
 	Natural &operator-=(const Natural &subtrahend);
 	Natural operator*(const Natural &multiplier) const;
+	Natural &operator*=(const Natural &multiplier);
 	Natural operator/(const Natural &divisor) const;
 	Natural &operator/=(const Natural &divisor);
 	Natural operator%(const Natural &divisor) const;
 	Natural Power(const Natural &exponent) const;
-	Natural Root(const Natural &exponent) const;
+	Natural Root(const Natural &exponent, bool &isExhaustive) const;
 
 	Natural &operator++();
+
+	Natural GreatestCommonDivisor(const Natural &other) const;
+	Natural Composition(const Natural &n, const Natural &m) const;
 
 	void Div(const Natural &divisor, Natural &quotient, Natural &remainder) const;
 	Natural GetNatural(uint8_t radix) const;
@@ -56,8 +60,8 @@ private:
 	static void DivN(uint8_t from, uint8_t to, std::list<char> &singles, char &remainder);
 	static char GetChar(uint8_t value);
 	static uint8_t GetValue(char c);
-	Natural Root(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom) const;
-
+	Natural Root2(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, bool &isExhaustive) const;
+	Natural Root(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, bool &isExhaustive) const;
 	std::list<char> m_singles;
 
 	uint8_t m_radix = 10;

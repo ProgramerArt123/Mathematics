@@ -28,6 +28,9 @@ Complex::Complex(const Fraction &real, const Imaginary &image) :
 	m_real(new Fraction(real)), m_image(new Imaginary(image)) {
 
 }
+Complex::Complex(const Complex &real, const Complex &image) {
+	*this = real + image * Imaginary(1);
+}
 const std::string Complex::GetString(uint8_t radix) const {
 	const std::string &realStr = m_real->GetString(radix);
 	const std::string &imageStr = m_image->GetString(radix);
@@ -66,9 +69,6 @@ void Complex::SetPositive(bool isPositive) {
 }
 bool Complex::IsPositive() const {
 	return m_real->IsPositive() && m_image->IsPositive();
-}
-Natural Complex::GetNatural() const {
-	throw "undefine";
 }
 const std::string Complex::GetDecimal(uint8_t radix, size_t decimalLength,
 	std::function<bool(char)> round) const {
@@ -201,12 +201,12 @@ Complex operator*(const Complex &number, const Imaginary &multiplier) {
 Complex operator/(const Complex &number, const Imaginary &divisor) {
 	return number / Complex(Integer(0), divisor);
 }
-Complex Power(const Complex &number, const Integer &exponent) {
-	Complex power(Integer(0), Integer(0));
-	for (Integer index(0); index <= exponent; index+=1) {
-		power += exponent.Composition(exponent, index) * 
-			(number.m_real->Power(exponent - index)) *
-			Power(*number.m_image, exponent);
-	}
-	return power;
-}
+//Complex Power(const Complex &number, const Integer &exponent) {
+//	Complex power(Integer(0), Integer(0));
+//	for (Integer index(0); index <= exponent; index+=1) {
+//		power += exponent.Composition(exponent, index) * 
+//			(number.m_real->Power(exponent - index)) *
+//			Power(*number.m_image, exponent);
+//	}
+//	return power;
+//}

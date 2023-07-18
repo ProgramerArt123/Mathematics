@@ -219,11 +219,12 @@ Fraction Integer::Power(const Integer &exponent) const {
 }
 Complex Integer::Root(const Integer &exponent) const {
 	if (!m_positive && 0 == exponent % Integer(2)) {
-		return Complex(0, m_value.Root(exponent.m_value));
+	//	return Complex(0, m_value.Root(exponent.m_value));
 	}
 	else {
-		return Complex(m_value.Root(exponent.m_value),0);
+	//	return Complex(m_value.Root(exponent.m_value),0);
 	}
+	return Complex(0, 0);
 }
 Complex Integer::Power(const Fraction &exponent) const{
 	return Fraction(*this, 1).Power(exponent);
@@ -246,12 +247,7 @@ Integer &Integer::operator/=(const Integer &divisor) {
 bool Integer::operator==(const Integer &other)const {
 	return m_positive == other.m_positive && m_value == other.m_value;
 }
-Integer Integer::GreatestCommonDivisor(const Integer &other) const {
-	return other ? other.GreatestCommonDivisor(*this%other) : *this;
-}
-Integer Integer::Composition(const Integer &n, const Integer &m) const {
-	return !n / (!m * !(n - m));
-}
+
 Integer Integer::PositiveAdd(const Integer &addition) const {
 	return Integer(m_value + addition.m_value);
 }

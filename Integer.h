@@ -17,7 +17,7 @@ public:
 	bool EqualZero() const override;
 	void SetPositive(bool isPositive)override;
 	bool IsPositive() const override;
-	Natural GetNatural() const override;
+	Natural GetNatural() const ;
 	const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round = [](char last) {return false; }) const override;
 	std::shared_ptr<Real> operator+(const Real &addition) const override;
@@ -28,8 +28,6 @@ public:
 	std::shared_ptr<Number> Root(const Real &exponent) const override;
 	bool operator==(const Real &other) const override;
 	bool operator<(const Real &other) const override;
-	Integer GreatestCommonDivisor(const Integer &other) const;
-	Integer Composition(const Integer &n, const Integer &m) const;
 	operator bool() const;
 	Integer operator-() const;
 	Integer operator!() const;

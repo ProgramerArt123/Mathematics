@@ -73,10 +73,6 @@ bool Fraction::IsPositive() const {
 	return m_numerator->IsPositive() == 
 		m_denominator->IsPositive();
 }
-Natural Fraction::GetNatural() const {
-	return m_numerator->GetNatural() / 
-		m_denominator->GetNatural();
-}
 std::shared_ptr<Real> Fraction::operator+(const Real &addition) const {
 	if (strstr(typeid(addition).name(), "Integer")) {
 		return std::shared_ptr<Real>(new Fraction(
@@ -185,56 +181,51 @@ bool Fraction::operator<(const Real &other) const {
 }
 const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength, 
 	std::function<bool(char)> round) const {
-	Natural integer(0, m_denominator->GetRadix()), integerRemainder(0, m_denominator->GetRadix());
-	m_numerator->GetNatural().Div(m_denominator->GetNatural(), integer, integerRemainder);
-	const std::string &integerStr = integer.GetString(radix);
-	if (!integerRemainder) {
-		return m_numerator->IsPositive() == m_denominator->IsPositive() ?
-			integerStr: "-" + integerStr;
+	Natural quotient(0, m_denominator->GetRadix()), remainder(0, m_denominator->GetRadix());
+	std::string numeratorStr = m_numerator->GetString(radix);
+	numeratorStr.append(decimalLength + 1, '0');
+	Natural(numeratorStr, radix).Div(m_denominator->GetNatural(), quotient.SetCheckLoop(), remainder);
+	const std::string &loop = quotient.GetLoop();
+	std::string quotientStr = quotient.GetString(radix);
+	if (quotientStr.length() < decimalLength + 2) {
+		quotientStr.insert(0, decimalLength + 2 - quotientStr.length(), '0');
 	}
-	std::string integerRemainderStr = integerRemainder.GetString(radix);
-	integerRemainderStr.append(decimalLength + 1, '0');
-	Natural decimal(0, m_denominator->GetRadix()), decimalRemainder(0, m_denominator->GetRadix());
-	Natural(integerRemainderStr, radix).Div(m_denominator->GetNatural(), decimal.SetCheckLoop(), decimalRemainder);
-	const std::string &loop = decimal.GetLoop();
-	std::string decimalStr = decimal.GetString(radix);
-	const std::string fill(decimalLength + 1 - decimalStr.size(), '0');
-	if (!decimalRemainder) {
+	std::string decimalStr = quotientStr.substr(0, quotientStr.length() - decimalLength - 1) +
+		"." + quotientStr.substr(quotientStr.length() - decimalLength - 1);
+	if (remainder.EqualZero()) {
 		while ('0' == decimalStr.back()){
 			decimalStr.pop_back();
 		}
+		if ('.' == decimalStr.back()) {
+			decimalStr.pop_back();
+		}
 	}
-	if (decimalStr.size() > decimalLength) {
+	if (decimalStr.find('.')!=std::string::npos && 
+		decimalStr.size() - decimalStr.find('.') > decimalLength) {
 		const char last = decimalStr.back();
 		decimalStr.pop_back();
-		if (!round(decimalStr.back())) {
+		if (!round(last)) {
 			if (!loop.empty()) {
-				return m_numerator->IsPositive() == m_denominator->IsPositive() ?
-					integerStr + "." + fill + decimalStr + loop : "-" +
-					integerStr + "." + fill + decimalStr + loop;
+				return IsPositive() ? decimalStr + loop : "-" + decimalStr + loop;
 			}
 			else {
-				return m_numerator->IsPositive() == m_denominator->IsPositive() ?
-					integerStr + "." + fill + decimalStr + "..." : "-" +
-					integerStr + "." + fill + decimalStr + "...";
+				return IsPositive() ? decimalStr + "..." : "-" + decimalStr + "...";
 			}
 		}
 		else {
 			std::string denominator = "1";
-			denominator.append((fill + decimalStr).length(), '0');
-			return ((Fraction(Integer(Natural(integerStr + fill + decimalStr, radix), IsPositive()))
+			denominator.append(decimalLength + 1, '0');
+			return ((Fraction(Integer(Natural(quotientStr, radix), IsPositive()))
 				+ Natural(1, radix)) / Natural(denominator, radix)).GetDecimal(radix, decimalLength, round);
 		}
 	}
 	else {
-		return m_numerator->IsPositive() == m_denominator->IsPositive() ?
-			integerStr + "." + fill + decimalStr + loop : "-" +
-			integerStr + "." + fill + decimalStr + loop;
+		return IsPositive() ? decimalStr + loop : "-" + decimalStr + loop;
 	}
 }
 
 void Fraction::Reduce() {
-	const Integer &common = m_denominator->GreatestCommonDivisor(*m_numerator);
+	const Integer &common = m_denominator->m_value.GreatestCommonDivisor(m_numerator->m_value);
 	*m_numerator /= common;
 	*m_denominator /= common;
 }

@@ -31,9 +31,6 @@ void Imaginary::SetPositive(bool isPositive) {
 bool Imaginary::IsPositive() const {
 	return m_value->IsPositive();
 }
-Natural Imaginary::GetNatural() const {
-	return m_value->GetNatural();
-}
 const std::string Imaginary::GetDecimal(uint8_t radix, size_t decimalLength,
 	std::function<bool(char)> round) const {
 	return m_value->GetDecimal(radix, decimalLength, round) + "i";

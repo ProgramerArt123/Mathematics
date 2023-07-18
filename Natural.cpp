@@ -70,15 +70,19 @@ void Natural::SetPositive(bool isPositive) {
 bool Natural::IsPositive() const {
 	return true;
 }
-Natural Natural::GetNatural() const {
-	return *this;
-}
 const std::string Natural::GetDecimal(uint8_t radix, size_t decimalLength,
 	std::function<bool(char)> round) const {
 	return GetString(radix);
 }
 Natural::operator bool() const {
 	return !(1 == m_singles.size() && '0' == m_singles.front());
+}
+Natural Natural::operator!() const {
+	Natural product(1);
+	for (Natural index(1, GetRadix()); index <= *this; ++index) {
+		product *= Natural(index);
+	}
+	return product;
 }
 bool Natural::operator==(const Natural &other) const {
 	return m_singles == other.m_singles;
@@ -201,6 +205,10 @@ Natural Natural::operator*(const Natural &multiplier) const {
 	}
 	return result.Format();
 }
+Natural &Natural::operator*=(const Natural &multiplier) {
+	*this = *this * multiplier;
+	return *this;
+}
 Natural Natural::operator/(const Natural &divisor) const {
 	Natural quotient(m_radix), remainder(m_radix);
 	Div(divisor, quotient, remainder);
@@ -224,8 +232,8 @@ Natural Natural::Power(const Natural &exponent) const {
 	return result;
 }
 
-Natural Natural::Root(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom) const {
-	char c = GetChar((GetValue(top) + GetValue(bottom) + 1)/2);
+Natural Natural::Root2(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, bool &isExhaustive) const {
+	char c = GetChar((GetValue(top) + GetValue(bottom)) / 2);
 	singles[index] = c;
 	Natural value(std::list<char>(singles.cbegin(), singles.cend()), m_radix);
 	const Natural &power = value.Power(exponent);
@@ -233,13 +241,12 @@ Natural Natural::Root(const Natural &exponent, std::vector<char> &singles, size_
 		return value;
 	}
 	else if (power > *this) {
-		if (c > bottom + 1) {
-			return Root(exponent, singles, index, c, bottom);
+		if (GetValue(c) > GetValue(bottom)) {
+			return Root2(exponent, singles, index, GetChar(GetValue(c) - 1), bottom, isExhaustive);
 		}
 		else {
-			singles[index] = bottom;
 			if (index) {
-				return Root(exponent, singles, index - 1, GetChar(m_radix - 1), '0');
+				return Root2(exponent, singles, index - 1, GetChar(m_radix - 1), '0', isExhaustive);
 			}
 			else {
 				return Natural(std::list<char>(singles.cbegin(), singles.cend()));
@@ -247,12 +254,17 @@ Natural Natural::Root(const Natural &exponent, std::vector<char> &singles, size_
 		}
 	}
 	else {
-		if (c + 1 < top) {
-			return Root(exponent, singles, index, top, c);
+		if (GetValue(c) < GetValue(top)) {
+			if (GetValue(c) < GetValue(top) - 1) {
+				return Root2(exponent, singles, index, top, c, isExhaustive);
+			}
+			else {
+				return Root(exponent, singles, index, top, c, isExhaustive);
+			}
 		}
 		else {
 			if (index) {
-				return Root(exponent, singles, index - 1, GetChar(m_radix - 1), '0');
+				return Root2(exponent, singles, index - 1, GetChar(m_radix - 1), '0', isExhaustive);
 			}
 			else {
 				return value;
@@ -261,16 +273,48 @@ Natural Natural::Root(const Natural &exponent, std::vector<char> &singles, size_
 	}
 }
 
-Natural Natural::Root(const Natural &exponent) const {
+Natural Natural::Root(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, bool &isExhaustive) const {
+	char c = top;
+	while (GetValue(c) >= GetValue(bottom)) {
+		singles[index] = c;
+		Natural value(std::list<char>(singles.cbegin(), singles.cend()), m_radix);
+		const Natural &power = value.Power(exponent);
+		if (power == *this) {
+			isExhaustive = true;
+			return value;
+		}
+		else if (power < *this) {
+			if (index) {
+				return Root2(exponent, singles, index - 1, GetChar(m_radix - 1), '0', isExhaustive);
+			}
+			else {
+				isExhaustive = false;
+				return value;
+			}
+		}
+		else {
+			c = GetChar(GetValue(c) - 1);
+		}
+	}
+}
+
+Natural Natural::Root(const Natural &exponent, bool &isExhaustive) const {
 	size_t len = strtoull(((Natural(m_singles.size(), m_radix) +
 		exponent - Natural(1, m_radix)) / exponent).GetString(m_radix).c_str(), NULL, m_radix);
 	std::vector<char> singles(len, '0');
-	return Root(exponent, singles, len - 1, GetChar(m_radix - 1), '0');
+	return Root(exponent, singles, len - 1, GetChar(m_radix - 1), '0', isExhaustive);
 }
 Natural &Natural::operator++() {
 	*this = *this + Natural(1, GetRadix());
 	return *this;
 }
+Natural Natural::GreatestCommonDivisor(const Natural &other) const {
+	return other ? other.GreatestCommonDivisor(*this%other) : *this;
+}
+Natural Natural::Composition(const Natural &n, const Natural &m) const {
+	return !n / (!m * !(n - m));
+}
+
 void Natural::Div(const Natural &divisor, Natural &quotient, Natural &remainder) const {
 	if (divisor == Natural(0, GetRadix())) {
 		throw "undefined";

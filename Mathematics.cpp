@@ -4,6 +4,7 @@
 #include "Fraction.h"
 #include "Series.hpp"
 #include "Imaginary.h"
+#include "Root.h"
 
 int main(){
 	std::cout << "calculating" << std::endl;
@@ -63,11 +64,11 @@ int main(){
 		std::cout << "2^256=" << Integer(2).Power(Integer(256)).GetStringRadix(10) << std::endl;
 	}
 	{
-		std::cout << Natural("39135395").Root(Natural(5, 10)).GetString() << std::endl;
-		std::cout << Natural("10000000000000000000000000000000000").Root(Natural(2, 10)).GetString() << std::endl;
-		std::cout << Natural("100000000000000000000000000000000000").Root(Natural(2, 10)).GetString() << std::endl;
-		std::cout << Natural("10010101010010100010100011", 2).Root(Natural(5, 2)).GetString() << std::endl;
-		std::cout << Natural("25528A3", 16).Root(Natural(5, 16)).GetString() << std::endl;
+		//std::cout << Natural("39135395").Root(Natural(5, 10)).GetString() << std::endl;
+		//std::cout << Natural("10000000000000000000000000000000000").Root(Natural(2, 10)).GetString() << std::endl;
+		//std::cout << Natural("100000000000000000000000000000000000").Root(Natural(2, 10)).GetString() << std::endl;
+		//std::cout << Natural("10010101010010100010100011", 2).Root(Natural(5, 2)).GetString() << std::endl;
+		//std::cout << Natural("25528A3", 16).Root(Natural(5, 16)).GetString() << std::endl;
 	}
 	{
 		std::cout << Integer(2).Power(Integer(0)).GetStringRadix(10) << std::endl;
@@ -75,7 +76,7 @@ int main(){
 		std::cout << Imaginary(Integer(1)) << std::endl;
 		std::cout << Integer(4, false).Root(Integer(2)) << std::endl;
 		std::cout << Integer(8, false).Root(Integer(3)) << std::endl;
-		std::cout << Fraction(1, 3).Power(Fraction(1, 3)) << std::endl;
+		//std::cout << Fraction(1, 3).Power(Fraction(1, 3)) << std::endl;
 	}
 	{
 		std::cout << Imaginary(Integer(1)) + Imaginary(Integer(2)) << std::endl;
@@ -108,6 +109,12 @@ int main(){
 		std::cout << (Complex(Fraction(1, 2), Fraction(1, 3)) - Complex(Fraction(1, 2), Fraction(1, 3))).GetDecimalRadix(10, 2) << std::endl;
 		std::cout << (Complex(Fraction(1, 2), Fraction(1, 3)) * Complex(Fraction(1, 2), Fraction(1, 3))).GetDecimalRadix(10, 2) << std::endl;
 		std::cout << (Complex(Fraction(1, 2), Fraction(1, 3)) / Complex(Fraction(1, 2), Fraction(1, 3))).GetDecimalRadix(10, 2) << std::endl;
+	}
+	{
+		std::cout << Root(2, 2).GetDecimal(10,20) <<std::endl;
+		std::cout << Root(20, 2).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(3, 3).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(30, 3).GetDecimal(10, 20) << std::endl;
 	}
 	getchar();
 	return 0;

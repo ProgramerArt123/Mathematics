@@ -23,7 +23,6 @@ public:
 	bool EqualZero() const override;
 	void SetPositive(bool isPositive) override;
 	bool IsPositive() const override;
-	Natural GetNatural() const override;
 	std::shared_ptr<Real> operator+(const Real &addition) const override;
 	std::shared_ptr<Real> operator-(const Real &subtrahend) const override;
 	std::shared_ptr<Real> operator*(const Real &multiplier) const override;

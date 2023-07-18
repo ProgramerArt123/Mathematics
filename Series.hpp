@@ -4,8 +4,10 @@
 #include <vector>
 #include <functional>
 
+#include "Output.h"
+
 template<typename MonomialValue>
-class Series{
+class Series : public Output{
 	static_assert(std::is_base_of<Number, MonomialValue>::value, "Monomial invalid");
 public:
 	Series(std::function<MonomialValue(const uint64_t index)> monomial) :
@@ -30,10 +32,13 @@ public:
 		}
 		return summation;
 	}
-	const std::string GetString(uint8_t radix = 10) const  {
+	const std::string GetString(uint8_t radix = 10) const override {
 		return GetMonomial().GetString(radix);
 	}
-	
+	const std::string GetDecimal(uint8_t radix, size_t decimalLength,
+		std::function<bool(char)> round = [](char last) {return false; }) const override {
+		return GetMonomial().GetDecimal(radix, decimalLength, round);
+	}
 private:
 	std::vector<MonomialValue> m_polynomial;
 	std::function<MonomialValue(const uint64_t index)> m_monomial;

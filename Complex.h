@@ -16,13 +16,13 @@ public:
 	Complex(const Integer &real, const Fraction &image);
 	Complex(const Integer &real, const Imaginary &image);
 	Complex(const Fraction &real, const Imaginary &image);
+	Complex(const Complex &real, const Complex &image);
 	const std::string GetString(uint8_t radix = 10) const override;
 	void SetRadix(uint8_t radix = 10) override;
 	uint8_t GetRadix() const override;
 	bool EqualZero() const override;
 	void SetPositive(bool isPositive)override;
 	bool IsPositive() const override;
-	Natural GetNatural() const override;
 	const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round = [](char last) {return false; }) const override;
 
@@ -65,7 +65,7 @@ public:
 	friend Complex operator*(const Complex &number, const Imaginary &multiplier);
 	friend Complex operator/(const Complex &number, const Imaginary &divisor);
 
-	friend Complex Power(const Complex &number, const Integer &exponent);
+	//friend Complex Power(const Complex &number, const Integer &exponent);
 
 	std::shared_ptr<Fraction> m_real;
 	std::shared_ptr<Imaginary> m_image;
