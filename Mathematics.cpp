@@ -115,6 +115,11 @@ int main(){
 		std::cout << Root(20, 2).GetDecimal(10, 20) << std::endl;
 		std::cout << Root(3, 3).GetDecimal(10, 20) << std::endl;
 		std::cout << Root(30, 3).GetDecimal(10, 20) << std::endl;
+
+		std::cout << Root(2, 2, false).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(3, Integer(3, false), false).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(Integer(2, false), 2, false).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(Integer(2, false), Integer(2, false), false).GetDecimal(10, 20) << std::endl;
 	}
 	getchar();
 	return 0;

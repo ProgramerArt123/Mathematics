@@ -182,7 +182,7 @@ bool Fraction::operator<(const Real &other) const {
 const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength, 
 	std::function<bool(char)> round) const {
 	Natural quotient(0, m_denominator->GetRadix()), remainder(0, m_denominator->GetRadix());
-	std::string numeratorStr = m_numerator->GetString(radix);
+	std::string numeratorStr = m_numerator->m_value.GetString(radix);
 	numeratorStr.append(decimalLength + 1, '0');
 	Natural(numeratorStr, radix).Div(m_denominator->GetNatural(), quotient.SetCheckLoop(), remainder);
 	const std::string &loop = quotient.GetLoop();
