@@ -8,6 +8,7 @@ class Complex;
 class Root : public Number{
 public:
 	Root(const Integer &base, const Integer &exponent, bool positive = true);
+	Root(const Integer &base, const Fraction &exponent, bool positive = true);
 
 	const std::string GetString(uint8_t radix = 10) const override;
 	void SetRadix(uint8_t radix = 10) override;
@@ -18,8 +19,10 @@ public:
 	const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round = [](char last) {return false; }) const override;
 
+	bool IsImaginary() const;
+
 	std::shared_ptr<Integer> m_base;
-	std::shared_ptr<Integer> m_exponent;
+	std::shared_ptr<Fraction> m_exponent;
 	bool m_positive = true;
 };
 

@@ -121,6 +121,21 @@ int main(){
 		std::cout << Root(Integer(2, false), 2, false).GetDecimal(10, 20) << std::endl;
 		std::cout << Root(Integer(2, false), Integer(2, false), false).GetDecimal(10, 20) << std::endl;
 	}
+	{
+		std::cout << Root(2, Fraction(2, 5)).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(20, Fraction(2, 5)).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(3, Fraction(3, 5)).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(30, Fraction(3, 5)).GetDecimal(10, 20) << std::endl;
+
+		std::cout << Root(2, Fraction(2, 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(3, Fraction(Integer(3, false), 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(Integer(2, false), Fraction(2, 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(Integer(2, false), Fraction(Integer(2, false), 5), false).GetDecimal(10, 20) << std::endl;
+
+		std::cout << Root(Integer(3, false), Fraction(Integer(3, false), 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(Integer(3, false), Fraction(Integer(2, false), 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(Integer(3, false), Fraction(Integer(3, false), 4), false).GetDecimal(10, 20) << std::endl;
+	}
 	getchar();
 	return 0;
 }
