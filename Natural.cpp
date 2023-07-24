@@ -21,9 +21,6 @@ Natural::Natural(const std::string &value, uint8_t radix):
 
 }
 
-Natural::Natural(uint8_t radix):m_radix(radix) {
-
-}
 Natural::Natural(const std::list<char> &singles, uint8_t radix):
 	m_radix(radix) {
 	m_singles = singles;
@@ -33,13 +30,13 @@ Natural::Natural(const std::list<char> &singles, uint8_t radix):
 }
 const std::string Natural::GetString(uint8_t radix) const {
 	assert(2 <= radix && radix <= (11 + ('Z' - 'A')));
-	const Natural bitradix(radix, GetRadix());
+	const Natural bitRadix(radix, GetRadix());
 	const Natural bitZero(0, GetRadix());
 	std::list<char> result;
 	Natural remaining(*this);
 	do {
-		Natural quotient(m_radix), remainde(m_radix);
-		remaining.Div(bitradix, quotient, remainde);
+		Natural quotient(0, m_radix), remainde(0, m_radix);
+		remaining.Div(bitRadix, quotient, remainde);
 		uint8_t built = remainde.GetBuilt();
 		if (0 <= built && built <= 9) {
 			result.push_front('0' + built);
@@ -77,15 +74,16 @@ const std::string Natural::GetDecimal(uint8_t radix, size_t decimalLength,
 Natural::operator bool() const {
 	return !(1 == m_singles.size() && '0' == m_singles.front());
 }
-Natural Natural::operator!() const {
-	Natural product(1);
+Natural Natural::Factorial() const {
+	Natural product(1, GetRadix());
 	for (Natural index(1, GetRadix()); index <= *this; ++index) {
-		product *= Natural(index);
+		product *= index;
 	}
 	return product;
 }
 bool Natural::operator==(const Natural &other) const {
-	return m_singles == other.m_singles;
+	const Natural &radixOther = other.GetNatural(m_radix);
+	return m_singles == radixOther.m_singles;
 }
 bool Natural::operator>(const Natural &other) const {
 	const Natural &radixOther = other.GetNatural(m_radix);
@@ -120,7 +118,7 @@ bool Natural::operator<=(const Natural &other) const {
 }
 Natural Natural::operator+(const Natural &addition) const {
 	const Natural &radixAddition = addition.GetNatural(m_radix);
-	Natural result(m_radix);
+	std::list<char> result;
 	bool isCarray = false;
 	for (auto bit = m_singles.cbegin(), aBit = radixAddition.m_singles.cbegin();
 		bit != m_singles.cend() || aBit != radixAddition.m_singles.cend();) {
@@ -133,12 +131,12 @@ Natural Natural::operator+(const Natural &addition) const {
 			aBitValue = GetValue(*aBit);
 		}
 		if (bitValue + aBitValue + isCarray >= m_radix) {
-			result.m_singles.push_back(
+			result.push_back(
 				GetChar((bitValue + aBitValue + isCarray)%m_radix));
 			isCarray = true;
 		}
 		else {
-			result.m_singles.push_back(
+			result.push_back(
 				GetChar(bitValue + aBitValue + isCarray));
 			isCarray = false;
 		}
@@ -148,9 +146,9 @@ Natural Natural::operator+(const Natural &addition) const {
 			aBit++;
 	}
 	if (isCarray) {
-		result.m_singles.push_back('1');
+		result.push_back('1');
 	}
-	return result.Format();
+	return Natural(result, GetRadix()).Format();
 }
 Natural &Natural::operator+=(const Natural &addition) {
 	*this = *this + addition;
@@ -159,7 +157,7 @@ Natural &Natural::operator+=(const Natural &addition) {
 Natural Natural::operator-(const Natural &subtrahend) const {
 	assert(*this >= subtrahend);
 	const Natural &radixSubtrahend = subtrahend.GetNatural(m_radix);
-	Natural result(m_radix);
+	std::list<char> result;
 	bool isCarray = false;
 	for (auto bit = m_singles.cbegin(), sBit = radixSubtrahend.m_singles.cbegin();
 		bit != m_singles.cend(); bit++) {
@@ -169,12 +167,12 @@ Natural Natural::operator-(const Natural &subtrahend) const {
 			sBitValue = GetValue(*sBit);
 		}
 		if (bitValue - sBitValue - isCarray < 0) {
-			result.m_singles.push_back(
+			result.push_back(
 				GetChar(m_radix + bitValue - sBitValue - isCarray));
 			isCarray = true;
 		}
 		else {
-			result.m_singles.push_back(
+			result.push_back(
 				GetChar(bitValue - sBitValue - isCarray));
 			isCarray = false;
 		}
@@ -182,7 +180,7 @@ Natural Natural::operator-(const Natural &subtrahend) const {
 			sBit++;
 	}
 	assert(!isCarray);
-	return result.Format();
+	return Natural(result, GetRadix()).Format();
 }
 Natural &Natural::operator-=(const Natural &subtrahend) {
 	*this = *this - subtrahend;
@@ -190,7 +188,7 @@ Natural &Natural::operator-=(const Natural &subtrahend) {
 }
 Natural Natural::operator*(const Natural &multiplier) const {
 	const Natural &radixMultiplier = multiplier.GetNatural(m_radix);
-	Natural result(m_radix);
+	Natural result(0, GetRadix());
 	size_t count = 0;
 	for (auto mBit = radixMultiplier.m_singles.cbegin();
 		mBit != radixMultiplier.m_singles.cend(); mBit++, count ++) {
@@ -210,7 +208,7 @@ Natural &Natural::operator*=(const Natural &multiplier) {
 	return *this;
 }
 Natural Natural::operator/(const Natural &divisor) const {
-	Natural quotient(m_radix), remainder(m_radix);
+	Natural quotient(0, m_radix), remainder(0, m_radix);
 	Div(divisor, quotient, remainder);
 	return quotient;
 }
@@ -219,14 +217,14 @@ Natural &Natural::operator/=(const Natural &divisor) {
 	return *this;
 }
 Natural Natural::operator%(const Natural &divisor) const {
-	Natural quotient(m_radix), remainder(m_radix);
+	Natural quotient(0, m_radix), remainder(0, m_radix);
 	Div(divisor, quotient, remainder);
 	return remainder;
 }
 Natural Natural::Power(const Natural &exponent) const {
 	const Natural &radixExponent = exponent.GetNatural(m_radix);
-	Natural result(1, m_radix);
-	for (Natural count(0, m_radix); count < radixExponent; ++count) {
+	Natural result(1, GetRadix());
+	for (Natural count(0, GetRadix()); count < radixExponent; ++count) {
 		result = *this * result;
 	}
 	return result;
@@ -235,7 +233,7 @@ Natural Natural::Power(const Natural &exponent) const {
 Natural Natural::Root2(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, bool &isExhaustive) const {
 	char c = GetChar((GetValue(top) + GetValue(bottom)) / 2);
 	singles[index] = c;
-	Natural value(std::list<char>(singles.cbegin(), singles.cend()), m_radix);
+	const Natural value(std::list<char>(singles.cbegin(), singles.cend()), m_radix);
 	const Natural &power = value.Power(exponent);
 	if (power == *this) {
 		return value;
@@ -317,8 +315,8 @@ Natural &Natural::operator++() {
 Natural Natural::GreatestCommonDivisor(const Natural &other) const {
 	return other ? other.GreatestCommonDivisor(*this%other) : *this;
 }
-Natural Natural::Composition(const Natural &n, const Natural &m) const {
-	return !n / (!m * !(n - m));
+Natural Natural::Composition(const Natural &m) const {
+	return Factorial() / (m.Factorial() * (*this - m).Factorial());
 }
 
 void Natural::Div(const Natural &divisor, Natural &quotient, Natural &remainder) const {
@@ -447,17 +445,17 @@ Natural Natural::GetNatural(uint8_t radix) const{
 	if (m_radix == radix) {
 		return *this;
 	}
-	Natural radixDecimal(radix);
+	std::list<char> radixDecimal;
 	std::list<char> quotient = m_singles;
 	char remainder = '0';
 	do {
 		DivN(m_radix, radix, quotient, remainder);
-		radixDecimal.m_singles.push_back(remainder);
+		radixDecimal.push_back(remainder);
 	} while (quotient.size() > 1 || '0' != quotient.front());
-	if (radixDecimal.m_singles.empty()) {
-		radixDecimal.m_singles.push_back('0');
+	if (radixDecimal.empty()) {
+		radixDecimal.push_back('0');
 	}
-	return radixDecimal;
+	return Natural(radixDecimal, radix);
 }
 
 

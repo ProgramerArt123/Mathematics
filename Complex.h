@@ -12,11 +12,13 @@ class Complex : public Number {
 public:
 	Complex(const Integer &real, const Integer &image);
 	Complex(const Fraction &real, const Fraction &image);
+	Complex(const Imaginary &real, const Imaginary &image);
+	Complex(const Complex &real, const Complex &image);
 	Complex(const Fraction &real, const Integer &image);
 	Complex(const Integer &real, const Fraction &image);
 	Complex(const Integer &real, const Imaginary &image);
 	Complex(const Fraction &real, const Imaginary &image);
-	Complex(const Complex &real, const Complex &image);
+	
 	const std::string GetString(uint8_t radix = 10) const override;
 	void SetRadix(uint8_t radix = 10) override;
 	uint8_t GetRadix() const override;
@@ -34,6 +36,8 @@ public:
 	Complex operator/(const Complex &divisor) const;
 
 	Complex &operator+=(const Complex &addition);
+
+	Complex Power(const Integer &exponent);
 
 	friend Complex operator+(const Integer &number, const Complex &addition);
 	friend Complex operator-(const Integer &number, const Complex &subtrahend);
@@ -65,7 +69,6 @@ public:
 	friend Complex operator*(const Complex &number, const Imaginary &multiplier);
 	friend Complex operator/(const Complex &number, const Imaginary &divisor);
 
-	//friend Complex Power(const Complex &number, const Integer &exponent);
 
 	std::shared_ptr<Fraction> m_real;
 	std::shared_ptr<Imaginary> m_image;

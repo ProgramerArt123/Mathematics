@@ -29,6 +29,7 @@ public:
 	Fraction operator*(const Imaginary &multiplier) const;
 	Fraction operator/(const Imaginary &divisor) const;
 
+	Complex Power(const Integer &exponent);
 
 	friend Complex operator+(const Integer &number, const Imaginary &addition);
 	friend Complex operator-(const Integer &number, const Imaginary &subtrahend);
@@ -50,11 +51,6 @@ public:
 	friend Imaginary operator*(const Imaginary &number, const Fraction &multiplier);
 	friend Imaginary operator/(const Imaginary &number, const Fraction &divisor);
 
-	friend Complex Power(const Imaginary &number, const Integer &exponent);
-	friend Complex Root(const Imaginary &number, const Integer &exponent);
-
-	friend Complex Power(const Imaginary &number, const Fraction &exponent);
-	friend Complex Root(const Imaginary &number, const Fraction &exponent);
 
 	std::shared_ptr<Fraction> m_value;
 };

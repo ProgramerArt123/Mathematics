@@ -42,24 +42,18 @@ bool Root::IsPositive() const {
 
 const std::string Root::GetDecimal(uint8_t radix, size_t decimalLength,
 	std::function<bool(char)> round) const {
-	const Fraction &numerator = GetFraction(*m_base->m_numerator, radix, decimalLength);
+	const Fraction &numerator = GetFraction(*m_base->m_numerator, radix, decimalLength) * Fraction(Integer(1, IsPositive()));
 	const Fraction &denominator = GetFraction(*m_base->m_denominator, radix, decimalLength);
 	const Fraction fraction(numerator, denominator);
+	std::string sign;
+	if (0 == m_base->m_numerator->GetNatural() % Natural(2)) {
+		sign = "(+/-)";
+	}
 	if (!IsImaginary()) {
-		if (IsPositive()) {
-			return fraction.GetDecimal(radix, decimalLength, round);
-		}
-		else {
-			return (-fraction).GetDecimal(radix, decimalLength, round);
-		}
+		return sign + fraction.GetDecimal(radix, decimalLength, round);
 	}
 	else {
-		if (IsPositive()) {
-			return Imaginary(fraction).GetDecimal(radix, decimalLength, round);
-		}
-		else {
-			return Imaginary(-fraction).GetDecimal(radix, decimalLength, round);
-		}
+		return sign + Imaginary(fraction).GetDecimal(radix, decimalLength, round);
 	}
 }
 

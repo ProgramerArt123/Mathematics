@@ -9,7 +9,7 @@
 
 class Natural : public Number{
 public:
-	Natural(uint64_t value, uint8_t radix);
+	Natural(uint64_t value = 0, uint8_t radix = 10);
 	Natural(const std::string &value, uint8_t radix = 10);
 
 	const std::string GetString(uint8_t radix = 10) const override;
@@ -22,7 +22,7 @@ public:
 		std::function<bool(char)> round = [](char last) {return false; }) const override;
 
 	operator bool() const;
-	Natural operator!() const;
+	Natural Factorial() const;
 	bool operator==(const Natural &other) const;
 	bool operator>(const Natural &other) const;
 	bool operator<(const Natural &other) const;
@@ -45,7 +45,7 @@ public:
 	Natural &operator++();
 
 	Natural GreatestCommonDivisor(const Natural &other) const;
-	Natural Composition(const Natural &n, const Natural &m) const;
+	Natural Composition(const Natural &m) const;
 
 	void Div(const Natural &divisor, Natural &quotient, Natural &remainder) const;
 	Natural GetNatural(uint8_t radix) const;
@@ -53,7 +53,6 @@ public:
 	Natural &SetCheckLoop();
 	std::string GetLoop() const;
 private:
-	Natural(uint8_t radix);
 	Natural(const std::list<char> &singles, uint8_t radix = 10);
 	uint8_t GetBuilt()const;
 	Natural &Format();

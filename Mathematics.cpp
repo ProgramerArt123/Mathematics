@@ -57,7 +57,7 @@ int main(){
 	{
 		std::cout << "e = " << Series<Fraction>(
 			[](const uint64_t index) {
-			return Fraction(Natural(1, 10), !Integer(index - 1));
+			return Fraction(Natural(1, 10), Natural(index - 1).Factorial());
 		}).Summation(20).GetMonomial().GetDecimal(10, 20) << std::endl;
 	}
 	{
@@ -74,9 +74,6 @@ int main(){
 		std::cout << Integer(2).Power(Integer(0)).GetStringRadix(10) << std::endl;
 		std::cout << Integer(3, false).Power(Integer(3, false)) << std::endl;
 		std::cout << Imaginary(Integer(1)) << std::endl;
-		std::cout << Integer(4, false).Root(Integer(2)) << std::endl;
-		std::cout << Integer(8, false).Root(Integer(3)) << std::endl;
-		//std::cout << Fraction(1, 3).Power(Fraction(1, 3)) << std::endl;
 	}
 	{
 		std::cout << Imaginary(Integer(1)) + Imaginary(Integer(2)) << std::endl;
@@ -150,6 +147,11 @@ int main(){
 		std::cout << Root(Fraction(Integer(1, false), 3), Fraction(Integer(3, false), 5), false).GetDecimal(10, 20) << std::endl;
 		std::cout << Root(Fraction(Integer(1, false), 3), Fraction(Integer(2, false), 5), false).GetDecimal(10, 20) << std::endl;
 		std::cout << Root(Fraction(Integer(1, false), 3), Fraction(Integer(3, false), 4), false).GetDecimal(10, 20) << std::endl;
+	}
+	{
+		std::cout << Complex(Fraction(1, 2), Fraction(1, 2)).Power(2) << std::endl;
+		std::cout << Complex(Fraction(1, 2), Fraction(1, 2)).Power(3) << std::endl;
+		std::cout << Complex(Fraction(Integer(1, false), 2), Fraction(1, 2)).Power(3) << std::endl;
 	}
 	getchar();
 	return 0;

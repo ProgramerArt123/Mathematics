@@ -4,10 +4,12 @@
 #include "Complex.h"
 
 Complex::Complex(const Integer &real, const Integer &image) :
-	m_real(new Fraction(real)),m_image(new Imaginary(image)) {
+	m_real(new Fraction(real)), m_image(new Imaginary(image)) {
 
 }
-
+Complex::Complex(const Imaginary &real, const Imaginary &image) {
+	*m_image = real + image;
+}
 Complex::Complex(const Fraction &real, const Fraction &image) :
 	m_real(new Fraction(real)), m_image(new Imaginary(image)) {
 
@@ -20,7 +22,7 @@ Complex::Complex(const Integer &real, const Fraction &image) :
 	m_real(new Fraction(real)), m_image(new Imaginary(image)) {
 
 }
-Complex::Complex(const Integer &real, const Imaginary &image):
+Complex::Complex(const Integer &real, const Imaginary &image) :
 	m_real(new Fraction(real)), m_image(new Imaginary(image)) {
 
 }
@@ -32,24 +34,20 @@ Complex::Complex(const Complex &real, const Complex &image) {
 	*this = real + image * Imaginary(1);
 }
 const std::string Complex::GetString(uint8_t radix) const {
-	const std::string &realStr = m_real->GetString(radix);
-	const std::string &imageStr = m_image->GetString(radix);
-	if ("0" == realStr && "0i"==imageStr) {
+	if (m_real->EqualZero() && m_image->EqualZero()) {
 		return "0";
 	}
-	else if ("0" == realStr) {
-		return imageStr;
+	else if (m_real->EqualZero()) {
+		return m_image->GetString(radix);
 	}
-	else if ("0i" == imageStr) {
-		return realStr;
+	else if (m_image->EqualZero()) {
+		return m_real->GetString(radix);
+	}
+	else if(m_image->IsPositive()){
+		return m_real->GetString(radix) + "+" + m_image->GetString(radix);
 	}
 	else {
-		if ('-' != imageStr.front()) {
-			return realStr + "+" + imageStr;
-		}
-		else {
-			return realStr + imageStr;
-		}
+		return m_real->GetString(radix) + m_image->GetString(radix);
 	}
 }
 
@@ -114,13 +112,13 @@ Complex Complex::operator*(const Complex &multiplier) const {
 }
 Complex Complex::operator/(const Complex &divisor) const {
 	const Fraction real((*m_real * *divisor.m_real) +
-		(*m_image->m_value * *divisor.m_image->m_value), 
+		(*m_image->m_value * *divisor.m_image->m_value),
 		(*divisor.m_real * *divisor.m_real) +
-			(*divisor.m_image->m_value * *divisor.m_image->m_value));
+		(*divisor.m_image->m_value * *divisor.m_image->m_value));
 	const Fraction image((*m_image->m_value * *divisor.m_real) -
 		(*m_real * *divisor.m_image->m_value),
-		(*divisor.m_real * *divisor.m_real) + 
-			(*divisor.m_image->m_value * *divisor.m_image->m_value));
+		(*divisor.m_real * *divisor.m_real) +
+		(*divisor.m_image->m_value * *divisor.m_image->m_value));
 	return Complex(real, image);
 }
 Complex &Complex::operator+=(const Complex &addition) {
@@ -201,12 +199,16 @@ Complex operator*(const Complex &number, const Imaginary &multiplier) {
 Complex operator/(const Complex &number, const Imaginary &divisor) {
 	return number / Complex(Integer(0), divisor);
 }
-//Complex Power(const Complex &number, const Integer &exponent) {
-//	Complex power(Integer(0), Integer(0));
-//	for (Integer index(0); index <= exponent; index+=1) {
-//		power += exponent.Composition(exponent, index) * 
-//			(number.m_real->Power(exponent - index)) *
-//			Power(*number.m_image, exponent);
-//	}
-//	return power;
-//}
+#include <iostream>
+Complex Complex::Power(const Integer &exponent) {
+	Complex power(0, 0);
+	for (Natural index(0); index <= exponent.GetNatural(); ++index) {
+		power += Integer(exponent.m_value.Composition(index)) *
+			m_real->Power(exponent - index) * m_image->Power(index);
+		//std::cout << Integer(exponent.m_value.Composition(index)) << std::endl;
+		//std::cout << m_real->Power(exponent - index) << std::endl;
+		//std::cout << m_image->Power(index) << std::endl;
+		//std::cout << power << std::endl;
+	}
+	return power;
+}

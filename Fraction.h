@@ -23,14 +23,7 @@ public:
 	bool EqualZero() const override;
 	void SetPositive(bool isPositive) override;
 	bool IsPositive() const override;
-	std::shared_ptr<Real> operator+(const Real &addition) const override;
-	std::shared_ptr<Real> operator-(const Real &subtrahend) const override;
-	std::shared_ptr<Real> operator*(const Real &multiplier) const override;
-	std::shared_ptr<Real> operator/(const Real &divisor) const override;
-	std::shared_ptr<Number> Power(const Real &exponent) const override;
-	std::shared_ptr<Number> Root(const Real &exponent) const override;
-	bool operator==(const Real &other) const override;
-	bool operator<(const Real &other) const override;
+
 	const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round = [](char last) {return false; }) const override;
 	
@@ -45,15 +38,11 @@ public:
 	Fraction operator*(const Fraction &multiplier) const;
 	Fraction operator/(const Fraction &divisor) const;
 	
-	Complex Power(const Fraction &exponent) const;
-	Complex Root(const Fraction &exponent) const;
+	Fraction Power(const Integer &exponent) const;
 
 	Fraction &operator+=(const Fraction &addition);
 	Fraction &operator*=(const Fraction &multiplier);
 	Fraction &operator/=(const Fraction &divisor);
-
-	Complex Power(const Integer &exponent)const;
-	Complex Root(const Integer &exponent)const;
 
 	friend bool operator==(const Integer &number, const Fraction &rational);
 

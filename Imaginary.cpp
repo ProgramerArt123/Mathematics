@@ -1,3 +1,4 @@
+#include <cassert>
 #include "Integer.h"
 #include "Complex.h"
 #include "Imaginary.h"
@@ -52,7 +53,26 @@ Fraction Imaginary::operator*(const Imaginary &multiplier) const {
 Fraction Imaginary::operator/(const Imaginary &divisor) const {
 	return Fraction(*m_value, *divisor.m_value);
 }
-
+Complex Imaginary::Power(const Integer &exponent) {
+	const Fraction &fraction = m_value->Power(exponent);
+	const Natural &mod = exponent.GetNatural() % Natural(4);
+	if (Natural(0) == mod) {
+		return Complex(fraction, 0);
+	}
+	else if (Natural(1) == mod) {
+		return Complex(0, fraction);
+	}
+	else if (Natural(2) == mod) {
+		return Complex(-fraction, 0);
+	}
+	else if (Natural(3) == mod) {
+		return Complex(0, -fraction);
+	}
+	else {
+		assert(0);
+		return Complex(0, 0);
+	}
+}
 Complex operator+(const Integer &number, const Imaginary &addition) {
 	return Complex(number, addition);
 }
@@ -115,16 +135,4 @@ Imaginary operator/(const Imaginary &number, const Fraction &divisor) {
 	Imaginary quotient(divisor);
 	*quotient.m_value = *number.m_value / *quotient.m_value;
 	return quotient;
-}
-Complex Power(const Imaginary &number, const Integer &exponent) {
-	return Power(number, Fraction(exponent, 1));
-}
-Complex Root(const Imaginary &number, const Integer &exponent) {
-	return Root(number, Fraction(exponent, 1));
-}
-Complex Power(const Imaginary &number, const Fraction &exponent) {
-	return number.m_value->Power(exponent);
-}
-Complex Root(const Imaginary &number, const Fraction &exponent) {
-	return Power(number, Fraction(*exponent.m_denominator, *exponent.m_numerator));
 }

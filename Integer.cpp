@@ -15,6 +15,10 @@ Integer::Integer(const Natural &value, bool positive) :
 		m_positive = true;
 	}
 }
+Integer::Integer(const std::string &value, bool positive) :
+	Integer(Natural(value, 10), positive){
+
+}
 const std::string Integer::GetString(uint8_t radix)const {
 	return m_positive ? m_value.GetString(radix) : "-" + m_value.GetString(radix);
 }
@@ -40,124 +44,12 @@ const std::string Integer::GetDecimal(uint8_t radix, size_t decimalLength,
 	std::function<bool(char)> round) const {
 	return GetString(radix);
 }
-std::shared_ptr<Real> Integer::operator+(const Real &addition) const {
-	if (strstr(typeid(addition).name(), "Integer")) {
-		return std::shared_ptr<Real>(new Integer(
-			*this + dynamic_cast<const Integer &>(addition)
-		));
-	}
-	else if (strstr(typeid(addition).name(), "Fraction")) {
-		return std::shared_ptr<Real>(new Fraction(
-			*this + dynamic_cast<const Fraction &>(addition)
-		));
-	}
-	else {
-		throw "undefine";
-	}
-}
-std::shared_ptr<Real> Integer::operator-(const Real &subtrahend) const {
-	if (strstr(typeid(subtrahend).name(), "Integer")) {
-		return std::shared_ptr<Real>(new Integer(
-			*this - dynamic_cast<const Integer &>(subtrahend)
-		));
-	}
-	else if (strstr(typeid(subtrahend).name(), "Fraction")) {
-		return std::shared_ptr<Real>(new Fraction(
-			*this - dynamic_cast<const Fraction &>(subtrahend)
-		));
-	}
-	else {
-		throw "undefine";
-	}
-}
-std::shared_ptr<Real> Integer::operator*(const Real &multiplier) const {
-	if (strstr(typeid(multiplier).name(), "Integer")) {
-		return std::shared_ptr<Real>(new Integer(
-			*this * dynamic_cast<const Integer &>(multiplier)
-		));
-	}
-	else if (strstr(typeid(multiplier).name(), "Fraction")) {
-		return std::shared_ptr<Real>(new Fraction(
-			*this * dynamic_cast<const Fraction &>(multiplier)
-		));
-	}
-	else {
-		throw "undefine";
-	}
-}
-std::shared_ptr<Real> Integer::operator/(const Real &divisor) const {
-	if (strstr(typeid(divisor).name(), "Integer")) {
-		return std::shared_ptr<Real>(new Integer(
-			*this / dynamic_cast<const Integer &>(divisor)
-		));
-	}
-	else if (strstr(typeid(divisor).name(), "Fraction")) {
-		return std::shared_ptr<Real>(new Fraction(
-			*this / dynamic_cast<const Fraction &>(divisor)
-		));
-	}
-	else {
-		throw "undefine";
-	}
-}
-std::shared_ptr<Number> Integer::Power(const Real &exponent) const {
-	if (strstr(typeid(exponent).name(), "Integer")) {
-		return std::shared_ptr<Number>(new Fraction(
-			Power(dynamic_cast<const Integer &>(exponent))
-		));
-	}
-	else if (strstr(typeid(exponent).name(), "Fraction")) {
-		return std::shared_ptr<Number>(new Complex(
-			Power(dynamic_cast<const Fraction &>(exponent))
-		));
-	}
-	else {
-		throw "undefine";
-	}
-}
-std::shared_ptr<Number> Integer::Root(const Real &exponent) const {
-	if (strstr(typeid(exponent).name(), "Integer")) {
-		return std::shared_ptr<Number>(new Complex(
-			Root(dynamic_cast<const Integer &>(exponent))
-		));
-	}
-	else if (strstr(typeid(exponent).name(), "Fraction")) {
-		return std::shared_ptr<Number>(new Complex(
-			Root(dynamic_cast<const Fraction &>(exponent))
-		));
-	}
-	else {
-		throw "undefine";
-	}
-}
-bool Integer::operator==(const Real &other) const {
-	if (strstr(typeid(other).name(), "Integer")) {
-		return *this == dynamic_cast<const Integer &>(other);
-	}
-	else {
-		throw "undefine";
-	}
-}
-bool Integer::operator<(const Real &other) const {
-	if (strstr(typeid(other).name(), "Integer")) {
-		return *this < dynamic_cast<const Integer &>(other);
-	}
-	else {
-		throw "undefine";
-	}
-}
+
 Integer::operator bool() const {
 	return m_value;
 }
 Integer Integer::operator-() const {
 	return Integer(m_value, !m_positive);
-}
-Integer Integer::operator!() const {
-	Integer product(1);
-	for (Natural index(1, m_value.GetRadix()); index <= m_value; ++index) {
-		product *= Integer(index);
-	}
-	return product;
 }
 Integer Integer::operator+(const Integer &addition) const {
 	if (m_positive) {
@@ -217,21 +109,7 @@ Fraction Integer::Power(const Integer &exponent) const {
 		return Fraction(1, product);
 	}
 }
-Complex Integer::Root(const Integer &exponent) const {
-	if (!m_positive && 0 == exponent % Integer(2)) {
-	//	return Complex(0, m_value.Root(exponent.m_value));
-	}
-	else {
-	//	return Complex(m_value.Root(exponent.m_value),0);
-	}
-	return Complex(0, 0);
-}
-Complex Integer::Power(const Fraction &exponent) const{
-	return Fraction(*this, 1).Power(exponent);
-}
-Complex Integer::Root(const Fraction &exponent) const {
-	return Fraction(*this, 1).Root(exponent);
-}
+
 Integer &Integer::operator+=(const Integer &addition) {
 	*this = *this + addition;
 	return *this;
