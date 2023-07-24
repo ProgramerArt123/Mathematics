@@ -296,6 +296,8 @@ Natural Natural::Root(const Natural &exponent, std::vector<char> &singles, size_
 			c = GetChar(GetValue(c) - 1);
 		}
 	}
+	assert(0);
+	return Natural(0, m_radix);
 }
 
 Natural Natural::Root(const Natural &exponent, bool &isExhaustive) const {
@@ -303,6 +305,10 @@ Natural Natural::Root(const Natural &exponent, bool &isExhaustive) const {
 		exponent - Natural(1, m_radix)) / exponent).GetString(m_radix).c_str(), NULL, m_radix);
 	std::vector<char> singles(len, '0');
 	return Root(exponent, singles, len - 1, GetChar(m_radix - 1), '0', isExhaustive);
+}
+Natural Natural::Root(const Natural &exponent) const {
+	bool isExhaustive = false;
+	return Root(exponent, isExhaustive);
 }
 Natural &Natural::operator++() {
 	*this = *this + Natural(1, GetRadix());

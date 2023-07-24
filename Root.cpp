@@ -2,15 +2,19 @@
 #include "Imaginary.h"
 #include "Root.h"
 
-Root::Root(const Integer &base, const Integer &exponent, bool positive): 
+Root::Root(const Integer &base, const Integer &exponent, bool positive):
 	m_positive(positive){
-	m_base = std::shared_ptr<Integer>(new Integer(base));
+	m_base = std::shared_ptr<Fraction>(new Fraction(base));
 	m_exponent = std::shared_ptr<Fraction>(new Fraction(exponent));
 }
-
 Root::Root(const Integer &base, const Fraction &exponent, bool positive) :
 	m_positive(positive) {
-	m_base = std::shared_ptr<Integer>(new Integer(base));
+	m_base = std::shared_ptr<Fraction>(new Fraction(base));
+	m_exponent = std::shared_ptr<Fraction>(new Fraction(exponent));
+}
+Root::Root(const Fraction &base, const Fraction &exponent, bool positive) :
+	m_positive(positive) {
+	m_base = std::shared_ptr<Fraction>(new Fraction(base));
 	m_exponent = std::shared_ptr<Fraction>(new Fraction(exponent));
 }
 
@@ -38,7 +42,35 @@ bool Root::IsPositive() const {
 
 const std::string Root::GetDecimal(uint8_t radix, size_t decimalLength,
 	std::function<bool(char)> round) const {
-	std::string powerStr = m_base->GetNatural().Power(m_exponent->m_denominator->GetNatural()).GetString(radix);
+	const Fraction &numerator = GetFraction(*m_base->m_numerator, radix, decimalLength);
+	const Fraction &denominator = GetFraction(*m_base->m_denominator, radix, decimalLength);
+	const Fraction fraction(numerator, denominator);
+	if (!IsImaginary()) {
+		if (IsPositive()) {
+			return fraction.GetDecimal(radix, decimalLength, round);
+		}
+		else {
+			return (-fraction).GetDecimal(radix, decimalLength, round);
+		}
+	}
+	else {
+		if (IsPositive()) {
+			return Imaginary(fraction).GetDecimal(radix, decimalLength, round);
+		}
+		else {
+			return Imaginary(-fraction).GetDecimal(radix, decimalLength, round);
+		}
+	}
+}
+
+bool Root::IsImaginary() const {
+	return !m_base->IsPositive() && 
+		1 == m_exponent->m_denominator->m_value % Natural(2, m_exponent->m_denominator->GetRadix()) &&
+		0 == m_exponent->m_numerator->m_value % Natural(2, m_exponent->m_denominator->GetRadix());
+}
+
+Fraction Root::GetFraction(const Integer &base, uint8_t radix, size_t decimalLength)const {
+	std::string powerStr = base.GetNatural().Power(m_exponent->m_denominator->GetNatural()).GetString(radix);
 	for (Natural index(1, radix); index <= m_exponent->m_numerator->m_value; ++index) {
 		powerStr.append(decimalLength + 1, '0');
 	}
@@ -53,38 +85,12 @@ const std::string Root::GetDecimal(uint8_t radix, size_t decimalLength,
 		denominator.append(decimalLength + 1, '0');
 		const Fraction &fraction = Fraction(Natural(rootStr, radix)) /
 			Fraction(Natural(denominator, radix));
-		if (!IsImaginary()) {
-			if (IsPositive()) {
-				return fraction.GetDecimal(radix, decimalLength, round);
-			}
-			else {
-				return (-fraction).GetDecimal(radix, decimalLength, round);
-			}
-		}
-		else {
-			return Imaginary(fraction).GetDecimal(radix, decimalLength, round);
-		}
+		return fraction;
 	}
 	else {
 		std::string numerator = "1";
 		numerator.insert(numerator.length(), decimalLength + 1, '0');
 		const Fraction &fraction = Fraction(Natural(numerator, radix), root);
-		if (!IsImaginary()) {
-			if (IsPositive()) {
-				return fraction.GetDecimal(radix, decimalLength, round);
-			}
-			else {
-				return (-fraction).GetDecimal(radix, decimalLength, round);
-			}
-		}
-		else {
-			return Imaginary(-fraction).GetDecimal(radix, decimalLength, round);
-		}
+		return fraction;
 	}
-}
-
-bool Root::IsImaginary() const {
-	return !m_base->IsPositive() && 
-		1 == m_exponent->m_denominator->m_value % Natural(2, m_exponent->m_denominator->GetRadix()) &&
-		0 == m_exponent->m_numerator->m_value % Natural(2, m_exponent->m_denominator->GetRadix());
 }

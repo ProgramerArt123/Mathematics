@@ -64,11 +64,11 @@ int main(){
 		std::cout << "2^256=" << Integer(2).Power(Integer(256)).GetStringRadix(10) << std::endl;
 	}
 	{
-		//std::cout << Natural("39135395").Root(Natural(5, 10)).GetString() << std::endl;
-		//std::cout << Natural("10000000000000000000000000000000000").Root(Natural(2, 10)).GetString() << std::endl;
-		//std::cout << Natural("100000000000000000000000000000000000").Root(Natural(2, 10)).GetString() << std::endl;
-		//std::cout << Natural("10010101010010100010100011", 2).Root(Natural(5, 2)).GetString() << std::endl;
-		//std::cout << Natural("25528A3", 16).Root(Natural(5, 16)).GetString() << std::endl;
+		std::cout << Natural("39135395").Root(Natural(5, 10)).GetString() << std::endl;
+		std::cout << Natural("10000000000000000000000000000000000").Root(Natural(2, 10)).GetString() << std::endl;
+		std::cout << Natural("100000000000000000000000000000000000").Root(Natural(2, 10)).GetString() << std::endl;
+		std::cout << Natural("10010101010010100010100011", 2).Root(Natural(5, 2)).GetString() << std::endl;
+		std::cout << Natural("25528A3", 16).Root(Natural(5, 16)).GetString() << std::endl;
 	}
 	{
 		std::cout << Integer(2).Power(Integer(0)).GetStringRadix(10) << std::endl;
@@ -135,6 +135,21 @@ int main(){
 		std::cout << Root(Integer(3, false), Fraction(Integer(3, false), 5), false).GetDecimal(10, 20) << std::endl;
 		std::cout << Root(Integer(3, false), Fraction(Integer(2, false), 5), false).GetDecimal(10, 20) << std::endl;
 		std::cout << Root(Integer(3, false), Fraction(Integer(3, false), 4), false).GetDecimal(10, 20) << std::endl;
+	}
+	{
+		std::cout << Root(Fraction(1, 2), Fraction(2, 5)).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(Fraction(1, 20), Fraction(2, 5)).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(Fraction(1, 3), Fraction(3, 5)).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(Fraction(1, 30), Fraction(3, 5)).GetDecimal(10, 20) << std::endl;
+
+		std::cout << Root(Fraction(1, 2), Fraction(2, 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(Fraction(1, 3), Fraction(Integer(3, false), 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(Fraction(Integer(1, false), 2), Fraction(2, 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(Fraction(Integer(1, false), 2), Fraction(Integer(2, false), 5), false).GetDecimal(10, 20) << std::endl;
+
+		std::cout << Root(Fraction(Integer(1, false), 3), Fraction(Integer(3, false), 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(Fraction(Integer(1, false), 3), Fraction(Integer(2, false), 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << Root(Fraction(Integer(1, false), 3), Fraction(Integer(3, false), 4), false).GetDecimal(10, 20) << std::endl;
 	}
 	getchar();
 	return 0;

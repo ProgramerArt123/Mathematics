@@ -40,6 +40,7 @@ public:
 	Natural operator%(const Natural &divisor) const;
 	Natural Power(const Natural &exponent) const;
 	Natural Root(const Natural &exponent, bool &isExhaustive) const;
+	Natural Root(const Natural &exponent) const;
 
 	Natural &operator++();
 

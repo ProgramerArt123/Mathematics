@@ -9,6 +9,7 @@ class Root : public Number{
 public:
 	Root(const Integer &base, const Integer &exponent, bool positive = true);
 	Root(const Integer &base, const Fraction &exponent, bool positive = true);
+	Root(const Fraction &base, const Fraction &exponent, bool positive = true);
 
 	const std::string GetString(uint8_t radix = 10) const override;
 	void SetRadix(uint8_t radix = 10) override;
@@ -20,8 +21,9 @@ public:
 		std::function<bool(char)> round = [](char last) {return false; }) const override;
 
 	bool IsImaginary() const;
+	Fraction GetFraction(const Integer &base, uint8_t radix, size_t decimalLength)const;
 
-	std::shared_ptr<Integer> m_base;
+	std::shared_ptr<Fraction> m_base;
 	std::shared_ptr<Fraction> m_exponent;
 	bool m_positive = true;
 };
