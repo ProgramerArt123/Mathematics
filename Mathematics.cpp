@@ -1,13 +1,27 @@
 ﻿#include <iostream>
 
-#include "Integer.h"
-#include "Fraction.h"
-#include "Series.hpp"
-#include "Imaginary.h"
-#include "Root.h"
+#define EXPRESSION_TEST
 
-int main(){
+#ifdef NUMBER_TEST
+#include "number/Integer.h"
+#include "number/Fraction.h"
+#include "number/Series.hpp"
+#include "number/Imaginary.h"
+#include "number/Root.h"
+#include "number/Complex.h"
+using namespace number;
+#endif
+
+#ifdef EXPRESSION_TEST
+#include "expression/Expression.h"
+#include "expression/Add.h"
+#include "expression/Integer.h"
+using namespace expression;
+#endif
+
+int main() {
 	std::cout << "calculating" << std::endl;
+#ifdef NUMBER_TEST
 	{
 		const Natural a(123, 10);
 		std::cout << "a:" << a.GetStringRadix(10) << std::endl;
@@ -61,7 +75,7 @@ int main(){
 		}).Summation(20).GetMonomial().GetDecimal(10, 20) << std::endl;
 	}
 	{
-		std::cout << "2^256=" << Integer(2).Power(Integer(256)).GetStringRadix(10) << std::endl;
+		std::cout << "2^256=" << Fraction::Power(2, 256).GetStringRadix(10) << std::endl;
 	}
 	{
 		std::cout << Natural("39135395").Root(Natural(5, 10)).GetString() << std::endl;
@@ -71,8 +85,8 @@ int main(){
 		std::cout << Natural("25528A3", 16).Root(Natural(5, 16)).GetString() << std::endl;
 	}
 	{
-		std::cout << Integer(2).Power(Integer(0)).GetStringRadix(10) << std::endl;
-		std::cout << Integer(3, false).Power(Integer(3, false)) << std::endl;
+		std::cout << Fraction::Power(2, 0).GetStringRadix(10) << std::endl;
+		std::cout << Fraction::Power(Integer(3, false), (Integer(3, false))) << std::endl;
 		std::cout << Imaginary(Integer(1)) << std::endl;
 	}
 	{
@@ -108,7 +122,7 @@ int main(){
 		std::cout << (Complex(Fraction(1, 2), Fraction(1, 3)) / Complex(Fraction(1, 2), Fraction(1, 3))).GetDecimalRadix(10, 2) << std::endl;
 	}
 	{
-		std::cout << Root(2, 2).GetDecimal(10,20) <<std::endl;
+		std::cout << Root(2, 2).GetDecimal(10, 20) << std::endl;
 		std::cout << Root(20, 2).GetDecimal(10, 20) << std::endl;
 		std::cout << Root(3, 3).GetDecimal(10, 20) << std::endl;
 		std::cout << Root(30, 3).GetDecimal(10, 20) << std::endl;
@@ -153,6 +167,12 @@ int main(){
 		std::cout << Complex(Fraction(1, 2), Fraction(1, 2)).Power(3) << std::endl;
 		std::cout << Complex(Fraction(Integer(1, false), 2), Fraction(1, 2)).Power(3) << std::endl;
 	}
+#endif
+#ifdef EXPRESSION_TEST
+	{
+		std::cout << Expression(expression::Integer(123), Add(), expression::Integer(456), Add(), expression::Integer(789)) << std::endl;
+	}
+#endif
 	getchar();
 	return 0;
 }
