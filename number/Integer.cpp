@@ -92,6 +92,10 @@ namespace number {
 		*this = *this + addition;
 		return *this;
 	}
+	Integer &Integer::operator-=(const Integer &subtrahend) {
+		*this = *this - subtrahend;
+		return *this;
+	}
 	Integer &Integer::operator*=(const Integer &multiplier) {
 		*this = *this * multiplier;
 		return *this;

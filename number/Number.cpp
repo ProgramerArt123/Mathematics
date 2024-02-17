@@ -2,7 +2,7 @@
 
 namespace number {
 
-	const std::string Number::OutPutString() const {
+	const std::string Number::OutPutString(size_t pos) const {
 		return GetString();
 	}
 

@@ -4,6 +4,8 @@
 #include "Output.h"
 namespace expression {
 	class Node : public Output {
+	public:
+
 	};
 }
 

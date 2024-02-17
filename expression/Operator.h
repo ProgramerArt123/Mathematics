@@ -3,9 +3,18 @@
 
 #include "Node.h"
 namespace expression {
-	class Operator : public Node {
 
+	enum OPERATOR_TYPE {
+		OPERATOR_TYPE_ADD,
+		OPERATOR_TYPE_SUB,
 	};
+
+	struct OperatorType {
+		OPERATOR_TYPE m_type = OPERATOR_TYPE_ADD;
+		const char *m_output = "";
+	};
+
+	OperatorType operators[];
 }
 
 #endif

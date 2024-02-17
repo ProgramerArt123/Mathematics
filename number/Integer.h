@@ -29,6 +29,7 @@ namespace number {
 		Integer operator/(const Integer &divisor) const;
 		Integer operator%(const Integer &divisor) const;
 		Integer &operator+=(const Integer &addition);
+		Integer &operator-=(const Integer &subtrahend);
 		Integer &operator*=(const Integer &multiplier);
 		Integer &operator/=(const Integer &divisor);
 		bool operator==(const Integer &other)const;

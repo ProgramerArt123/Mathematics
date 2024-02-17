@@ -14,8 +14,8 @@ using namespace number;
 
 #ifdef EXPRESSION_TEST
 #include "expression/Expression.h"
-#include "expression/Add.h"
 #include "expression/Integer.h"
+#include "expression/ExpressionDeformationer.h"
 using namespace expression;
 #endif
 
@@ -170,7 +170,20 @@ int main() {
 #endif
 #ifdef EXPRESSION_TEST
 	{
-		std::cout << Expression(expression::Integer(123), Add(), expression::Integer(456), Add(), expression::Integer(789)) << std::endl;
+		Expression e(expression::Fraction(number::Fraction(123)), OPERATOR_TYPE_ADD,
+			expression::Fraction(number::Fraction(456)), OPERATOR_TYPE_SUB,
+				expression::Fraction(number::Fraction(789)));
+		std::cout << e;
+		while (e.Collectable()) {
+			std::cout << "\t==>\t" << (e = e.Collect());
+		}
+		std::cout << std::endl;
+	}
+	{
+		Expression e(expression::Fraction(number::Fraction(number::Integer(123, false))), OPERATOR_TYPE_ADD,
+			expression::Fraction(number::Fraction(456)), OPERATOR_TYPE_SUB,
+			expression::Fraction(number::Fraction(number::Integer(789, false))));
+		std::cout << ExpressionDeformationer(e.OutPutString()).Deformation(e) << std::endl;
 	}
 #endif
 	getchar();

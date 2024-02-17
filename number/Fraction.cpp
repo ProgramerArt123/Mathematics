@@ -159,6 +159,9 @@ namespace number {
 	Fraction &Fraction::operator+=(const Fraction &addition) {
 		return *this = *this + addition;
 	}
+	Fraction &Fraction::operator-=(const Fraction &subtrahend) {
+		return *this = *this - subtrahend;
+	}
 	Fraction &Fraction::operator*=(const Fraction &multiplier) {
 		return *this = *this * multiplier;
 	}
@@ -171,6 +174,9 @@ namespace number {
 	}
 	Fraction Fraction::Power(const Integer &exponent) const {
 		return Power(m_numerator, exponent) / Power(m_denominator, exponent);
+	}
+	Fraction Fraction::Power(const Fraction &exponent) const {
+		return Power(exponent.m_numerator) / Power(exponent.m_denominator);
 	}
 	bool operator==(const Integer &number, const Fraction &rational) {
 		return Fraction(number) == rational;
@@ -209,5 +215,10 @@ namespace number {
 		else {
 			return Fraction(1, product);
 		}
+	}
+
+	Fraction Fraction::Power(const Integer &number, const Fraction &exponent) {
+		return Fraction::Power(number, exponent.m_numerator) /
+			Fraction::Power(number, exponent.m_denominator);
 	}
 }

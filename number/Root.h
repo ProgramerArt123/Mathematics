@@ -23,8 +23,14 @@ namespace number {
 		bool IsImaginary() const;
 		Fraction GetFraction(const Integer &base, uint8_t radix, size_t decimalLength)const;
 
-		std::shared_ptr<Fraction> m_base;
-		std::shared_ptr<Fraction> m_exponent;
+		friend Root operator*(const Root &number, const Integer &multiplier);
+		friend Root operator/(const Root &number, const Integer &divisor);
+
+		friend Root operator*(const Root &number, const Fraction &multiplier);
+		friend Root operator/(const Root &number, const Fraction &divisor);
+
+		Fraction m_base;
+		Fraction m_exponent;
 		bool m_positive = true;
 	};
 }

@@ -35,8 +35,10 @@ namespace number {
 		Fraction operator/(const Fraction &divisor) const;
 
 		Fraction Power(const Integer &exponent) const;
+		Fraction Power(const Fraction &exponent) const;
 
 		Fraction &operator+=(const Fraction &addition);
+		Fraction &operator-=(const Fraction &subtrahend);
 		Fraction &operator*=(const Fraction &multiplier);
 		Fraction &operator/=(const Fraction &divisor);
 
@@ -53,6 +55,7 @@ namespace number {
 		friend Fraction operator/(const Integer &number, const Fraction &divisor);
 
 		static Fraction Power(const Integer &number, const Integer &exponent);
+		static Fraction Power(const Integer &number, const Fraction &exponent);
 
 		Integer m_numerator;
 		Integer m_denominator;
