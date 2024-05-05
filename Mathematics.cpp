@@ -13,8 +13,7 @@ using namespace number;
 #endif
 
 #ifdef EXPRESSION_TEST
-#include "expression/Expression.h"
-#include "expression/Integer.h"
+#include "expression/Expression.hpp"
 #include "expression/ExpressionDeformationer.h"
 using namespace expression;
 #endif
@@ -170,20 +169,87 @@ int main() {
 #endif
 #ifdef EXPRESSION_TEST
 	{
-		Expression e(expression::Fraction(number::Fraction(123)), OPERATOR_TYPE_ADD,
-			expression::Fraction(number::Fraction(456)), OPERATOR_TYPE_SUB,
-				expression::Fraction(number::Fraction(789)));
-		std::cout << e;
-		while (e.Collectable()) {
-			std::cout << "\t==>\t" << (e = e.Collect());
-		}
-		std::cout << std::endl;
+		expression::Expression<OPERATOR_TYPE_0> e(number::Integer(123), OPERATOR_TYPE_ADD(),
+			number::Integer(456), OPERATOR_TYPE_SUB(), number::Integer(789));
+		e.Forward(std::cout) << std::endl;
+	}
+	//{
+	//	expression::Expression<OPERATOR_TYPE_0> e(number::Integer(123, false), OPERATOR_TYPE_ADD(),
+	//		number::Integer(456), OPERATOR_TYPE_SUB(), number::Integer(789, false));
+
+	//	std::cout << ExpressionDeformationer<OPERATOR_TYPE_0>(e.OutPutString()).Deformation(e) << std::endl;
+	//}
+	{
+		expression::Expression<OPERATOR_TYPE_0> e0(number::Integer(456), OPERATOR_TYPE_ADD(), number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_1> e1(number::Integer(123), OPERATOR_TYPE_MUL(), e0);
+		e1.Forward(std::cout) << std::endl;
+	}
+	//{
+	//	expression::Expression<OPERATOR_TYPE_0> e0(number::Integer(123), OPERATOR_TYPE_ADD(), number::Integer(456));
+	//	expression::Expression<OPERATOR_TYPE_0> e1(number::Integer(789), OPERATOR_TYPE_SUB(), number::Integer(123));
+	//	expression::Expression<OPERATOR_TYPE_1> e2(e0, OPERATOR_TYPE_MUL(), e1, OPERATOR_TYPE_DIV(), e0);
+	//	e2.Forward(std::cout) << std::endl;
+	//}
+	{
+		expression::Expression<OPERATOR_TYPE_1> e(number::Integer(123), OPERATOR_TYPE_MUL(), number::Integer(456), OPERATOR_TYPE_DIV(), number::Integer(789));
+		e.Forward(std::cout) << std::endl;
 	}
 	{
-		Expression e(expression::Fraction(number::Fraction(number::Integer(123, false))), OPERATOR_TYPE_ADD,
-			expression::Fraction(number::Fraction(456)), OPERATOR_TYPE_SUB,
-			expression::Fraction(number::Fraction(number::Integer(789, false))));
-		std::cout << ExpressionDeformationer(e.OutPutString()).Deformation(e) << std::endl;
+		expression::Expression<OPERATOR_TYPE_0> e0(number::Integer(123), OPERATOR_TYPE_ADD(), number::Integer(456));
+		expression::Expression<OPERATOR_TYPE_1> e1(e0, OPERATOR_TYPE_MUL(), number::Integer(789));
+		e1.Forward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_0> e0(number::Integer(123), OPERATOR_TYPE_ADD(), number::Integer(456));
+		expression::Expression<OPERATOR_TYPE_1> e1(number::Integer(789), OPERATOR_TYPE_MUL(), e0);
+		e1.Forward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_1> e0(number::Integer(123), OPERATOR_TYPE_MUL(), number::Integer(456));
+		expression::Expression<OPERATOR_TYPE_0> e1(e0, OPERATOR_TYPE_ADD(), number::Integer(789));
+		e1.Forward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_1> e0(number::Integer(123), OPERATOR_TYPE_MUL(), number::Integer(456));
+		expression::Expression<OPERATOR_TYPE_0> e1(e0, OPERATOR_TYPE_ADD(), e0);
+		e1.Forward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_1> e0(number::Integer(123), OPERATOR_TYPE_MUL(), number::Integer(456), OPERATOR_TYPE_DIV(), number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_0> e1(e0, OPERATOR_TYPE_ADD(), e0, OPERATOR_TYPE_SUB(), number::Integer(789));
+		e1.Forward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2,2), OPERATOR_TYPE_ADD(), number::Root(2, 2));
+		e.Forward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2, 2), OPERATOR_TYPE_SUB(), number::Root(2, 2));
+		e.Forward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_1> e(number::Root(2, 2), OPERATOR_TYPE_MUL(), number::Root(2, 2));
+		e.Forward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_1> e(number::Root(2, 2), OPERATOR_TYPE_DIV(), number::Root(2, 2));
+		e.Forward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2, 2), OPERATOR_TYPE_ADD(), number::Root(2, 2), OPERATOR_TYPE_ADD(), number::Integer(123));
+		e.Forward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2, 2), OPERATOR_TYPE_SUB(), number::Integer(123), OPERATOR_TYPE_SUB(), number::Root(2, 2));
+		e.Forward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_0> e(number::Root(4, 2), OPERATOR_TYPE_ADD(), number::Root(9, 2));
+		e.Forward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2, 2), OPERATOR_TYPE_ADD(), number::Root(8, 2), OPERATOR_TYPE_ADD(), number::Root(18, 2), OPERATOR_TYPE_ADD(), number::Integer(123));
+		e.Forward(std::cout) << std::endl;
 	}
 #endif
 	getchar();

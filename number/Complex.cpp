@@ -4,6 +4,10 @@
 #include "Imaginary.h"
 #include "Complex.h"
 namespace number {
+	Complex::Complex() :
+		m_real(0), m_image(0) {
+
+	}
 	Complex::Complex(const Integer &real, const Integer &image) :
 		m_real(real), m_image(image) {
 
@@ -124,6 +128,15 @@ namespace number {
 	}
 	Complex &Complex::operator+=(const Complex &addition) {
 		return *this = *this + addition;
+	}
+	Complex &Complex::operator-=(const Complex &subtrahend) {
+		return *this = *this - subtrahend;
+	}
+	Complex &Complex::operator*=(const Complex &multiplier) {
+		return *this = *this * multiplier;
+	}
+	Complex &Complex::operator/=(const Complex &divisor) {
+		return *this = *this / divisor;
 	}
 	Complex operator+(const Integer &number, const Complex &addition) {
 		return Complex(number, 0) + addition;

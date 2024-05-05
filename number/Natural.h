@@ -39,7 +39,7 @@ namespace number {
 		Natural &operator/=(const Natural &divisor);
 		Natural operator%(const Natural &divisor) const;
 		Natural Power(const Natural &exponent) const;
-		Natural Root(const Natural &exponent, bool &isExhaustive) const;
+		Natural Root(const Natural &exponent, Natural &remainder) const;
 		Natural Root(const Natural &exponent) const;
 
 		Natural &operator++();
@@ -60,8 +60,8 @@ namespace number {
 		static void DivN(uint8_t from, uint8_t to, std::list<char> &singles, char &remainder);
 		static char GetChar(uint8_t value);
 		static uint8_t GetValue(char c);
-		Natural Root2(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, bool &isExhaustive) const;
-		Natural Root(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, bool &isExhaustive) const;
+		Natural Root2(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, Natural &remainder) const;
+		Natural Root(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, Natural &remainder) const;
 		std::list<char> m_singles;
 
 		uint8_t m_radix = 10;

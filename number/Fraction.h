@@ -14,6 +14,7 @@ namespace number {
 		Fraction(const Integer &numerator, const Fraction &denominator);
 		Fraction(const Fraction &numerator, const Integer &denominator);
 		Fraction(const Fraction &numerator, const Fraction &denominator);
+
 		Fraction &SetPointPos(size_t point);
 		const std::string GetString(uint8_t radix = 10) const override;
 		void SetRadix(uint8_t radix = 10) override;
@@ -21,6 +22,10 @@ namespace number {
 		bool EqualZero() const override;
 		void SetPositive(bool isPositive) override;
 		bool IsPositive() const override;
+		const Integer &Numerator() const;
+		const Integer &Denominator() const;
+		Fraction GetAbs() const;
+		Fraction GetReciprocal() const;
 
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
@@ -35,7 +40,6 @@ namespace number {
 		Fraction operator/(const Fraction &divisor) const;
 
 		Fraction Power(const Integer &exponent) const;
-		Fraction Power(const Fraction &exponent) const;
 
 		Fraction &operator+=(const Fraction &addition);
 		Fraction &operator-=(const Fraction &subtrahend);
@@ -55,12 +59,14 @@ namespace number {
 		friend Fraction operator/(const Integer &number, const Fraction &divisor);
 
 		static Fraction Power(const Integer &number, const Integer &exponent);
-		static Fraction Power(const Integer &number, const Fraction &exponent);
+
+	private:
 
 		Integer m_numerator;
 		Integer m_denominator;
 
-	private:
+		Integer m_reduction_interger;
+		Integer m_reduction_numerator;
 
 		void Reduce();
 

@@ -5,6 +5,7 @@
 #include <functional>
 
 #include "Output.h"
+
 namespace number {
 	class Number : public Output {
 	public:

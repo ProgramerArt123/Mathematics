@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iostream>
 #include "Integer.h"
 #include "Complex.h"
 #include "Fraction.h"
@@ -73,6 +74,25 @@ namespace number {
 		return m_numerator.IsPositive() ==
 			m_denominator.IsPositive();
 	}
+	const Integer &Fraction::Numerator() const {
+		return m_numerator;
+	}
+	const Integer &Fraction::Denominator() const {
+		return m_denominator;
+	}
+
+	Fraction Fraction::GetAbs() const {
+		if (IsPositive()) {
+			return *this;
+		}
+		else {
+			return -*this;
+		}
+	}
+
+	Fraction Fraction::GetReciprocal() const {
+		return Fraction(m_denominator, m_numerator);
+	}
 
 	const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
@@ -123,6 +143,8 @@ namespace number {
 		const Integer &common = m_denominator.m_value.GreatestCommonDivisor(m_numerator.m_value);
 		m_numerator /= common;
 		m_denominator /= common;
+		m_reduction_interger = m_numerator / m_denominator;
+		m_reduction_numerator = m_numerator % m_denominator;
 	}
 
 	Fraction Fraction::operator-() const {
@@ -175,9 +197,6 @@ namespace number {
 	Fraction Fraction::Power(const Integer &exponent) const {
 		return Power(m_numerator, exponent) / Power(m_denominator, exponent);
 	}
-	Fraction Fraction::Power(const Fraction &exponent) const {
-		return Power(exponent.m_numerator) / Power(exponent.m_denominator);
-	}
 	bool operator==(const Integer &number, const Fraction &rational) {
 		return Fraction(number) == rational;
 	}
@@ -215,10 +234,5 @@ namespace number {
 		else {
 			return Fraction(1, product);
 		}
-	}
-
-	Fraction Fraction::Power(const Integer &number, const Fraction &exponent) {
-		return Fraction::Power(number, exponent.m_numerator) /
-			Fraction::Power(number, exponent.m_denominator);
 	}
 }

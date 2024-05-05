@@ -230,7 +230,7 @@ namespace number {
 		return result;
 	}
 
-	Natural Natural::Root2(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, bool &isExhaustive) const {
+	Natural Natural::Root2(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, Natural &remainder) const {
 		char c = GetChar((GetValue(top) + GetValue(bottom)) / 2);
 		singles[index] = c;
 		const Natural value(std::list<char>(singles.cbegin(), singles.cend()), m_radix);
@@ -240,11 +240,11 @@ namespace number {
 		}
 		else if (power > *this) {
 			if (GetValue(c) > GetValue(bottom)) {
-				return Root2(exponent, singles, index, GetChar(GetValue(c) - 1), bottom, isExhaustive);
+				return Root2(exponent, singles, index, GetChar(GetValue(c) - 1), bottom, remainder);
 			}
 			else {
 				if (index) {
-					return Root2(exponent, singles, index - 1, GetChar(m_radix - 1), '0', isExhaustive);
+					return Root2(exponent, singles, index - 1, GetChar(m_radix - 1), '0', remainder);
 				}
 				else {
 					return Natural(std::list<char>(singles.cbegin(), singles.cend()));
@@ -254,15 +254,15 @@ namespace number {
 		else {
 			if (GetValue(c) < GetValue(top)) {
 				if (GetValue(c) < GetValue(top) - 1) {
-					return Root2(exponent, singles, index, top, c, isExhaustive);
+					return Root2(exponent, singles, index, top, c, remainder);
 				}
 				else {
-					return Root(exponent, singles, index, top, c, isExhaustive);
+					return Root(exponent, singles, index, top, c, remainder);
 				}
 			}
 			else {
 				if (index) {
-					return Root2(exponent, singles, index - 1, GetChar(m_radix - 1), '0', isExhaustive);
+					return Root2(exponent, singles, index - 1, GetChar(m_radix - 1), '0', remainder);
 				}
 				else {
 					return value;
@@ -271,22 +271,22 @@ namespace number {
 		}
 	}
 
-	Natural Natural::Root(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, bool &isExhaustive) const {
+	Natural Natural::Root(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, Natural &remainder) const {
 		char c = top;
 		while (GetValue(c) >= GetValue(bottom)) {
 			singles[index] = c;
 			Natural value(std::list<char>(singles.cbegin(), singles.cend()), m_radix);
 			const Natural &power = value.Power(exponent);
 			if (power == *this) {
-				isExhaustive = true;
+				remainder = 0;
 				return value;
 			}
 			else if (power < *this) {
 				if (index) {
-					return Root2(exponent, singles, index - 1, GetChar(m_radix - 1), '0', isExhaustive);
+					return Root2(exponent, singles, index - 1, GetChar(m_radix - 1), '0', remainder);
 				}
 				else {
-					isExhaustive = false;
+					remainder = *this - power;
 					return value;
 				}
 			}
@@ -298,15 +298,15 @@ namespace number {
 		return Natural(0, m_radix);
 	}
 
-	Natural Natural::Root(const Natural &exponent, bool &isExhaustive) const {
-		size_t len = strtoull(((Natural(m_singles.size(), m_radix) +
+	Natural Natural::Root(const Natural &exponent, Natural &remainder) const {
+		size_t len = (size_t)strtoull(((Natural(m_singles.size(), m_radix) +
 			exponent - Natural(1, m_radix)) / exponent).GetString(m_radix).c_str(), NULL, m_radix);
 		std::vector<char> singles(len, '0');
-		return Root(exponent, singles, len - 1, GetChar(m_radix - 1), '0', isExhaustive);
+		return Root(exponent, singles, len - 1, GetChar(m_radix - 1), '0', remainder);
 	}
 	Natural Natural::Root(const Natural &exponent) const {
-		bool isExhaustive = false;
-		return Root(exponent, isExhaustive);
+		Natural remainder;
+		return Root(exponent, remainder);
 	}
 	Natural &Natural::operator++() {
 		*this = *this + Natural(1, GetRadix());

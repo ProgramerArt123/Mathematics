@@ -12,6 +12,7 @@ namespace number {
 
 	class Complex : public Number {
 	public:
+		Complex();
 		Complex(const Integer &real, const Integer &image);
 		Complex(const Fraction &real, const Fraction &image);
 		Complex(const Imaginary &real, const Imaginary &image);
@@ -38,6 +39,9 @@ namespace number {
 		Complex operator/(const Complex &divisor) const;
 
 		Complex &operator+=(const Complex &addition);
+		Complex &operator-=(const Complex &subtrahend);
+		Complex &operator*=(const Complex &multiplier);
+		Complex &operator/=(const Complex &divisor);
 
 		Complex Power(const Integer &exponent);
 
