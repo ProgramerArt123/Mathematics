@@ -37,7 +37,7 @@ namespace number {
 	bool Integer::IsPositive() const {
 		return m_positive;
 	}
-	Natural Integer::GetNatural() const {
+	Natural Integer::Value() const {
 		return m_value;
 	}
 	const std::string Integer::GetDecimal(uint8_t radix, size_t decimalLength,

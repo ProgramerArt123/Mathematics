@@ -17,7 +17,7 @@ namespace number {
 		bool EqualZero() const override;
 		void SetPositive(bool isPositive)override;
 		bool IsPositive() const override;
-		Natural GetNatural() const;
+		Natural Value() const;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
 

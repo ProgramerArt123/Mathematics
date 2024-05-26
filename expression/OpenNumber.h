@@ -1,6 +1,7 @@
 #ifndef __EXPRESSION_OPEN_NUMBER_H__
 #define __EXPRESSION_OPEN_NUMBER_H__
 
+#include <optional>
 #include "Number.h"
 #include "number/Root.h"
 #include "Operator.h"
@@ -9,11 +10,13 @@ namespace expression {
 	class OpenNumber : public Number {
 	public:
 		OpenNumber(const expression::OpenNumber &prototype);
-		OpenNumber(const number::Root &value);
-		const std::string OutPutString(size_t pos = 0) const override;
+		OpenNumber(const expression::OpenNumber &prototype, OPERATOR_TYPE_FLAG flag);
+		OpenNumber(const number::Root &value, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_NONE);
+		const std::string GetString(size_t pos = 0, uint8_t radix = 10) const override;
 		const OpenNumber &operator=(const OpenNumber &right);
-		bool Collect0(const expression::OpenNumber &right, expression::OpenNumber &collect) const;
-		bool Collect1(const expression::OpenNumber &right, expression::OpenNumber &collect) const;
+		std::optional<expression::OpenNumber> Collect(const expression::OpenNumber &right, uint8_t level) const;
+		std::optional<expression::OpenNumber> Collect0(const expression::OpenNumber &right) const;
+		std::optional<expression::OpenNumber> Collect1(const expression::OpenNumber &right) const;
 		const number::Root &Value()const;
 	private:
 		number::Root m_value;

@@ -10,10 +10,11 @@ namespace expression {
 	class ClosureNumber : public Number {
 	public:
 		ClosureNumber(const expression::ClosureNumber &prototype);
-		ClosureNumber(const number::Integer &value);
-		ClosureNumber(const number::Fraction &value);
-		ClosureNumber(const number::Complex &value);
-		const std::string OutPutString(size_t pos = 0) const override;
+		ClosureNumber(const expression::ClosureNumber &prototype, OPERATOR_TYPE_FLAG flag);
+		ClosureNumber(const number::Integer &value, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_NONE);
+		ClosureNumber(const number::Fraction &value, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_NONE);
+		ClosureNumber(const number::Complex &value, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_NONE);
+		const std::string GetString(size_t pos = 0, uint8_t radix = 10) const override;
 		const ClosureNumber &operator=(const ClosureNumber &right);
 		ClosureNumber operator+(const ClosureNumber &addition) const;
 		ClosureNumber operator-(const ClosureNumber &subtrahend) const;

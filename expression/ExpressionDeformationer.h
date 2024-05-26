@@ -9,12 +9,13 @@ namespace expression {
 	public:
 		ExpressionDeformationer(const std::string &expression) :
 			m_expression(expression) {
-
 		}
 		ExpressionDeformationer(const Expression<OperatorType> &expression) :
 			m_expression(expression.OutPutString()) {
-			if (expression.Collectable()) {
-				Deformation(expression.Collect());
+			size_t completed = 0;
+			const Expression<OperatorType> &collect = expression.Collect(1, completed);
+			if (completed) {
+				Deformation(collect);
 			}
 		}
 
@@ -34,6 +35,36 @@ namespace expression {
 			}
 		}
 		const ExpressionDeformationer<OperatorType> &Deformation(const Expression<OperatorType> &child) {
+			if (1 < child.m_nodes.size())
+			{
+				std::list < std::pair< ExpressionNodes::const_iterator, ExpressionNodes::const_iterator > > combines;
+
+				for (auto itorI = child.m_nodes.cbegin(); itorI != child.m_nodes.cend(); itorI++) {
+					for (auto itorJ = itorI; itorJ != child.m_nodes.cend(); itorJ++) {
+						if (itorI != itorJ) {
+							combines.push_back(std::make_pair(itorI, itorJ));
+						}
+					}
+				}
+
+				for (auto const combine : combines) {
+					Expression<OperatorType> collect;
+					collect.m_nodes.push_back(*combine.first);
+					collect.m_nodes.push_back(*combine.second);
+					for (auto itor = child.m_nodes.cbegin(); itor != child.m_nodes.cend(); ++ itor) {
+						if (itor != combine.first && itor != combine.second) {
+							collect.m_nodes.push_back(*itor);
+						}
+					}
+					m_collects.push_back(ExpressionDeformationer<OperatorType>(collect));
+				}
+			}
+			else
+			{
+				Expression<OperatorType> collect;
+				collect.m_nodes.push_back(child.m_nodes.front());
+				m_collects.push_back(ExpressionDeformationer<OperatorType>(collect));
+			}
 			return *this;
 		}
 	private:

@@ -8,6 +8,7 @@
 namespace expression {
 
 	enum OPERATOR_TYPE_FLAG {
+		OPERATOR_TYPE_FLAG_NONE,
 		OPERATOR_TYPE_FLAG_ADD,
 		OPERATOR_TYPE_FLAG_SUB,
 		OPERATOR_TYPE_FLAG_MUL,
@@ -27,6 +28,12 @@ namespace expression {
 	class OPERATOR_TYPE_1 : public OPERATOR_TYPE {
 	public:
 		static const uint8_t GetLevel();
+	};
+
+	class OPERATOR_TYPE_NONE : public OPERATOR_TYPE {
+	public:
+		const std::string OutPutString(size_t pos = 0) const override;
+		OPERATOR_TYPE_FLAG GetFlag() const override;
 	};
 
 	class OPERATOR_TYPE_ADD : public OPERATOR_TYPE_0 {

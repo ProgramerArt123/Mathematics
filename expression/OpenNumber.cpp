@@ -3,26 +3,38 @@
 #include "OpenNumber.h"
 
 namespace expression {
-
 	OpenNumber::OpenNumber(const expression::OpenNumber &prototype) {
 		*this = prototype;
 	}
-	OpenNumber::OpenNumber(const number::Root &value) : m_value(value){
+	OpenNumber::OpenNumber(const expression::OpenNumber &prototype, OPERATOR_TYPE_FLAG flag) {
+		*this = prototype;
+		SetOperator(flag);
 	}
-	const std::string OpenNumber::OutPutString(size_t pos) const {
-		std::stringstream ss;
-		if (m_operator) {
-			ss << m_operator->OutPutString(pos);
-		}
-		ss << m_value.OutPutString(pos);
-		return ss.str();
+	OpenNumber::OpenNumber(const number::Root &value, OPERATOR_TYPE_FLAG flag) : m_value(value), Number(flag){
+	}
+	const std::string OpenNumber::GetString(size_t pos, uint8_t radix) const {
+		return m_value.OutPutString(pos);
 	}
 	const OpenNumber &OpenNumber::operator=(const OpenNumber &right) {
 		Number::operator=(right);
 		m_value = right.m_value;
 		return *this;
 	}
-	bool OpenNumber::Collect0(const expression::OpenNumber &right, expression::OpenNumber &collect) const {
+	std::optional<expression::OpenNumber> OpenNumber::Collect(const expression::OpenNumber &right, uint8_t level) const {
+		switch (level)
+		{
+		case 0:
+			return Collect0(right);
+			break;
+		case 1:
+			return Collect1(right);
+			break;
+		default:
+			break;
+		}
+		return std::nullopt;
+	}
+	std::optional<expression::OpenNumber> OpenNumber::Collect0(const expression::OpenNumber &right) const {
 		number::Root leftValue = m_value;
 		if (m_operator && OPERATOR_TYPE_FLAG_SUB == m_operator->GetFlag()) {
 			leftValue = -m_value;
@@ -32,15 +44,14 @@ namespace expression {
 			rightValue = -right.m_value;
 		}
 		if (leftValue.EqualBase0(rightValue)) {
-			collect.m_value = leftValue.AddEqual(rightValue);
-			return true;
+			return leftValue.AddEqual(rightValue);
 		}
 		else {
-			return false;
+			return std::nullopt;
 		}
 	}
 
-	bool OpenNumber::Collect1(const expression::OpenNumber &right, expression::OpenNumber &collect) const {
+	std::optional<expression::OpenNumber> OpenNumber::Collect1(const expression::OpenNumber &right) const {
 		number::Root leftValue = m_value;
 		bool isLeftMul = true;
 		if (m_operator && OPERATOR_TYPE_FLAG_DIV == m_operator->GetFlag()) {
@@ -54,11 +65,10 @@ namespace expression {
 			isRightMul = false;
 		}
 		if (leftValue.EqualBase1(rightValue)) {
-			collect.m_value = leftValue.MulEqual(rightValue, isLeftMul, isRightMul);
-			return true;
+			return leftValue.MulEqual(rightValue, isLeftMul, isRightMul);
 		}
 		else {
-			return false;
+			return std::nullopt;
 		}
 	}
 	const number::Root &OpenNumber::Value()const {

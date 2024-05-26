@@ -4,22 +4,21 @@
 #include "ClosureNumber.hpp"
 
 namespace expression {
-	ClosureNumber::ClosureNumber(const expression::ClosureNumber &prototype){
+	ClosureNumber::ClosureNumber(const expression::ClosureNumber &prototype) {
 		*this = prototype;
 	}
-	ClosureNumber::ClosureNumber(const number::Integer &value) :m_value(value, 0) {
+	ClosureNumber::ClosureNumber(const expression::ClosureNumber &prototype, OPERATOR_TYPE_FLAG flag){
+		*this = prototype;
+		SetOperator(flag);
 	}
-	ClosureNumber::ClosureNumber(const number::Fraction &value) :m_value(value, 0) {
+	ClosureNumber::ClosureNumber(const number::Integer &value, OPERATOR_TYPE_FLAG flag) :m_value(value, 0), Number(OPERATOR_TYPE_FLAG_ADD) {
 	}
-	ClosureNumber::ClosureNumber(const number::Complex &value):m_value(value){
+	ClosureNumber::ClosureNumber(const number::Fraction &value, OPERATOR_TYPE_FLAG flag) :m_value(value, 0), Number(OPERATOR_TYPE_FLAG_ADD) {
 	}
-	const std::string ClosureNumber::OutPutString(size_t pos) const {
-		std::stringstream ss;
-		if (m_operator) {
-			ss << m_operator->OutPutString(pos);
-		}
-		ss << m_value.OutPutString(pos);
-		return ss.str();
+	ClosureNumber::ClosureNumber(const number::Complex &value, OPERATOR_TYPE_FLAG flag):m_value(value), Number(OPERATOR_TYPE_FLAG_ADD) {
+	}
+	const std::string ClosureNumber::GetString(size_t pos, uint8_t radix) const {
+		return m_value.OutPutString(pos);
 	}
 	const ClosureNumber &ClosureNumber::operator=(const ClosureNumber &right) {
 		Number::operator=(right);

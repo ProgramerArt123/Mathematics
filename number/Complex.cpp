@@ -216,7 +216,7 @@ namespace number {
 
 	Complex Complex::Power(const Integer &exponent) {
 		Complex power(0, 0);
-		for (Natural index(0); index <= exponent.GetNatural(); ++index) {
+		for (Natural index(0); index <= exponent.Value(); ++index) {
 			power += Integer(exponent.m_value.Composition(index)) *
 				m_real.Power(exponent - index) * Complex::Power(m_image, index);
 		}
@@ -225,7 +225,7 @@ namespace number {
 
 	Complex Complex::Power(const Imaginary &number, const Integer &exponent) {
 		const Fraction &fraction = number.m_value.Power(exponent);
-		const Natural &mod = exponent.GetNatural() % Natural(4);
+		const Natural &mod = exponent.Value() % Natural(4);
 		if (Natural(0) == mod) {
 			return Complex(fraction, 0);
 		}

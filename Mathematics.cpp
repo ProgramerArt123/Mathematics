@@ -1,14 +1,15 @@
 ﻿#include <iostream>
 
+//#define NUMBER_TEST
 #define EXPRESSION_TEST
 
 #ifdef NUMBER_TEST
 #include "number/Integer.h"
 #include "number/Fraction.h"
-#include "number/Series.hpp"
 #include "number/Imaginary.h"
 #include "number/Root.h"
 #include "number/Complex.h"
+#include "expression/Series.hpp"
 using namespace number;
 #endif
 
@@ -171,85 +172,85 @@ int main() {
 	{
 		expression::Expression<OPERATOR_TYPE_0> e(number::Integer(123), OPERATOR_TYPE_ADD(),
 			number::Integer(456), OPERATOR_TYPE_SUB(), number::Integer(789));
-		e.Forward(std::cout) << std::endl;
+		e.CollectForward(std::cout) << std::endl;
 	}
-	//{
-	//	expression::Expression<OPERATOR_TYPE_0> e(number::Integer(123, false), OPERATOR_TYPE_ADD(),
-	//		number::Integer(456), OPERATOR_TYPE_SUB(), number::Integer(789, false));
+	{
+		expression::Expression<OPERATOR_TYPE_0> e(number::Integer(123, false), OPERATOR_TYPE_ADD(),
+			number::Integer(456), OPERATOR_TYPE_SUB(), number::Integer(789, false));
 
-	//	std::cout << ExpressionDeformationer<OPERATOR_TYPE_0>(e.OutPutString()).Deformation(e) << std::endl;
-	//}
+		std::cout << ExpressionDeformationer<OPERATOR_TYPE_0>(e.OutPutString()).Deformation(e) << std::endl;
+	}
 	{
 		expression::Expression<OPERATOR_TYPE_0> e0(number::Integer(456), OPERATOR_TYPE_ADD(), number::Integer(789));
 		expression::Expression<OPERATOR_TYPE_1> e1(number::Integer(123), OPERATOR_TYPE_MUL(), e0);
-		e1.Forward(std::cout) << std::endl;
+		e1.CollectForward(std::cout) << std::endl;
 	}
-	//{
-	//	expression::Expression<OPERATOR_TYPE_0> e0(number::Integer(123), OPERATOR_TYPE_ADD(), number::Integer(456));
-	//	expression::Expression<OPERATOR_TYPE_0> e1(number::Integer(789), OPERATOR_TYPE_SUB(), number::Integer(123));
-	//	expression::Expression<OPERATOR_TYPE_1> e2(e0, OPERATOR_TYPE_MUL(), e1, OPERATOR_TYPE_DIV(), e0);
-	//	e2.Forward(std::cout) << std::endl;
-	//}
+	{
+		expression::Expression<OPERATOR_TYPE_0> e0(number::Integer(123), OPERATOR_TYPE_ADD(), number::Integer(456));
+		expression::Expression<OPERATOR_TYPE_0> e1(number::Integer(789), OPERATOR_TYPE_SUB(), number::Integer(123));
+		expression::Expression<OPERATOR_TYPE_1> e2(e0, OPERATOR_TYPE_MUL(), e1, OPERATOR_TYPE_DIV(), e0);
+		e2.CollectForward(std::cout) << std::endl;
+	}
 	{
 		expression::Expression<OPERATOR_TYPE_1> e(number::Integer(123), OPERATOR_TYPE_MUL(), number::Integer(456), OPERATOR_TYPE_DIV(), number::Integer(789));
-		e.Forward(std::cout) << std::endl;
+		e.CollectForward(std::cout) << std::endl;
 	}
 	{
 		expression::Expression<OPERATOR_TYPE_0> e0(number::Integer(123), OPERATOR_TYPE_ADD(), number::Integer(456));
 		expression::Expression<OPERATOR_TYPE_1> e1(e0, OPERATOR_TYPE_MUL(), number::Integer(789));
-		e1.Forward(std::cout) << std::endl;
+		e1.CollectForward(std::cout) << std::endl;
 	}
 	{
 		expression::Expression<OPERATOR_TYPE_0> e0(number::Integer(123), OPERATOR_TYPE_ADD(), number::Integer(456));
 		expression::Expression<OPERATOR_TYPE_1> e1(number::Integer(789), OPERATOR_TYPE_MUL(), e0);
-		e1.Forward(std::cout) << std::endl;
+		e1.CollectForward(std::cout) << std::endl;
 	}
 	{
 		expression::Expression<OPERATOR_TYPE_1> e0(number::Integer(123), OPERATOR_TYPE_MUL(), number::Integer(456));
 		expression::Expression<OPERATOR_TYPE_0> e1(e0, OPERATOR_TYPE_ADD(), number::Integer(789));
-		e1.Forward(std::cout) << std::endl;
+		e1.CollectForward(std::cout) << std::endl;
 	}
 	{
 		expression::Expression<OPERATOR_TYPE_1> e0(number::Integer(123), OPERATOR_TYPE_MUL(), number::Integer(456));
 		expression::Expression<OPERATOR_TYPE_0> e1(e0, OPERATOR_TYPE_ADD(), e0);
-		e1.Forward(std::cout) << std::endl;
+		e1.CollectForward(std::cout) << std::endl;
 	}
 	{
 		expression::Expression<OPERATOR_TYPE_1> e0(number::Integer(123), OPERATOR_TYPE_MUL(), number::Integer(456), OPERATOR_TYPE_DIV(), number::Integer(789));
 		expression::Expression<OPERATOR_TYPE_0> e1(e0, OPERATOR_TYPE_ADD(), e0, OPERATOR_TYPE_SUB(), number::Integer(789));
-		e1.Forward(std::cout) << std::endl;
+		e1.CollectForward(std::cout) << std::endl;
 	}
 	{
 		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2,2), OPERATOR_TYPE_ADD(), number::Root(2, 2));
-		e.Forward(std::cout) << std::endl;
+		e.CollectForward(std::cout) << std::endl;
 	}
 	{
 		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2, 2), OPERATOR_TYPE_SUB(), number::Root(2, 2));
-		e.Forward(std::cout) << std::endl;
+		e.CollectForward(std::cout) << std::endl;
 	}
 	{
 		expression::Expression<OPERATOR_TYPE_1> e(number::Root(2, 2), OPERATOR_TYPE_MUL(), number::Root(2, 2));
-		e.Forward(std::cout) << std::endl;
+		e.CollectForward(std::cout) << std::endl;
 	}
 	{
 		expression::Expression<OPERATOR_TYPE_1> e(number::Root(2, 2), OPERATOR_TYPE_DIV(), number::Root(2, 2));
-		e.Forward(std::cout) << std::endl;
+		e.CollectForward(std::cout) << std::endl;
 	}
 	{
 		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2, 2), OPERATOR_TYPE_ADD(), number::Root(2, 2), OPERATOR_TYPE_ADD(), number::Integer(123));
-		e.Forward(std::cout) << std::endl;
+		e.CollectForward(std::cout) << std::endl;
 	}
 	{
 		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2, 2), OPERATOR_TYPE_SUB(), number::Integer(123), OPERATOR_TYPE_SUB(), number::Root(2, 2));
-		e.Forward(std::cout) << std::endl;
+		e.CollectForward(std::cout) << std::endl;
 	}
 	{
 		expression::Expression<OPERATOR_TYPE_0> e(number::Root(4, 2), OPERATOR_TYPE_ADD(), number::Root(9, 2));
-		e.Forward(std::cout) << std::endl;
+		e.CollectForward(std::cout) << std::endl;
 	}
 	{
 		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2, 2), OPERATOR_TYPE_ADD(), number::Root(8, 2), OPERATOR_TYPE_ADD(), number::Root(18, 2), OPERATOR_TYPE_ADD(), number::Integer(123));
-		e.Forward(std::cout) << std::endl;
+		e.CollectForward(std::cout) << std::endl;
 	}
 #endif
 	getchar();

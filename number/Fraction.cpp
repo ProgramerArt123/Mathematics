@@ -52,8 +52,11 @@ namespace number {
 		else if (Integer(1) == m_denominator) {
 			return m_numerator.GetString(radix);
 		}
+		else if(m_reduction_interger.EqualZero()){
+			return m_reduction_numerator.GetString(radix) + "/" + m_denominator.GetString(radix);
+		}
 		else {
-			return m_numerator.GetString(radix) + "/" + m_denominator.GetString(radix);
+			return m_reduction_interger.GetString(radix) + "[" + m_reduction_numerator.GetString(radix) + "/" + m_denominator.GetString(radix) + "]";
 		}
 	}
 	void Fraction::SetRadix(uint8_t radix) {
@@ -99,7 +102,7 @@ namespace number {
 		Natural quotient(0, m_denominator.GetRadix()), remainder(0, m_denominator.GetRadix());
 		std::string numeratorStr = m_numerator.m_value.GetString(radix);
 		numeratorStr.append(decimalLength + 1, '0');
-		Natural(numeratorStr, radix).Div(m_denominator.GetNatural(), quotient.SetCheckLoop(), remainder);
+		Natural(numeratorStr, radix).Div(m_denominator.Value(), quotient.SetCheckLoop(), remainder);
 		const std::string &loop = quotient.GetLoop();
 		std::string quotientStr = quotient.GetString(radix);
 		if (quotientStr.length() < decimalLength + 2) {

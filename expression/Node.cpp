@@ -1,31 +1,35 @@
 #include "Node.hpp"
 namespace expression {
-	Node::Node(){
+	Node::Node(OPERATOR_TYPE_FLAG flag){
+		SetOperator(flag);
 	}
 	Node::Node(const Node &prototype){
 		*this = prototype;
 	}
 	const Node &Node::operator=(const Node &right) {
-		SetOperator(right.m_operator);
+		SetOperator(right.m_operator->GetFlag());
 		return *this;
 	}
-	void Node::SetOperator(const std::unique_ptr<OPERATOR_TYPE> &flag) {
-		if (!flag) {
-			m_operator.reset();
-			return;
-		}
-		switch (flag->GetFlag())
+	OPERATOR_TYPE_FLAG Node::Flag() const {
+		return m_operator->GetFlag();
+	}
+
+	void Node::SetOperator(OPERATOR_TYPE_FLAG flag) {
+		switch (flag)
 		{
-		case OPERATOR_TYPE_FLAG_ADD:
+		case expression::OPERATOR_TYPE_FLAG_NONE:
+			m_operator.reset(new OPERATOR_TYPE_NONE);
+			break;
+		case expression::OPERATOR_TYPE_FLAG_ADD:
 			m_operator.reset(new OPERATOR_TYPE_ADD);
 			break;
-		case OPERATOR_TYPE_FLAG_SUB:
+		case expression::OPERATOR_TYPE_FLAG_SUB:
 			m_operator.reset(new OPERATOR_TYPE_SUB);
 			break;
-		case OPERATOR_TYPE_FLAG_MUL:
+		case expression::OPERATOR_TYPE_FLAG_MUL:
 			m_operator.reset(new OPERATOR_TYPE_MUL);
 			break;
-		case OPERATOR_TYPE_FLAG_DIV:
+		case expression::OPERATOR_TYPE_FLAG_DIV:
 			m_operator.reset(new OPERATOR_TYPE_DIV);
 			break;
 		default:

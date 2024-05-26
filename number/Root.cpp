@@ -63,7 +63,7 @@ namespace number {
 		const Fraction &denominator = GetFraction(m_base.Denominator(), radix, decimalLength);
 		const Fraction fraction(numerator, denominator);
 		std::string sign;
-		if (0 == m_base.Numerator().GetNatural() % Natural(2)) {
+		if (0 == m_base.Numerator().Value() % Natural(2)) {
 			sign = "(+/-)";
 		}
 		if (!IsImaginary()) {
@@ -92,13 +92,13 @@ namespace number {
 	}
 	void Root::Reduce() {
 		if (!EqualZero()) {
-			const Natural &powerNumerator = m_base.Numerator().GetNatural().Power(m_exponent.Denominator().GetNatural());
+			const Natural &powerNumerator = m_base.Numerator().Value().Power(m_exponent.Denominator().Value());
 			Natural rootNumeratorRemainder;
-			const Natural &rootNumerator = powerNumerator.Root(m_exponent.Numerator().GetNatural(), rootNumeratorRemainder);
+			const Natural &rootNumerator = powerNumerator.Root(m_exponent.Numerator().Value(), rootNumeratorRemainder);
 
-			const Natural &powerDenominator = m_base.Denominator().GetNatural().Power(m_exponent.Denominator().GetNatural());
+			const Natural &powerDenominator = m_base.Denominator().Value().Power(m_exponent.Denominator().Value());
 			Natural rootDenominatorRemainder;
-			const Natural &rootDenominator = powerDenominator.Root(m_exponent.Numerator().GetNatural(), rootDenominatorRemainder);
+			const Natural &rootDenominator = powerDenominator.Root(m_exponent.Numerator().Value(), rootDenominatorRemainder);
 
 			m_reduction_coefficient = Fraction(rootNumerator, rootDenominator);
 
@@ -122,7 +122,7 @@ namespace number {
 	}
 
 	Fraction Root::GetFraction(const Integer &base, uint8_t radix, size_t decimalLength)const {
-		std::string powerStr = base.GetNatural().Power(m_exponent.Denominator().GetNatural()).GetString(radix);
+		std::string powerStr = base.Value().Power(m_exponent.Denominator().Value()).GetString(radix);
 		for (Natural index(1, radix); index <= m_exponent.Numerator().m_value; ++index) {
 			powerStr.append(decimalLength + 1, '0');
 		}
@@ -175,11 +175,11 @@ namespace number {
 		}
 		const number::Fraction &coefficient = leftCoefficient + rightCoefficient;
 
-		const Natural &powerNumerator = coefficient.Numerator().GetNatural().Power(Exponent().Numerator().GetNatural());
-		const Natural &rootNumerator = powerNumerator.Root(Exponent().Denominator().GetNatural());
+		const Natural &powerNumerator = coefficient.Numerator().Value().Power(Exponent().Numerator().Value());
+		const Natural &rootNumerator = powerNumerator.Root(Exponent().Denominator().Value());
 
-		const Natural &powerDenominator = coefficient.Denominator().GetNatural().Power(Exponent().Numerator().GetNatural());
-		const Natural &rootDenominator = powerDenominator.Root(Exponent().Denominator().GetNatural());
+		const Natural &powerDenominator = coefficient.Denominator().Value().Power(Exponent().Numerator().Value());
+		const Natural &rootDenominator = powerDenominator.Root(Exponent().Denominator().Value());
 
 		return Root(ReductionBase()*(rootNumerator / rootDenominator), Exponent(), coefficient.IsPositive());
 	}
@@ -209,11 +209,11 @@ namespace number {
 			return Root(coefficient, 1);
 		}
 
-		const Natural &powerNumerator = coefficient.Numerator().GetNatural().Power(Exponent().Numerator().GetNatural());
-		const Natural &rootNumerator = powerNumerator.Root(Exponent().Denominator().GetNatural());
+		const Natural &powerNumerator = coefficient.Numerator().Value().Power(Exponent().Numerator().Value());
+		const Natural &rootNumerator = powerNumerator.Root(Exponent().Denominator().Value());
 
-		const Natural &powerDenominator = coefficient.Denominator().GetNatural().Power(Exponent().Numerator().GetNatural());
-		const Natural &rootDenominator = powerDenominator.Root(Exponent().Denominator().GetNatural());
+		const Natural &powerDenominator = coefficient.Denominator().Value().Power(Exponent().Numerator().Value());
+		const Natural &rootDenominator = powerDenominator.Root(Exponent().Denominator().Value());
 
 		return Root(ReductionBase()*(rootNumerator / rootDenominator), exponent.GetReciprocal(), coefficient.IsPositive());
 	}
