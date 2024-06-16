@@ -40,10 +40,16 @@ namespace number {
 		std::function<bool(char)> round) const {
 		return m_value.GetDecimal(radix, decimalLength, round) + "i";
 	}
+	const Fraction &Imaginary::Value() const {
+		return m_value;
+	}
 	Imaginary Imaginary::operator-() const {
 		Imaginary negative(*this);
 		negative.SetPositive(!negative.IsPositive());
 		return negative;
+	}
+	bool Imaginary::operator==(const Imaginary &other) const {
+		return Value() == other.Value();
 	}
 	Imaginary Imaginary::operator+(const Imaginary &addition) const {
 		return m_value + addition.m_value;

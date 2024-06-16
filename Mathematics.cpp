@@ -122,45 +122,45 @@ int main() {
 		std::cout << (Complex(Fraction(1, 2), Fraction(1, 3)) / Complex(Fraction(1, 2), Fraction(1, 3))).GetDecimalRadix(10, 2) << std::endl;
 	}
 	{
-		std::cout << Root(2, 2).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(20, 2).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(3, 3).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(30, 3).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(2, 2).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(20, 2).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(3, 3).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(30, 3).GetDecimal(10, 20) << std::endl;
 
-		std::cout << Root(2, 2, false).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(3, Integer(3, false), false).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(Integer(2, false), 2, false).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(Integer(2, false), Integer(2, false), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(2, 2, false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(3, Integer(3, false), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Integer(2, false), 2, false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Integer(2, false), Integer(2, false), false).GetDecimal(10, 20) << std::endl;
 	}
 	{
-		std::cout << Root(2, Fraction(2, 5)).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(20, Fraction(2, 5)).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(3, Fraction(3, 5)).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(30, Fraction(3, 5)).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(2, Fraction(2, 5)).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(20, Fraction(2, 5)).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(3, Fraction(3, 5)).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(30, Fraction(3, 5)).GetDecimal(10, 20) << std::endl;
 
-		std::cout << Root(2, Fraction(2, 5), false).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(3, Fraction(Integer(3, false), 5), false).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(Integer(2, false), Fraction(2, 5), false).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(Integer(2, false), Fraction(Integer(2, false), 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(2, Fraction(2, 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(3, Fraction(Integer(3, false), 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Integer(2, false), Fraction(2, 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Integer(2, false), Fraction(Integer(2, false), 5), false).GetDecimal(10, 20) << std::endl;
 
-		std::cout << Root(Integer(3, false), Fraction(Integer(3, false), 5), false).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(Integer(3, false), Fraction(Integer(2, false), 5), false).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(Integer(3, false), Fraction(Integer(3, false), 4), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Integer(3, false), Fraction(Integer(3, false), 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Integer(3, false), Fraction(Integer(2, false), 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Integer(3, false), Fraction(Integer(3, false), 4), false).GetDecimal(10, 20) << std::endl;
 	}
 	{
-		std::cout << Root(Fraction(1, 2), Fraction(2, 5)).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(Fraction(1, 20), Fraction(2, 5)).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(Fraction(1, 3), Fraction(3, 5)).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(Fraction(1, 30), Fraction(3, 5)).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Fraction(1, 2), Fraction(2, 5)).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Fraction(1, 20), Fraction(2, 5)).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Fraction(1, 3), Fraction(3, 5)).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Fraction(1, 30), Fraction(3, 5)).GetDecimal(10, 20) << std::endl;
 
-		std::cout << Root(Fraction(1, 2), Fraction(2, 5), false).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(Fraction(1, 3), Fraction(Integer(3, false), 5), false).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(Fraction(Integer(1, false), 2), Fraction(2, 5), false).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(Fraction(Integer(1, false), 2), Fraction(Integer(2, false), 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Fraction(1, 2), Fraction(2, 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Fraction(1, 3), Fraction(Integer(3, false), 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Fraction(Integer(1, false), 2), Fraction(2, 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Fraction(Integer(1, false), 2), Fraction(Integer(2, false), 5), false).GetDecimal(10, 20) << std::endl;
 
-		std::cout << Root(Fraction(Integer(1, false), 3), Fraction(Integer(3, false), 5), false).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(Fraction(Integer(1, false), 3), Fraction(Integer(2, false), 5), false).GetDecimal(10, 20) << std::endl;
-		std::cout << Root(Fraction(Integer(1, false), 3), Fraction(Integer(3, false), 4), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Fraction(Integer(1, false), 3), Fraction(Integer(3, false), 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Fraction(Integer(1, false), 3), Fraction(Integer(2, false), 5), false).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Root(Fraction(Integer(1, false), 3), Fraction(Integer(3, false), 4), false).GetDecimal(10, 20) << std::endl;
 	}
 	{
 		std::cout << Complex(Fraction(1, 2), Fraction(1, 2)).Power(2) << std::endl;
@@ -221,35 +221,56 @@ int main() {
 		e1.CollectForward(std::cout) << std::endl;
 	}
 	{
-		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2,2), OPERATOR_TYPE_ADD(), number::Root(2, 2));
+		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(2), OPERATOR_TYPE_ROOT(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_0> e(e0, OPERATOR_TYPE_ADD(), e0);
 		e.CollectForward(std::cout) << std::endl;
 	}
 	{
-		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2, 2), OPERATOR_TYPE_SUB(), number::Root(2, 2));
+		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(2), OPERATOR_TYPE_ROOT(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_0> e(e0, OPERATOR_TYPE_SUB(), e0);
 		e.CollectForward(std::cout) << std::endl;
 	}
 	{
-		expression::Expression<OPERATOR_TYPE_1> e(number::Root(2, 2), OPERATOR_TYPE_MUL(), number::Root(2, 2));
+		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(2), OPERATOR_TYPE_ROOT(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_1> e(e0, OPERATOR_TYPE_MUL(), e0);
 		e.CollectForward(std::cout) << std::endl;
 	}
 	{
-		expression::Expression<OPERATOR_TYPE_1> e(number::Root(2, 2), OPERATOR_TYPE_DIV(), number::Root(2, 2));
+		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(2), OPERATOR_TYPE_ROOT(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_1> e(e0, OPERATOR_TYPE_DIV(), e0);
 		e.CollectForward(std::cout) << std::endl;
 	}
 	{
-		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2, 2), OPERATOR_TYPE_ADD(), number::Root(2, 2), OPERATOR_TYPE_ADD(), number::Integer(123));
+		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(2), OPERATOR_TYPE_ROOT(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_1> e1(e0, OPERATOR_TYPE_MUL(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_0> e(e0, OPERATOR_TYPE_ADD(), e1);
 		e.CollectForward(std::cout) << std::endl;
 	}
 	{
-		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2, 2), OPERATOR_TYPE_SUB(), number::Integer(123), OPERATOR_TYPE_SUB(), number::Root(2, 2));
+		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(2), OPERATOR_TYPE_ROOT(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_0> e(e0, number::Integer(2), OPERATOR_TYPE_ADD(), e0, OPERATOR_TYPE_ADD(), number::Integer(123));
 		e.CollectForward(std::cout) << std::endl;
 	}
 	{
-		expression::Expression<OPERATOR_TYPE_0> e(number::Root(4, 2), OPERATOR_TYPE_ADD(), number::Root(9, 2));
+		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(2), OPERATOR_TYPE_ROOT(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_0> e(e0, OPERATOR_TYPE_SUB(), number::Integer(123), OPERATOR_TYPE_SUB(), e0);
 		e.CollectForward(std::cout) << std::endl;
 	}
 	{
-		expression::Expression<OPERATOR_TYPE_0> e(number::Root(2, 2), OPERATOR_TYPE_ADD(), number::Root(8, 2), OPERATOR_TYPE_ADD(), number::Root(18, 2), OPERATOR_TYPE_ADD(), number::Integer(123));
+		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(4), OPERATOR_TYPE_ROOT(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_2> e1(number::Integer(9), OPERATOR_TYPE_ROOT(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_0> e(e0, OPERATOR_TYPE_ADD(), e1);
+		e.CollectForward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(2), OPERATOR_TYPE_ROOT(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_2> e1(number::Integer(8), OPERATOR_TYPE_ROOT(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_2> e2(number::Integer(8), OPERATOR_TYPE_ROOT(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_0> e(e0, OPERATOR_TYPE_ADD(), e1, OPERATOR_TYPE_ADD(), e2, OPERATOR_TYPE_ADD(), number::Integer(123));
+		e.CollectForward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_2> e(number::Integer(2), OPERATOR_TYPE_ROOT(), number::Integer(2), OPERATOR_TYPE_POWER(), expression::ClosureNumber(2));
 		e.CollectForward(std::cout) << std::endl;
 	}
 #endif

@@ -26,6 +26,7 @@ namespace number {
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
 
 		Root operator-() const;
+		bool operator==(const Root &other) const;
 
 		const Fraction &Base()const;
 		const Fraction &Exponent()const;

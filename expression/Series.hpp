@@ -46,6 +46,7 @@ namespace expression {
 		const std::string OutPutString(size_t pos = 0) const override {
 			return GetMonomial().OutPutString(pos);
 		}
+
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const {
 			return GetMonomial().GetDecimal(radix, decimalLength, round);

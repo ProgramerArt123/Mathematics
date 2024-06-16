@@ -53,8 +53,8 @@ namespace number {
 	}
 	bool Root::IsPositive() const {
 		return m_positive == !(!m_base.IsPositive() &&
-			1 == m_exponent.Denominator().m_value % Natural(2, m_exponent.Denominator().GetRadix()) &&
-			1 == m_exponent.Numerator().m_value % Natural(2, m_exponent.Denominator().GetRadix()));
+			1 == m_exponent.Denominator().Value() % Natural(2, m_exponent.Denominator().GetRadix()) &&
+			1 == m_exponent.Numerator().Value() % Natural(2, m_exponent.Denominator().GetRadix()));
 	}
 
 	const std::string Root::GetDecimal(uint8_t radix, size_t decimalLength,
@@ -77,6 +77,12 @@ namespace number {
 		Root opposite(*this);
 		opposite.m_positive = !opposite.m_positive;
 		return opposite;
+	}
+	bool Root::operator==(const Root &other) const {
+		return m_positive == other.m_positive &&
+			m_reduction_base == other.m_reduction_base &&
+			m_reduction_coefficient == other.m_reduction_coefficient &&
+			m_exponent == other.m_exponent;
 	}
 	const Fraction &Root::Base()const {
 		return m_base;
@@ -117,16 +123,16 @@ namespace number {
 
 	bool Root::IsImaginary() const {
 		return !m_base.IsPositive() &&
-			1 == m_exponent.Denominator().m_value % Natural(2, m_exponent.Denominator().GetRadix()) &&
-			0 == m_exponent.Numerator().m_value % Natural(2, m_exponent.Denominator().GetRadix());
+			1 == m_exponent.Denominator().Value() % Natural(2, m_exponent.Denominator().GetRadix()) &&
+			0 == m_exponent.Numerator().Value() % Natural(2, m_exponent.Denominator().GetRadix());
 	}
 
 	Fraction Root::GetFraction(const Integer &base, uint8_t radix, size_t decimalLength)const {
 		std::string powerStr = base.Value().Power(m_exponent.Denominator().Value()).GetString(radix);
-		for (Natural index(1, radix); index <= m_exponent.Numerator().m_value; ++index) {
+		for (Natural index(1, radix); index <= m_exponent.Numerator().Value(); ++index) {
 			powerStr.append(decimalLength + 1, '0');
 		}
-		const Natural &root = Natural(powerStr, radix).Root(m_exponent.Numerator().m_value);
+		const Natural &root = Natural(powerStr, radix).Root(m_exponent.Numerator().Value());
 		if (m_exponent.IsPositive()) {
 			std::string rootStr = root.GetString(radix);
 			if (rootStr.length() < decimalLength + 2) {

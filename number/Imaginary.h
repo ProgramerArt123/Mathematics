@@ -20,7 +20,11 @@ namespace number {
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
 
+		const Fraction &Value() const;
+
 		Imaginary operator-() const;
+
+		bool operator==(const Imaginary &other) const;
 
 		Imaginary operator+(const Imaginary &addition) const;
 		Imaginary operator-(const Imaginary &subtrahend) const;
@@ -40,6 +44,7 @@ namespace number {
 		friend Imaginary operator*(const Imaginary &number, const Fraction &multiplier);
 		friend Imaginary operator/(const Imaginary &number, const Fraction &divisor);
 
+	private:
 		Fraction m_value;
 	};
 }

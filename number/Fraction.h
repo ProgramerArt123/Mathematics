@@ -22,13 +22,16 @@ namespace number {
 		bool EqualZero() const override;
 		void SetPositive(bool isPositive) override;
 		bool IsPositive() const override;
-		const Integer &Numerator() const;
-		const Integer &Denominator() const;
-		Fraction GetAbs() const;
-		Fraction GetReciprocal() const;
-
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
+
+		const Integer &Numerator() const;
+		const Integer &Denominator() const;
+		const Integer &Interger() const;
+
+		Fraction GetAbs() const;
+		Fraction GetReciprocal() const;
+		bool IsInteger() const;
 
 		Fraction operator-() const;
 		bool operator<(const Fraction &other) const;

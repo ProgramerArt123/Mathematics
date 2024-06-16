@@ -1,4 +1,7 @@
 #include <sstream>
+
+#include <iostream>
+
 #include "number/Number.h"
 #include "Series.hpp"
 #include "ClosureNumber.hpp"
@@ -20,10 +23,29 @@ namespace expression {
 	const std::string ClosureNumber::GetString(size_t pos, uint8_t radix) const {
 		return m_value.OutPutString(pos);
 	}
+	bool ClosureNumber::IsEqual(const Node &other) const {
+		if (!Node::IsEqual(other)) {
+			return false;
+		}
+		const ClosureNumber &otherClosure = dynamic_cast<const ClosureNumber&>(other);
+		return *this == otherClosure;
+	}
+	bool ClosureNumber::EqualZero() const {
+		return Value().EqualZero();
+	}
+	bool ClosureNumber::EqualOne() const {
+		return Value() == number::Complex(1, 0);
+	}
+	const number::Complex &ClosureNumber::Value() const {
+		return m_value;
+	}
 	const ClosureNumber &ClosureNumber::operator=(const ClosureNumber &right) {
 		Number::operator=(right);
 		m_value = right.m_value;
 		return *this;
+	}
+	bool ClosureNumber::operator==(const ClosureNumber &other) const {
+		return Node::operator==(other) && Value() == other.Value();
 	}
 	ClosureNumber ClosureNumber::operator+(const ClosureNumber &addition) const {
 		return m_value + addition.m_value;

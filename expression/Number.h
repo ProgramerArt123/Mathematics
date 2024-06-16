@@ -6,7 +6,7 @@
 namespace expression {
 	class Number : public Node {
 	public:
-		Number(OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_NONE);
+		Number(OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD);
 		Number(const Number &prototype);
 
 		const std::string OutPutString(size_t pos = 0) const override;

@@ -36,6 +36,12 @@ namespace number {
 		m_real(real), m_image(image) {
 
 	}
+	const Fraction &Complex::Real() const {
+		return m_real;
+	}
+	const Imaginary &Complex::Image() const {
+		return m_image;
+	}
 	Complex::Complex(const Complex &real, const Complex &image) :
 		m_real(0), m_image(0) {
 		*this = real + image * Imaginary(1);
@@ -95,10 +101,23 @@ namespace number {
 				m_image.GetDecimal(radix, decimalLength, round);
 		}
 	}
+	bool Complex::IsElement() const {
+		return Real().EqualZero() ||
+			Image().EqualZero();
+	}
+	bool Complex::IsReal() const {
+		return Image().EqualZero();
+	}
+	bool Complex::IsRealInteger() const {
+		return IsReal() && Real().IsInteger();
+	}
 	Complex Complex::operator-() const {
 		Complex negative(*this);
 		negative.SetPositive(!negative.IsPositive());
 		return negative;
+	}
+	bool Complex::operator==(const Complex &other) const {
+		return Real() == other.Real() && Image() == other.Image();
 	}
 	Complex Complex::operator+(const Complex &addition) const {
 		const Fraction &real = m_real + addition.m_real;
@@ -110,20 +129,20 @@ namespace number {
 	}
 	Complex Complex::operator*(const Complex &multiplier) const {
 		const Fraction &real = (m_real * multiplier.m_real) -
-			(m_image.m_value * multiplier.m_image.m_value);
-		const Fraction &image = (m_real * multiplier.m_image.m_value) +
-			(m_image.m_value * multiplier.m_real);
+			(m_image.Value() * multiplier.m_image.Value());
+		const Fraction &image = (m_real * multiplier.m_image.Value()) +
+			(m_image.Value() * multiplier.m_real);
 		return Complex(real, image);
 	}
 	Complex Complex::operator/(const Complex &divisor) const {
 		const Fraction real((m_real * divisor.m_real) +
-			(m_image.m_value * divisor.m_image.m_value),
+			(m_image.Value() * divisor.m_image.Value()),
 			(divisor.m_real * divisor.m_real) +
-			(divisor.m_image.m_value * divisor.m_image.m_value));
-		const Fraction image((m_image.m_value * divisor.m_real) -
-			(m_real * divisor.m_image.m_value),
+			(divisor.m_image.Value() * divisor.m_image.Value()));
+		const Fraction image((m_image.Value() * divisor.m_real) -
+			(m_real * divisor.m_image.Value()),
 			(divisor.m_real * divisor.m_real) +
-			(divisor.m_image.m_value * divisor.m_image.m_value));
+			(divisor.m_image.Value() * divisor.m_image.Value()));
 		return Complex(real, image);
 	}
 	Complex &Complex::operator+=(const Complex &addition) {
@@ -217,14 +236,14 @@ namespace number {
 	Complex Complex::Power(const Integer &exponent) {
 		Complex power(0, 0);
 		for (Natural index(0); index <= exponent.Value(); ++index) {
-			power += Integer(exponent.m_value.Composition(index)) *
+			power += Integer(exponent.Value().Composition(index)) *
 				m_real.Power(exponent - index) * Complex::Power(m_image, index);
 		}
 		return power;
 	}
 
 	Complex Complex::Power(const Imaginary &number, const Integer &exponent) {
-		const Fraction &fraction = number.m_value.Power(exponent);
+		const Fraction &fraction = number.Value().Power(exponent);
 		const Natural &mod = exponent.Value() % Natural(4);
 		if (Natural(0) == mod) {
 			return Complex(fraction, 0);

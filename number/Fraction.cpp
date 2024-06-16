@@ -6,10 +6,11 @@
 namespace number {
 	Fraction::Fraction() :
 		m_numerator(0), m_denominator(UINT64_MAX) {
-
+		Reduce();
 	}
 	Fraction::Fraction(const Integer &significant) :
 		m_numerator(significant), m_denominator(1) {
+		Reduce();
 	}
 	Fraction::Fraction(const Integer &numerator, const Integer &denominator) :
 		m_numerator(numerator), m_denominator(denominator) {
@@ -83,7 +84,9 @@ namespace number {
 	const Integer &Fraction::Denominator() const {
 		return m_denominator;
 	}
-
+	const Integer &Fraction::Interger() const {
+		return m_reduction_interger;
+	}
 	Fraction Fraction::GetAbs() const {
 		if (IsPositive()) {
 			return *this;
@@ -97,10 +100,14 @@ namespace number {
 		return Fraction(m_denominator, m_numerator);
 	}
 
+	bool Fraction::IsInteger() const {
+		return Denominator().GetAbs() == Integer(1);
+	}
+
 	const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
 		Natural quotient(0, m_denominator.GetRadix()), remainder(0, m_denominator.GetRadix());
-		std::string numeratorStr = m_numerator.m_value.GetString(radix);
+		std::string numeratorStr = m_numerator.Value().GetString(radix);
 		numeratorStr.append(decimalLength + 1, '0');
 		Natural(numeratorStr, radix).Div(m_denominator.Value(), quotient.SetCheckLoop(), remainder);
 		const std::string &loop = quotient.GetLoop();
@@ -143,7 +150,7 @@ namespace number {
 	}
 
 	void Fraction::Reduce() {
-		const Integer &common = m_denominator.m_value.GreatestCommonDivisor(m_numerator.m_value);
+		const Integer &common = m_denominator.Value().GreatestCommonDivisor(m_numerator.Value());
 		m_numerator /= common;
 		m_denominator /= common;
 		m_reduction_interger = m_numerator / m_denominator;
@@ -229,8 +236,8 @@ namespace number {
 		return Fraction(number) / divisor;
 	}
 	Fraction Fraction::Power(const Integer &number, const Integer &exponent) {
-		Integer product = number.m_value.Power(exponent.m_value);
-		product.SetPositive(product.IsPositive() || 0 == exponent.m_value % Natural(2));
+		Integer product = number.Value().Power(exponent.Value());
+		product.SetPositive(product.IsPositive() || 0 == exponent.Value() % Natural(2));
 		if (exponent.IsPositive()) {
 			return Fraction(product, 1);
 		}

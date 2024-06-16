@@ -22,6 +22,9 @@ namespace number {
 		Complex(const Integer &real, const Imaginary &image);
 		Complex(const Fraction &real, const Imaginary &image);
 
+		const Fraction &Real() const;
+		const Imaginary &Image() const;
+
 		const std::string GetString(uint8_t radix = 10) const override;
 		void SetRadix(uint8_t radix = 10) override;
 		uint8_t GetRadix() const override;
@@ -31,7 +34,13 @@ namespace number {
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
 
+		bool IsElement() const;
+		bool IsReal() const;
+		bool IsRealInteger() const;
+
 		Complex operator-() const;
+
+		bool operator==(const Complex &other) const;
 
 		Complex operator+(const Complex &addition) const;
 		Complex operator-(const Complex &subtrahend) const;
@@ -89,6 +98,7 @@ namespace number {
 		friend Complex operator+(const Imaginary &number, const Fraction &addition);
 		friend Complex operator-(const Imaginary &number, const Fraction &subtrahend);
 
+	private:
 		Fraction m_real;
 		Imaginary m_image;
 	};

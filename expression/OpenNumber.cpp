@@ -15,18 +15,24 @@ namespace expression {
 	const std::string OpenNumber::GetString(size_t pos, uint8_t radix) const {
 		return m_value.OutPutString(pos);
 	}
+	bool OpenNumber::EqualZero() const {
+		return Value().EqualZero();
+	}
+	bool OpenNumber::EqualOne() const {
+		return Value() == number::Root(1,0);
+	}
 	const OpenNumber &OpenNumber::operator=(const OpenNumber &right) {
 		Number::operator=(right);
 		m_value = right.m_value;
 		return *this;
 	}
-	std::optional<expression::OpenNumber> OpenNumber::Collect(const expression::OpenNumber &right, uint8_t level) const {
-		switch (level)
+	std::optional<expression::OpenNumber> OpenNumber::Collect(const expression::OpenNumber &right) const {
+		switch (right.Level())
 		{
-		case 0:
+		case OPERATOR_TYPE_LEVEL_0:
 			return Collect0(right);
 			break;
-		case 1:
+		case OPERATOR_TYPE_LEVEL_1:
 			return Collect1(right);
 			break;
 		default:

@@ -37,14 +37,16 @@ namespace number {
 	bool Integer::IsPositive() const {
 		return m_positive;
 	}
-	Natural Integer::Value() const {
-		return m_value;
-	}
 	const std::string Integer::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
 		return GetString(radix);
 	}
-
+	Natural Integer::Value() const {
+		return m_value;
+	}
+	Integer Integer::GetAbs() const {
+		return IsPositive() ? *this : -*this;
+	}
 	Integer::operator bool() const {
 		return m_value;
 	}

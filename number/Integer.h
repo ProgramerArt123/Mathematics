@@ -17,9 +17,11 @@ namespace number {
 		bool EqualZero() const override;
 		void SetPositive(bool isPositive)override;
 		bool IsPositive() const override;
-		Natural Value() const;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
+
+		Natural Value() const;
+		Integer GetAbs() const;
 
 		operator bool() const;
 		Integer operator-() const;
@@ -34,12 +36,13 @@ namespace number {
 		Integer &operator/=(const Integer &divisor);
 		bool operator==(const Integer &other)const;
 
-		Natural m_value;
 	private:
 		Integer PositiveAdd(const Integer &addition) const;
 		Integer PositiveSub(const Integer &subtrahend) const;
 
 		bool m_positive = true;
+
+		Natural m_value;
 	};
 }
 #endif
