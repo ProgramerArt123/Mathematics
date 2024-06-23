@@ -1,12 +1,14 @@
 #include "Node.hpp"
 namespace expression {
-	Node::Node(OPERATOR_TYPE_FLAG flag){
+	Node::Node(bool isPositive, OPERATOR_TYPE_FLAG flag):
+		m_positive(isPositive){
 		SetOperator(flag);
 	}
 	Node::Node(const Node &prototype){
 		*this = prototype;
 	}
 	const Node &Node::operator=(const Node &right) {
+		m_positive = right.m_positive;
 		if (right.m_operator){
 			SetOperator(right.m_operator->GetFlag());
 		}
@@ -16,7 +18,8 @@ namespace expression {
 		return *this;
 	}
 	bool Node::operator==(const Node &other) const {
-		return m_operator->GetFlag() == other.m_operator->GetFlag();
+		return m_positive == other.m_positive &&
+			m_operator->GetFlag() == other.m_operator->GetFlag();
 	}
 	const OPERATOR_TYPE &Node::Operator() const {
 		return *m_operator;
@@ -32,6 +35,9 @@ namespace expression {
 			return false;
 		}
 		return *this == other;
+	}
+	void Node::Opposite() {
+		m_positive = !m_positive;
 	}
 
 	void Node::SuperpositionFlag(const OPERATOR_TYPE &other) {

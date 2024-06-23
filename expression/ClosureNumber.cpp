@@ -14,11 +14,8 @@ namespace expression {
 		*this = prototype;
 		SetOperator(flag);
 	}
-	ClosureNumber::ClosureNumber(const number::Integer &value, OPERATOR_TYPE_FLAG flag) :m_value(value, 0), Number(OPERATOR_TYPE_FLAG_ADD) {
-	}
-	ClosureNumber::ClosureNumber(const number::Fraction &value, OPERATOR_TYPE_FLAG flag) :m_value(value, 0), Number(OPERATOR_TYPE_FLAG_ADD) {
-	}
-	ClosureNumber::ClosureNumber(const number::Complex &value, OPERATOR_TYPE_FLAG flag):m_value(value), Number(OPERATOR_TYPE_FLAG_ADD) {
+	ClosureNumber::ClosureNumber(const number::Integer &value, OPERATOR_TYPE_FLAG flag) :
+		Number(OPERATOR_TYPE_FLAG_ADD), m_value(value) {
 	}
 	const std::string ClosureNumber::GetString(size_t pos, uint8_t radix) const {
 		return m_value.OutPutString(pos);
@@ -34,9 +31,9 @@ namespace expression {
 		return Value().EqualZero();
 	}
 	bool ClosureNumber::EqualOne() const {
-		return Value() == number::Complex(1, 0);
+		return Value() == number::Integer(1);
 	}
-	const number::Complex &ClosureNumber::Value() const {
+	const number::Integer &ClosureNumber::Value() const {
 		return m_value;
 	}
 	const ClosureNumber &ClosureNumber::operator=(const ClosureNumber &right) {

@@ -8,7 +8,7 @@ namespace expression {
 	public:
 		Symbol(const expression::Symbol &prototype);
 		Symbol(const expression::Symbol &prototype, OPERATOR_TYPE_FLAG flag);
-		Symbol(const std::string &name, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD);
+		Symbol(const std::string &name, bool isPositive = true, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD);
 
 		const std::string &Name() const;
 

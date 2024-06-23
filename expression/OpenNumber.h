@@ -18,6 +18,8 @@ namespace expression {
 		const OpenNumber &operator=(const OpenNumber &right);
 		std::optional<expression::OpenNumber> Collect(const expression::OpenNumber &right) const;
 		const number::Root &Value()const;
+
+		virtual void Opposite() {};
 	private:
 
 		std::optional<expression::OpenNumber> Collect0(const expression::OpenNumber &right) const;

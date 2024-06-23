@@ -37,7 +37,8 @@ namespace expression {
 		const ExpressionDeformationer<OperatorType> &Deformation(const Expression<OperatorType> &child) {
 			if (1 < child.m_nodes.size())
 			{
-				std::list < std::pair< ExpressionNodes::const_iterator, ExpressionNodes::const_iterator > > combines;
+				std::list < std::pair< Expression<OperatorType>::ExpressionNodes::const_iterator,
+					Expression<OperatorType>::ExpressionNodes::const_iterator > > combines;
 
 				for (auto itorI = child.m_nodes.cbegin(); itorI != child.m_nodes.cend(); itorI++) {
 					for (auto itorJ = itorI; itorJ != child.m_nodes.cend(); itorJ++) {
