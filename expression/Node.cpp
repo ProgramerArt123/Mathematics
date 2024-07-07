@@ -41,7 +41,7 @@ namespace expression {
 	}
 
 	void Node::SuperpositionFlag(const OPERATOR_TYPE &other) {
-		m_operator =  std::move(other.Superposition(*m_operator));
+		m_operator = std::move(other.Superposition(*m_operator));
 	}
 
 	void Node::SetOperator(OPERATOR_TYPE_FLAG flag) {

@@ -26,8 +26,9 @@ namespace number {
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
 
 		const Integer &Numerator() const;
+		const Integer &ReductionNumerator() const;
 		const Integer &Denominator() const;
-		const Integer &Interger() const;
+		const Integer &Integer() const;
 
 		Fraction GetAbs() const;
 		Fraction GetReciprocal() const;
@@ -42,34 +43,34 @@ namespace number {
 		Fraction operator*(const Fraction &multiplier) const;
 		Fraction operator/(const Fraction &divisor) const;
 
-		Fraction Power(const Integer &exponent) const;
+		Fraction Power(const number::Integer &exponent) const;
 
 		Fraction &operator+=(const Fraction &addition);
 		Fraction &operator-=(const Fraction &subtrahend);
 		Fraction &operator*=(const Fraction &multiplier);
 		Fraction &operator/=(const Fraction &divisor);
 
-		friend bool operator==(const Integer &number, const Fraction &rational);
+		friend bool operator==(const number::Integer &number, const Fraction &rational);
 
-		friend Fraction operator+(const Fraction &number, const Integer &addition);
-		friend Fraction operator-(const Fraction &number, const Integer &subtrahend);
-		friend Fraction operator*(const Fraction &number, const Integer &multiplier);
-		friend Fraction operator/(const Fraction &number, const Integer &divisor);
+		friend Fraction operator+(const Fraction &number, const number::Integer &addition);
+		friend Fraction operator-(const Fraction &number, const number::Integer &subtrahend);
+		friend Fraction operator*(const Fraction &number, const number::Integer &multiplier);
+		friend Fraction operator/(const Fraction &number, const number::Integer &divisor);
 
-		friend Fraction operator+(const Integer &number, const Fraction &addition);
-		friend Fraction operator-(const Integer &number, const Fraction &subtrahend);
-		friend Fraction operator*(const Integer &number, const Fraction &multiplier);
-		friend Fraction operator/(const Integer &number, const Fraction &divisor);
+		friend Fraction operator+(const number::Integer &number, const Fraction &addition);
+		friend Fraction operator-(const number::Integer &number, const Fraction &subtrahend);
+		friend Fraction operator*(const number::Integer &number, const Fraction &multiplier);
+		friend Fraction operator/(const number::Integer &number, const Fraction &divisor);
 
-		static Fraction Power(const Integer &number, const Integer &exponent);
+		static Fraction Power(const number::Integer &number, const number::Integer &exponent);
 
 	private:
 
-		Integer m_numerator;
-		Integer m_denominator;
+		number::Integer m_numerator;
+		number::Integer m_denominator;
 
-		Integer m_reduction_interger;
-		Integer m_reduction_numerator;
+		number::Integer m_reduction_integer;
+		number::Integer m_reduction_numerator;
 
 		void Reduce();
 
