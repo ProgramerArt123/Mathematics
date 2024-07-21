@@ -5,9 +5,10 @@
 #include <list>
 #include <ostream>
 
-#include "Number.h"
+#include "Real.h"
+
 namespace number {
-	class Natural : public Number {
+	class Natural : public Real {
 	public:
 		Natural(uint64_t value = 0, uint8_t radix = 10);
 		Natural(const std::string &value, uint8_t radix = 10);

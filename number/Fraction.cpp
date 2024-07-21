@@ -107,6 +107,12 @@ namespace number {
 		return Denominator().GetAbs() == number::Integer(1);
 	}
 
+	void Fraction::Opposite() {
+		m_numerator.Opposite();
+		m_reduction_integer.Opposite();
+		m_reduction_numerator.Opposite();
+	}
+
 	const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
 		Natural quotient(0, m_denominator.GetRadix()), remainder(0, m_denominator.GetRadix());

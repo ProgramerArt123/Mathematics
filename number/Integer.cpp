@@ -47,6 +47,11 @@ namespace number {
 	Integer Integer::GetAbs() const {
 		return IsPositive() ? *this : -*this;
 	}
+	void Integer::Opposite() {
+		if (!EqualZero()) {
+			m_positive = !m_positive;
+		}
+	}
 	Integer::operator bool() const {
 		return m_value;
 	}

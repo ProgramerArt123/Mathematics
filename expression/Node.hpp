@@ -8,7 +8,7 @@
 namespace expression {
 	class Node : public Output {
 	public:
-		Node(bool isPositive = true, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD);
+		Node(OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD);
 		Node(const Node &prototype);
 
 		const Node &operator=(const Node &right);
@@ -21,15 +21,19 @@ namespace expression {
 		virtual bool EqualZero() const = 0;
 		virtual bool EqualOne() const = 0;
 
-		void Opposite();
+		virtual void Opposite() = 0;
 
 		void SuperpositionFlag(const OPERATOR_TYPE &other);
-	protected:
+
+		bool IsBase() const;
+		void SetBase();
+
 		void SetOperator(OPERATOR_TYPE_FLAG flag);
+	protected:
 
 		std::unique_ptr<OPERATOR_TYPE> m_operator;
 
-		bool m_positive = true;
+		bool m_is_base = false;
 	};
 }
 

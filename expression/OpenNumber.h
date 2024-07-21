@@ -19,7 +19,7 @@ namespace expression {
 		std::optional<expression::OpenNumber> Collect(const expression::OpenNumber &right) const;
 		const number::Root &Value()const;
 
-		virtual void Opposite() {};
+		void Opposite() override;
 	private:
 
 		std::optional<expression::OpenNumber> Collect0(const expression::OpenNumber &right) const;

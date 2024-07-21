@@ -283,6 +283,11 @@ int main() {
 		expression::Expression<OPERATOR_TYPE_2> e(number::Integer(2), OPERATOR_TYPE_ROOT(), number::Integer(2), OPERATOR_TYPE_POWER(), expression::ClosureNumber(0));
 		e.CollectForward(std::cout) << std::endl;
 	}
+	{
+		expression::Expression<OPERATOR_TYPE_1> e0(number::Integer(5), OPERATOR_TYPE_DIV(), number::Integer(6));
+		expression::Expression<OPERATOR_TYPE_2> e(number::Integer(2), OPERATOR_TYPE_ROOT(), e0);
+		e.CollectForward(std::cout) << std::endl;
+	}
 #endif
 	getchar();
 	return 0;

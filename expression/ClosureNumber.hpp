@@ -19,8 +19,10 @@ namespace expression {
 		bool EqualZero() const override;
 		bool EqualOne() const override;
 
-		const number::Integer &Value() const;
+		void Opposite() override;
 
+		const number::Integer &Value() const;
+		
 		const ClosureNumber &operator=(const ClosureNumber &right);
 		bool operator==(const ClosureNumber &other) const;
 		ClosureNumber operator+(const ClosureNumber &addition) const;
@@ -35,6 +37,7 @@ namespace expression {
 						
 	private:
 		number::Integer m_value;
+
 	};
 }
 

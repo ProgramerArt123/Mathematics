@@ -33,6 +33,7 @@ namespace number {
 		Fraction GetAbs() const;
 		Fraction GetReciprocal() const;
 		bool IsInteger() const;
+		void Opposite();
 
 		Fraction operator-() const;
 		bool operator<(const Fraction &other) const;

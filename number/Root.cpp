@@ -223,7 +223,11 @@ namespace number {
 
 		return Root(ReductionBase()*(rootNumerator / rootDenominator), exponent.GetReciprocal(), coefficient.IsPositive());
 	}
-
+	void Root::Opposite() {
+		if (!EqualZero()) {
+			m_positive = !m_positive;
+		}
+	}
 	Root Power(const Fraction &base, const Fraction &exponent) {
 		return Root(base, exponent.GetReciprocal());
 	}

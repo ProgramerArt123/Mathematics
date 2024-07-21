@@ -22,6 +22,7 @@ namespace number {
 
 		Natural Value() const;
 		Integer GetAbs() const;
+		void Opposite();
 
 		operator bool() const;
 		Integer operator-() const;

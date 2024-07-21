@@ -19,8 +19,13 @@ namespace expression {
 		const std::string OutPutString(size_t pos = 0) const override;
 		bool EqualZero() const override;
 		bool EqualOne() const override;
+
+		void Opposite() override;
 	private:
 		std::string m_name;
+
+		bool m_positive = true;
+
 	};
 }
 

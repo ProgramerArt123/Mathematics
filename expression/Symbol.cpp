@@ -8,7 +8,7 @@ namespace expression {
 		SetOperator(flag);
 	}
 	Symbol::Symbol(const std::string &name, bool isPositive, OPERATOR_TYPE_FLAG flag):
-		Node(isPositive, flag), m_name(name){
+		Node(flag), m_name(name), m_positive(isPositive){
 
 	}
 	const std::string &Symbol::Name() const {
@@ -33,5 +33,8 @@ namespace expression {
 	}
 	bool Symbol::EqualOne() const {
 		return false;
+	}
+	void Symbol::Opposite() {
+		m_positive = !m_positive;
 	}
 }

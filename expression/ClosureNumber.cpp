@@ -10,7 +10,7 @@ namespace expression {
 	ClosureNumber::ClosureNumber(const expression::ClosureNumber &prototype) {
 		*this = prototype;
 	}
-	ClosureNumber::ClosureNumber(const expression::ClosureNumber &prototype, OPERATOR_TYPE_FLAG flag){
+	ClosureNumber::ClosureNumber(const expression::ClosureNumber &prototype, OPERATOR_TYPE_FLAG flag) {
 		*this = prototype;
 		SetOperator(flag);
 	}
@@ -32,6 +32,9 @@ namespace expression {
 	}
 	bool ClosureNumber::EqualOne() const {
 		return Value() == number::Integer(1);
+	}
+	void ClosureNumber::Opposite() {
+
 	}
 	const number::Integer &ClosureNumber::Value() const {
 		return m_value;

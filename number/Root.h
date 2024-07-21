@@ -42,6 +42,8 @@ namespace number {
 		Root AddEqual(const number::Root &right) const;
 		Root MulEqual(const number::Root &right, bool isLeftMul, bool isRightMul) const;
 
+		void Opposite();
+
 		friend Root Power(const Fraction &base, const Fraction &exponent);
 
 	private:

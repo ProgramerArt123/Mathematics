@@ -80,4 +80,7 @@ namespace expression {
 	const number::Root &OpenNumber::Value()const {
 		return m_value;
 	}
+	void OpenNumber::Opposite() {
+		m_value.Opposite();
+	}
 }
