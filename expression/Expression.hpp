@@ -360,6 +360,10 @@ namespace expression {
 			m_nodes.erase(node);
 		}
 
+		ExpressionNode &FirstChild() {
+			return m_nodes.front();
+		}
+
 		std::optional<ClosureNumber> GetIntegerBase() {
 			if (ClosureNumber *base = std::get_if<ClosureNumber>(&m_nodes.front())) {
 				return *base;

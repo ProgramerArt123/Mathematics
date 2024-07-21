@@ -483,11 +483,9 @@ namespace expression {
 				closure.SetBase();
 				m_exp.RemoveNode(multiplier);
 
-				for (auto &node : m_exp.m_nodes) {
-					if (OPERATOR_TYPE_FLAG_DIV == Visit(node)->Flag()){
-						Visit(node)->SetOperator(OPERATOR_TYPE_FLAG_MUL);
-						m_exp.SetOperator(OPERATOR_TYPE_FLAG_ROOT);
-					}
+				if (OPERATOR_TYPE_FLAG_DIV == Visit(m_exp.FirstChild())->Flag()){
+					Visit(m_exp.FirstChild())->SetOperator(OPERATOR_TYPE_FLAG_MUL);
+					m_exp.SetOperator(OPERATOR_TYPE_FLAG_ROOT);
 				}
 
 				return true;
@@ -506,11 +504,9 @@ namespace expression {
 				closure.SetBase();
 				m_exp.RemoveNode(divisor);
 
-				for (auto &node : m_exp.m_nodes) {
-					if (OPERATOR_TYPE_FLAG_DIV == Visit(node)->Flag()) {
-						Visit(node)->SetOperator(OPERATOR_TYPE_FLAG_MUL);
-						m_exp.SetOperator(OPERATOR_TYPE_FLAG_POWER);
-					}
+				if (OPERATOR_TYPE_FLAG_DIV == Visit(m_exp.FirstChild())->Flag()) {
+					Visit(m_exp.FirstChild())->SetOperator(OPERATOR_TYPE_FLAG_MUL);
+					m_exp.SetOperator(OPERATOR_TYPE_FLAG_POWER);
 				}
 
 				return true;

@@ -1,14 +1,16 @@
 #ifndef __EXPRESSION_SYMBOL_H__
 #define __EXPRESSION_SYMBOL_H__
 
-#include "Node.hpp"
+#include "Atom.h"
 
 namespace expression {
-	class Symbol : public Node {
+	class Symbol : public Atom {
 	public:
 		Symbol(const expression::Symbol &prototype);
 		Symbol(const expression::Symbol &prototype, OPERATOR_TYPE_FLAG flag);
 		Symbol(const std::string &name, bool isPositive = true, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD);
+
+		virtual const std::string GetString(size_t pos = 0, uint8_t radix = 10) const override;
 
 		const std::string &Name() const;
 
@@ -16,7 +18,6 @@ namespace expression {
 
 		bool operator==(const Symbol &other) const;
 
-		const std::string OutPutString(size_t pos = 0) const override;
 		bool EqualZero() const override;
 		bool EqualOne() const override;
 

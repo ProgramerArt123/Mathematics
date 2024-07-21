@@ -288,6 +288,10 @@ int main() {
 		expression::Expression<OPERATOR_TYPE_2> e(number::Integer(2), OPERATOR_TYPE_ROOT(), e0);
 		e.CollectForward(std::cout) << std::endl;
 	}
+	{
+		expression::Expression<OPERATOR_TYPE_0> e(expression::Symbol("x"), OPERATOR_TYPE_ADD(), expression::Symbol("y"));
+		e.CollectForward(std::cout) << std::endl;
+	}
 #endif
 	getchar();
 	return 0;
