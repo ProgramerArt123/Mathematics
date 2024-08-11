@@ -33,7 +33,8 @@ namespace expression {
 		typedef std::variant<ClosureNumber, Symbol, Expression<OPERATOR_TYPE_0>, Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> ExpressionNode;
 		typedef std::list<ExpressionNode> ExpressionNodes;
 
-		Expression() {
+		Expression(OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD) {
+			SetOperator(flag);
 			InitPolymorphism();
 		}
 
@@ -51,14 +52,17 @@ namespace expression {
 			m_nodes = right.m_nodes;
 			m_is_child = right.m_is_child;
 			InitPolymorphism();
+			if (!right.m_polymorphism->IsPositive()) {
+				m_polymorphism->Opposite();
+			}
 			return *this;
 		}
 
 		bool operator==(const Expression<OperatorType> &other) const {
-			if (m_nodes.size() != other.m_nodes.size()) {
+			if (Size() != other.Size()) {
 				return false;
 			}
-			if (!m_polymorphism->IsEqual(*Visit(other.m_nodes.front()))) {
+			if (!m_polymorphism->IsEqual(*Visit(other.First()))) {
 				return false;
 			}
 			for (auto& i : m_nodes) {
@@ -76,6 +80,10 @@ namespace expression {
 			return true;
 		}
 
+		bool operator!=(const Expression<OperatorType> &other) const {
+			return !(*this == other);
+		}
+
 		template<typename ConcreteOperatorType, typename ...Append>
 		Expression(const ConcreteOperatorType &o, const expression::ClosureNumber &n, Append ...append) :Expression(append...) {
 			static_assert(std::is_base_of<OperatorType, ConcreteOperatorType>::value, "ConcreteOperatorType invalid");
@@ -84,7 +92,7 @@ namespace expression {
 		template<typename ...Append>
 		Expression(const expression::ClosureNumber &n, Append ...append) :Expression(append...){
 			InitPolymorphism();
-			m_polymorphism->MarkFirst(&AddClosure(n));
+			AddClosure(n);
 		}
 
 		template<typename ConcreteOperatorType, typename ChildOperatorType, typename ...Append>
@@ -95,7 +103,7 @@ namespace expression {
 		template<typename ChildOperatorType, typename ...Append>
 		Expression(const expression::Expression<ChildOperatorType> &n, Append ...append) :Expression(append...) {
 			InitPolymorphism();
-			m_polymorphism->MarkFirst(&AddChild(n));
+			AddChild(n);
 		}
 
 		template<typename ConcreteOperatorType, typename ...Append>
@@ -109,24 +117,28 @@ namespace expression {
 			InitPolymorphism();
 		}
 
-		const std::string OutPutString(size_t pos = 0) const override {
+		const std::string OutPutString() const override {
 			std::stringstream ss;
-			ss << m_operator->OutPutString(pos);
-			if (m_is_child) {
+			ss << m_operator->updatePosition(m_position).OutPutString();
+			if (!m_polymorphism->IsPositive()) {
+				ss << "-";
+			}
+			if (m_is_child || !m_polymorphism->IsPositive()) {
 				ss << "(";
 			}
 			size_t index = 0;
 			for (auto& node : m_nodes) {
-				ss << Visit(node)->OutPutString(index++);
+				ss << Visit(node)->updatePosition(index++).OutPutString();
 			}
-			if (m_is_child) {
+			if (m_is_child || !m_polymorphism->IsPositive()) {
 				ss << ")";
 			}
+			std::string s = ss.str();
 			return ss.str();
 		}
 		
-		bool IsEqual(const Node &other) const override {
-			if (!Node::IsEqual(other)) {
+		bool IsEqual(const Node &other, bool ignoreOperator = false) const override {
+			if (!Node::IsEqual(other, ignoreOperator)) {
 				return false;
 			}
 			const Expression<OperatorType> &otherExp = dynamic_cast<const Expression<OperatorType>&>(other);
@@ -148,25 +160,20 @@ namespace expression {
 			return Visit(m_nodes.front())->EqualOne();
 		}
 		void Opposite() override {
-			for (auto &node : m_nodes) {
-				Visit(node)->Opposite();
-			}
+			m_polymorphism->Opposite();
 		}
 		Expression<OperatorType> Collect(size_t count, size_t &completed) const{
 			Expression<OperatorType> collect(*this);
 			if (count == (completed += collect.CollectChild(count - completed))) {
 				return collect;
 			}
+			if (count == (completed += collect.CheckCollectChild(count - completed))) {
+				return collect;
+			}
 			if (count == (completed += collect.CollectSpecial(count - completed))) {
 				return collect;
 			}
 			if (count == (completed += collect.CollectClosure(count - completed))) {
-				return collect;
-			}
-			if (count == (completed += collect.ReduceFraction(count - completed))) {
-				return collect;
-			}
-			if (count == (completed += collect.ReduceOpen(count - completed))) {
 				return collect;
 			}
 			if (count == (completed += collect.EliminationChild(count - completed))) {
@@ -191,6 +198,12 @@ namespace expression {
 					std::cout << " --> " << collect;
 				}
 				else {
+					if (collect.ReduceFraction()) {
+						std::cout << " --> "; collect.GetFractionReduction().CollectForward(out);
+					}
+					else if (collect.ReduceOpen()) {
+						std::cout << " --> "; collect.GetOpenReduction().CollectForward(out);
+					}
 					break;
 				}
 			}
@@ -226,14 +239,13 @@ namespace expression {
 		static Expression<OPERATOR_TYPE_1> Absorb(const number::Imaginary &number);
 		static Expression<OPERATOR_TYPE_0> Absorb(const number::Complex &number);
 		static Expression<OPERATOR_TYPE_1> Absorb(const number::Root &number) {
-			const Expression<OPERATOR_TYPE_2> numeratorReduction(number.ReductionBase().Numerator(),
+			const Expression<OPERATOR_TYPE_2> numeratorReduction(number.Base().Numerator(),
 				OPERATOR_TYPE_POWER(), number.Exponent().Denominator(),
 				OPERATOR_TYPE_ROOT(), number.Exponent().Numerator());
-			const Expression<OPERATOR_TYPE_2> denominatorReduction(number.ReductionBase().Numerator(),
+			const Expression<OPERATOR_TYPE_2> denominatorReduction(number.Base().Denominator(),
 				OPERATOR_TYPE_POWER(), number.Exponent().Denominator(),
 				OPERATOR_TYPE_ROOT(), number.Exponent().Numerator());
-			return Expression<OPERATOR_TYPE_1>(number.ReductionCoefficient().Numerator(),
-				OPERATOR_TYPE_MUL(), numeratorReduction, OPERATOR_TYPE_DIV(), denominatorReduction);
+			return Expression<OPERATOR_TYPE_1>(numeratorReduction, OPERATOR_TYPE_DIV(), denominatorReduction);
 		}
 		static Expression<OPERATOR_TYPE_1> Reciprocal(const expression::ClosureNumber &number) {
 			return Expression<OPERATOR_TYPE_1>(expression::ClosureNumber(1), OPERATOR_TYPE_DIV(), number);
@@ -318,7 +330,7 @@ namespace expression {
 		template<typename OPERATOR_TYPE_2> friend class Expression;
 
 		expression::ClosureNumber &AddClosure(const expression::ClosureNumber &n) {
-			m_nodes.push_front(expression::ClosureNumber(n, OperatorType::FLAG));
+			m_nodes.push_front(expression::ClosureNumber(n));
 			return std::get<expression::ClosureNumber>(m_nodes.front());
 		}
 
@@ -329,7 +341,7 @@ namespace expression {
 		
 		template<typename AbstractOperatorType>
 		expression::Expression<AbstractOperatorType> &AddChild(const expression::Expression<AbstractOperatorType> &child) {
-			m_nodes.push_front(expression::Expression<AbstractOperatorType>(child, OperatorType::FLAG).SetChild());
+			m_nodes.push_front(expression::Expression<AbstractOperatorType>(child).SetChild());
 			return std::get<expression::Expression<AbstractOperatorType>>(m_nodes.front());
 		}
 
@@ -339,7 +351,7 @@ namespace expression {
 		}
 
 		expression::Symbol &AddSymbol(const expression::Symbol &s) {
-			m_nodes.push_front(expression::Symbol(s, OperatorType::FLAG));
+			m_nodes.push_front(expression::Symbol(s));
 			return std::get<expression::Symbol>(m_nodes.front());
 		}
 
@@ -350,14 +362,45 @@ namespace expression {
 
 		void AppendNode(const ExpressionNode &node) {
 			m_nodes.push_back(node);
+			if (IsSingle()) {
+				Visit(m_nodes.front())->SetOperator(OPERATOR_TYPE_FLAG_ADD);
+			}
 		}
 
-		void RemoveNode(const ExpressionNodes::iterator &node) {
-			m_nodes.erase(node);
+		void AppendChild(const Expression<OPERATOR_TYPE_0> &child) {
+			AppendNode(Expression<OPERATOR_TYPE_0>(child).SetChild());
 		}
 
-		void RemoveNode(const ExpressionNodes::const_iterator &node) {
+		void AppendChild(const Expression<OPERATOR_TYPE_1> &child) {
+			AppendNode(Expression<OPERATOR_TYPE_1>(child).SetChild());
+		}
+
+		void AppendChild(const Expression<OPERATOR_TYPE_2> &child) {
+			AppendNode(Expression<OPERATOR_TYPE_2>(child).SetChild());
+		}
+
+		OPERATOR_TYPE_FLAG RemoveNode(const ExpressionNodes::iterator &node) {
 			m_nodes.erase(node);
+			OPERATOR_TYPE_FLAG flag = Visit(m_nodes.front())->Flag();
+			if (IsSingle()) {
+				Visit(m_nodes.front())->SetOperator(OPERATOR_TYPE_FLAG_ADD);
+				if (OPERATOR_TYPE_FLAG_SUB == flag) {
+					Visit(m_nodes.front())->Opposite();
+				}
+			}
+			return flag;
+		}
+
+		OPERATOR_TYPE_FLAG RemoveNode(const ExpressionNodes::const_iterator &node) {
+			m_nodes.erase(node);
+			OPERATOR_TYPE_FLAG flag = Visit(m_nodes.front())->Flag();
+			if (IsSingle()) {
+				Visit(m_nodes.front())->SetOperator(OPERATOR_TYPE_FLAG_ADD);
+				if (OPERATOR_TYPE_FLAG_SUB == flag) {
+					Visit(m_nodes.front())->Opposite();
+				}
+			}
+			return flag;
 		}
 
 		ExpressionNode &FirstChild() {
@@ -398,7 +441,7 @@ namespace expression {
 			}
 			if (1 == reciprocalsCount % 2) {
 				if (1 == m_nodes.size()) {
-					AddChild(Reciprocal(collect));
+					AppendChild(Reciprocal(collect).SetChild());
 					RemoveNode(m_nodes.begin());
 				}
 				else {
@@ -447,6 +490,35 @@ namespace expression {
 			return m_polymorphism->CollectClosureExp2(count);
 		}
 
+		template<typename ChildOperatorType>
+		size_t CheckCollectChild(size_t count) {
+			size_t completed = 0;
+			std::vector<ExpressionNodes::iterator> exps;
+			GetAll<expression::Expression<ChildOperatorType>>(exps);
+			for (auto exp : exps) {
+				if (CheckCollectChild<ChildOperatorType>(exp)) {
+					if (++completed == count) {
+						return completed;
+					}
+				}
+			}
+			return completed;
+		}
+
+		size_t CheckCollectChild(size_t count) {
+			size_t completed = 0;
+			if (count == (completed += CheckCollectChild<OPERATOR_TYPE_0>(count - completed))) {
+				return completed;
+			}
+			if (count == (completed += CheckCollectChild<OPERATOR_TYPE_1>(count - completed))) {
+				return completed;
+			}
+			if (count == (completed += CheckCollectChild<OPERATOR_TYPE_2>(count - completed))) {
+				return completed;
+			}
+			return completed;
+		}
+
 		size_t CollectSpecial(size_t count) {
 			return m_polymorphism->CollectSpecial(count);
 		}
@@ -477,65 +549,77 @@ namespace expression {
 			return completed;
 		}
 
-		template<typename ChildOperatorType>
-		size_t Reduce(size_t count, std::function<bool(ExpressionNodes::iterator)> factor) {
-			std::vector<ExpressionNodes::iterator> exps;
-			GetAll<Expression<ChildOperatorType>>(exps);
-			for (auto &itor : exps) {
-				auto &exp = std::get<Expression<ChildOperatorType>>(*itor);
-				if (2 != exp.m_nodes.size()) {
-					continue;
-				}
-				if (!std::get_if<expression::ClosureNumber>(&exp.m_nodes.front())) {
-					continue;
-				}
-				if (!std::get_if<expression::ClosureNumber>(&exp.m_nodes.back())) {
-					continue;
-				}
-				if (factor(itor)) {
-					return 1;
-				}
-				else {
-					continue;
-				}
+		bool Reduce(std::function<bool()> factor) {
+			if (2 != m_nodes.size()) {
+				return false;
 			}
-			return 0;
+			if (!std::get_if<expression::ClosureNumber>(&m_nodes.front())) {
+				return false;
+			}
+			if (!std::get_if<expression::ClosureNumber>(&m_nodes.back())) {
+				return false;
+			}
+			if (factor()) {
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 
-		size_t ReduceFraction(size_t count) {
-			return Reduce<OPERATOR_TYPE_1>(count, [](ExpressionNodes::iterator itor) {
-				const auto &exp = std::get<Expression<OPERATOR_TYPE_1>>(*itor);
-				auto &numerator = std::get<expression::ClosureNumber>(exp.m_nodes.front());
-				auto &denominator = std::get<expression::ClosureNumber>(exp.m_nodes.back());
-				if (OPERATOR_TYPE_FLAG_DIV != denominator.Flag()) {
-					return false;
-				}
-				const number::Fraction fraction(numerator.Value(), denominator.Value());
-				if (fraction.ReductionNumerator() == numerator.Value() &&
-					fraction.Integer() == number::Integer(0)) {
-					return false;
-				}
-				*itor = Absorb(fraction);
-				return true;
-			});
+		const Expression<OPERATOR_TYPE_0> GetFractionReduction() const {
+			return m_polymorphism->GetFractionReduction().value();
 		}
 
-		size_t ReduceOpen(size_t count) {
-			return Reduce<OPERATOR_TYPE_2>(count, [](ExpressionNodes::iterator itor) {
-				const auto &exp = std::get<Expression<OPERATOR_TYPE_2>>(*itor);
-				auto &base = std::get<expression::ClosureNumber>(exp.m_nodes.front());
-				auto &exponent = std::get<expression::ClosureNumber>(exp.m_nodes.back());
-				if (OPERATOR_TYPE_FLAG_ROOT != exponent.Flag()) {
-					return false;
-				}
-				const number::Root root(base.Value(), exponent.Value());
-				if (root.ReductionBase() == base.Value() &&
-					root.ReductionCoefficient() == number::Fraction(1)) {
-					return false;
-				}
-				*itor = Absorb(root);
-				return true;
-			});
+		bool ReduceFraction() {
+			if constexpr (std::is_same<OPERATOR_TYPE_1, OperatorType>::value) {
+				return Reduce([&]() {
+					auto &numerator = std::get<expression::ClosureNumber>(m_nodes.front());
+					auto &denominator = std::get<expression::ClosureNumber>(m_nodes.back());
+					if (OPERATOR_TYPE_FLAG_DIV != denominator.Flag()) {
+						return false;
+					}
+					const number::Fraction fraction(numerator.Value(), denominator.Value());
+					if (fraction.ReductionNumerator() == numerator.Value() &&
+						fraction.Integer() == number::Integer(0)) {
+						return false;
+					}
+
+					m_polymorphism->SetFractionReduction(fraction);
+
+					return true;
+				});
+			}
+			return false;
+		}
+
+		const Expression<OPERATOR_TYPE_1> GetOpenReduction() const {
+			return m_polymorphism->GetOpenReduction().value();
+		}
+
+		bool ReduceOpen() {
+			if constexpr (std::is_same<OPERATOR_TYPE_2, OperatorType>::value) {
+				return Reduce([&]() {
+					auto &base = std::get<expression::ClosureNumber>(m_nodes.front());
+					auto &exponent = std::get<expression::ClosureNumber>(m_nodes.back());
+					if (OPERATOR_TYPE_FLAG_ROOT != exponent.Flag()) {
+						return false;
+					}
+					const number::Root root(base.Value(), exponent.Value());
+					if (root.ReductionBase() == base.Value() &&
+						root.ReductionCoefficient().EqualOne()) {
+						return false;
+					}
+
+					const Expression<OPERATOR_TYPE_2> reduction(root.ReductionBase().Numerator(),
+						OPERATOR_TYPE_ROOT(), root.Exponent().Numerator());
+
+					m_polymorphism->SetOpenReduction(root.ReductionCoefficient().Numerator(), reduction);
+
+					return true;
+				});
+			}
+			return false;
 		}
 
 		size_t CollectExp2Closure(size_t count, std::function<std::pair<size_t, bool>(size_t)> factor) {
@@ -635,7 +719,7 @@ namespace expression {
 			std::vector<ExpressionNodes::iterator> closureMultipliers;
 			GetAll<expression::ClosureNumber>(closureMultipliers,
 				[](const expression::ClosureNumber &number) {
-					return OPERATOR_TYPE_FLAG_MUL == number.Flag();
+					return OPERATOR_TYPE_FLAG_MUL == number.Flag() || OPERATOR_TYPE_FLAG_ADD == number.Flag();
 				}
 			);
 			if (closureDivisors.empty() || closureMultipliers.empty()) {
@@ -653,16 +737,22 @@ namespace expression {
 					break;
 				}
 			}
+			//divFront = expression::ClosureNumber(collect, OPERATOR_TYPE_FLAG_DIV);
 			if (completed == count) {
-				divFront = collect;
+				divFront = expression::ClosureNumber(collect, OPERATOR_TYPE_FLAG_DIV);
 			}
 			else {
 				expression::ClosureNumber &mulFront = std::get<expression::ClosureNumber>(*closureMultipliers.front());
 				const number::Fraction reduce(mulFront.Value(), collect);
-				if (!(reduce.ReductionNumerator() == mulFront.Value() &&
-					reduce.Integer() == number::Integer(0))) {
+				if (reduce.IsInteger()) {
+					*closureMultipliers.front() = reduce.Integer();
+					RemoveNode(closureDivisors.front());
+					++completed;
+				}
+				else if (!(reduce.Numerator() == mulFront.Value() &&
+							reduce.Denominator() == collect)) {
 					*closureMultipliers.front() = reduce.Numerator();
-					*closureDivisors.front() = reduce.Denominator();
+					*closureDivisors.front() = expression::ClosureNumber(reduce.Denominator(), OPERATOR_TYPE_FLAG_DIV);
 					++completed;
 				}
 			}
@@ -729,7 +819,6 @@ namespace expression {
 			size_t completed = 0;
 			for (auto itor = exps.begin(); itor != exps.end();) {
 				if (m_polymorphism->CollectCommonChild(exps, itor)) {
-					RemoveNode(*itor);
 					itor = exps.erase(itor);
 					++completed;
 				}
@@ -747,27 +836,58 @@ namespace expression {
 			return 1 == m_nodes.size();
 		}
 
+		bool IsEmpty() const {
+			return m_nodes.empty();
+		}
+
+		size_t Size() const {
+			return m_nodes.size();
+		}
+
+		void Clear() {
+			return m_nodes.clear();
+		}
+
+		ExpressionNodes::const_iterator begin() const{ return m_nodes.begin(); }
+		ExpressionNodes::const_iterator end() const { return m_nodes.end(); }
+
+		void ReplaceSingle(const ExpressionNodes::iterator oldChild, const ExpressionNode &newChild) {
+			OPERATOR_TYPE_FLAG oldFlag = Visit(*oldChild)->Flag();
+			typename ExpressionNodes::iterator newItor = m_nodes.insert(oldChild, newChild);
+			Visit(*newItor)->SetOperator(oldFlag);
+			RemoveNode(oldChild);
+		}
+
 		template<typename ChildOperatorType>
-		void Flat(const ExpressionNodes::iterator child) {
-			const auto &exp = std::get<Expression<ChildOperatorType>>(*child);
-			const auto &nodes = exp.m_nodes;
-			for (auto itor = nodes.begin(); itor != nodes.end(); itor++) {
-				typename ExpressionNodes::iterator newItor = m_nodes.insert(child, *itor);
-				if (exp.IsSingle()) {
-					Visit(*newItor)->SuperpositionFlag(exp.Operator());
-				}
+		void Replace(const ExpressionNodes::iterator oldChild, const Expression<ChildOperatorType> &newChild) {
+			const OPERATOR_TYPE &oldFlag = Visit(*oldChild)->Operator();
+			for (const auto &child : newChild) {
+				typename ExpressionNodes::iterator newItor = m_nodes.insert(oldChild, child);
+				Visit(*newItor)->SuperpositionFlag(oldFlag);
 			}
-			RemoveNode(child);
+			RemoveNode(oldChild);
+		}
+
+		template<typename ChildOperatorType>
+		void FlatSingle(const ExpressionNodes::iterator old) {
+			const auto &exp = std::get<Expression<ChildOperatorType>>(*old);
+			ReplaceSingle(old, exp.First());
+		}
+
+		template<typename ChildOperatorType>
+		void FlatSame(const ExpressionNodes::iterator old) {
+			const auto &exp = std::get<Expression<ChildOperatorType>>(*old);
+			Replace(old, exp);
 		}
 
 		template<typename ChildOperatorType>
 		bool CheckCollectChild(const ExpressionNodes::iterator child) {
 			if (std::get<Expression<ChildOperatorType>>(*child).IsSingle()) {
-				Flat<ChildOperatorType>(child);
+				FlatSingle<ChildOperatorType>(child);
 				return true;
 			}
 			if constexpr (std::is_same<ChildOperatorType, OperatorType>::value) {
-				Flat<ChildOperatorType>(child);
+				FlatSame<ChildOperatorType>(child);
 				return true;
 			}
 			return false;
@@ -781,7 +901,7 @@ namespace expression {
 
 
 		template<typename NodeType>
-		ExpressionNodes::iterator GetFirst(std::function<bool(const NodeType &)> filter = [](const NodeType &node) {return true; }) {
+		std::optional<ExpressionNodes::iterator> GetFirst(std::function<bool(const NodeType &)> filter = [](const NodeType &node) {return true; }) {
 			for (auto node = m_nodes.begin(); node != m_nodes.end(); ++node) {
 				if (NodeType *typeNode = std::get_if<NodeType>(&*node)) {
 					if (filter(*typeNode)) {
@@ -789,11 +909,19 @@ namespace expression {
 					}
 				}
 			}
-			return m_nodes.end();
+			return std::nullopt;
 		}
 
+		const ExpressionNode &First() const{
+			return m_nodes.front();
+		}
+
+		ExpressionNode &First() {
+			return m_nodes.front();
+		}
+		
 		template<typename NodeType>
-		ExpressionNodes::iterator GetLast(std::function<bool(const NodeType &)> filter = [](const NodeType &node) {return true; }) {
+		std::optional < ExpressionNodes::iterator> GetLast(std::function<bool(const NodeType &)> filter = [](const NodeType &node) {return true; }) {
 			ExpressionNodes::iterator last = m_nodes.end();
 			for (auto node = m_nodes.begin(); node != m_nodes.end(); ++node) {
 				if (NodeType *typeNode = std::get_if<NodeType>(&*node)) {
@@ -802,7 +930,20 @@ namespace expression {
 					}
 				}
 			}
-			return last;
+			if (last != m_nodes.end()) {
+				return last;
+			}
+			else {
+				return std::nullopt;
+			}
+		}
+
+		const ExpressionNode &Last() const {
+			return m_nodes.back();
+		}
+
+		ExpressionNode &Last() {
+			return m_nodes.back();
 		}
 
 		template<typename NodeType>
@@ -818,6 +959,12 @@ namespace expression {
 
 		void GetAll(std::vector<ExpressionNodes::const_iterator> &nodes) const {
 			for (auto itor = m_nodes.cbegin(); itor != m_nodes.cend(); ++itor) {
+				nodes.push_back(itor);
+			}
+		}
+
+		void GetAll(std::vector<ExpressionNodes::iterator> &nodes) {
+			for (auto itor = m_nodes.begin(); itor != m_nodes.end(); ++itor) {
 				nodes.push_back(itor);
 			}
 		}
@@ -839,12 +986,14 @@ namespace expression {
 			GetAll(leftChildren);
 			std::vector<ExpressionNodes::const_iterator> rightChildren;
 			right.GetAll(rightChildren);
-			std::vector<ExpressionNodes::const_iterator> commons;
+			expression::Expression<OperatorType> commons;
+			bool isCommonBase = false;
 			for (auto leftChild = leftChildren.begin(); leftChild != leftChildren.end(); ) {
 				if ([&] {
 					for (auto rightChild = rightChildren.begin(); rightChild != rightChildren.end(); ++rightChild) {
-						if (Visit(**leftChild)->IsEqual(*Visit(**rightChild))) {
-							commons.push_back(*leftChild);
+						if (Visit(**leftChild)->IsEqual(*Visit(**rightChild), true)) {
+							isCommonBase = isCommonBase || Visit(**leftChild)->IsAdd();
+							commons.AppendNode(**leftChild);
 							rightChildren.erase(rightChild);
 							return true;
 						}
@@ -858,14 +1007,20 @@ namespace expression {
 				}
 			}
 
-			if (commons.empty()) {
+			if (commons.IsEmpty()) {
 				return std::nullopt;
 			}
 			Expression<OperatorType> collect;
-			for (auto &common : commons) {
-				collect.AppendNode(*common);
+			if (isCommonBase) {
+				collect.AppendNode(commons);
 			}
-			collect.AppendNode(m_polymorphism->BuildCommon(leftChildren, rightChildren, right.Flag()).SetChild());
+			std::visit([&collect, isCommonBase](auto &&c) {
+				collect.AppendChild(c.SetChild());
+			}, m_polymorphism->BuildCommon(leftChildren, rightChildren, right.Flag()));
+			if (!isCommonBase) {
+				commons.SetOperator(Visit(collect.Last())->Flag());
+				collect.AppendNode(commons);
+			}
 			return collect;
 		}
 
@@ -873,16 +1028,35 @@ namespace expression {
 		size_t CollectOperatorTypeChild(size_t count) {
 			std::vector<ExpressionNodes::iterator> exps;
 			GetAll<expression::Expression<ChildOperatorType>>(exps);
-			size_t completed = 0;
+			size_t totalCompleted = 0;
 			for (size_t index = 0; index < exps.size(); ++index) {
 				Expression<ChildOperatorType> &exp = std::get<Expression<ChildOperatorType>>(*exps.at(index));
-				exp = exp.Collect(1, completed);
-				CheckCollectChild<ChildOperatorType>(exps.at(index));
-				if (completed == count) {
-					return completed;
+				OPERATOR_TYPE_FLAG flag = exp.Flag();
+				size_t completed = 0;
+				exp = exp.Collect(count - totalCompleted, completed);
+				if (completed) {
+					if (count == (totalCompleted += completed)) {
+						return totalCompleted;
+					}
+				}
+				else {
+					if (exp.ReduceFraction()) {
+						*exps.at(index) = exp.GetFractionReduction();
+						Visit(*exps.at(index))->SetOperator(flag);
+						if (count == (totalCompleted += 1)) {
+							return totalCompleted;
+						}
+					}
+					else if (exp.ReduceOpen()) {
+						*exps.at(index) = exp.GetOpenReduction();
+						Visit(*exps.at(index))->SetOperator(flag);
+						if (count == (totalCompleted += 1)) {
+							return totalCompleted;
+						}
+					}
 				}
 			}
-			return completed;
+			return totalCompleted;
 		}
 
 		template<typename ChildOperatorType>
@@ -893,7 +1067,6 @@ namespace expression {
 			for (size_t index = 0; index < exps.size(); ++index) {
 				Expression<ChildOperatorType> &exp = std::get<Expression<ChildOperatorType>>(*exps[index]);
 				completed += exp.EliminationChild(count - completed);
-				CheckCollectChild<ChildOperatorType>(exps.at(index));
 				if (completed == count) {
 					return completed;
 				}
@@ -924,14 +1097,19 @@ namespace expression {
 				virtual size_t CollectSpecial(size_t count) = 0;
 				virtual void GetChildren(std::vector<ExpressionNodes::iterator> &exps) = 0;
 				virtual bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) = 0;
-				virtual Expression<OPERATOR_TYPE_0> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+				virtual std::variant<Expression<OPERATOR_TYPE_0>, Expression<OPERATOR_TYPE_1>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
 					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right) = 0;
 				virtual bool IsEqual(const Node &other) const = 0;
 				virtual bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) = 0;
 				virtual size_t CollectClosureExp1(size_t count) = 0;
 				virtual size_t CollectClosureExp2(size_t count) = 0;
 				virtual bool CollectClosure(ClosureNumber &closure) = 0;
-				virtual void MarkFirst(Node *first) = 0;
+				virtual void SetOpenReduction(const ClosureNumber &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) = 0;
+				virtual std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const = 0;
+				virtual void SetFractionReduction(const number::Fraction &fraction) = 0;
+				virtual std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const = 0;
+				virtual bool IsPositive() const = 0;
+				virtual void Opposite() = 0;
 
 				template<typename ChildOperatorType>
 				static std::optional<typename Expression<ChildOperatorType>::ExpressionNodes::iterator> CollectClosures(const std::vector<ExpressionNodes::iterator> &closures,
@@ -944,14 +1122,19 @@ namespace expression {
 				size_t CollectSpecial(size_t count) override;
 				void GetChildren(std::vector<ExpressionNodes::iterator> &exps) override;
 				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				Expression<OPERATOR_TYPE_0> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+				std::variant<Expression<OPERATOR_TYPE_0>, Expression<OPERATOR_TYPE_1>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
 					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right) override;
 				bool IsEqual(const Node &other) const override;
 				bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
 				size_t CollectClosureExp1(size_t count) override;
 				size_t CollectClosureExp2(size_t count) override;
 				bool CollectClosure(ClosureNumber &closure) override;
-				void MarkFirst(Node *first) override;
+				void SetOpenReduction(const ClosureNumber &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) override;
+				std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const override;
+				void SetFractionReduction(const number::Fraction &fraction) override;
+				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
+				bool IsPositive() const override;
+				void Opposite() override;
 
 				Expression<OPERATOR_TYPE_1> LevelDown(ExpressionNodes::iterator exp2);
 				static std::optional<number::Fraction> Exhale(const expression::Expression<OPERATOR_TYPE_1> &exp1);
@@ -965,7 +1148,7 @@ namespace expression {
 				size_t CollectSpecial(size_t count) override;
 				void GetChildren(std::vector<ExpressionNodes::iterator> &exps) override;
 				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				Expression<OPERATOR_TYPE_0> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+				std::variant<Expression<OPERATOR_TYPE_0>, Expression<OPERATOR_TYPE_1>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
 					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right) override;
 				bool IsEqual(const Node &other) const override;
 				bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
@@ -973,12 +1156,18 @@ namespace expression {
 				size_t CollectClosureExp1(size_t count) override;
 				size_t CollectClosureExp2(size_t count) override;
 				bool CollectClosure(ClosureNumber &closure) override;
-				void MarkFirst(Node *first) override;
+				void SetOpenReduction(const ClosureNumber &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) override;
+				std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const override;
+				void SetFractionReduction(const number::Fraction &fraction) override;
+				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
+				bool IsPositive() const override;
+				void Opposite() override;
 
 				template<typename ChildOperatorType>
 				size_t CollectClosureExp1(size_t count);
 			private:
 				Expression<OPERATOR_TYPE_1> &m_exp;
+				Expression<OPERATOR_TYPE_0> m_reduction;
 			};
 
 			class Polymorphism2 : public Polymorphism {
@@ -987,14 +1176,19 @@ namespace expression {
 				size_t CollectSpecial(size_t count) override;
 				void GetChildren(std::vector<ExpressionNodes::iterator> &exps) override;
 				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				Expression<OPERATOR_TYPE_0> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+				std::variant<Expression<OPERATOR_TYPE_0>, Expression<OPERATOR_TYPE_1>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
 					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right) override;
 				bool IsEqual(const Node &other) const override;
 				bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
 				size_t CollectClosureExp1(size_t count) override;
 				size_t CollectClosureExp2(size_t count) override;
 				bool CollectClosure(ClosureNumber &closure) override;
-				void MarkFirst(Node *first) override;
+				void SetOpenReduction(const ClosureNumber &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) override;
+				std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const override;
+				void SetFractionReduction(const number::Fraction &fraction) override;
+				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
+				bool IsPositive() const override;
+				void Opposite() override;
 
 				const Node *Base() const;
 
@@ -1002,15 +1196,10 @@ namespace expression {
 				size_t CollectClosureExp2(size_t count);
 			private:
 				Expression<OPERATOR_TYPE_2> &m_exp;
+				Expression<OPERATOR_TYPE_1> m_reduction;
+				bool m_positive = true;
 			};
-
-			friend class Polymorphism;
-			friend class Polymorphism0;
-			friend class Polymorphism1;
-			friend class Polymorphism2;
-
-			std::unique_ptr<Polymorphism> m_polymorphism;
-
+			
 			void InitPolymorphism() {
 				if (!m_polymorphism) {
 					if constexpr (std::is_same<OperatorType, OPERATOR_TYPE_0>::value) {
@@ -1024,6 +1213,8 @@ namespace expression {
 					}
 				}
 			}
+		private:
+			std::unique_ptr<Polymorphism> m_polymorphism;
 	};
 
 }

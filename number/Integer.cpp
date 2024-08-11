@@ -11,7 +11,7 @@ namespace number {
 
 	Integer::Integer(const Natural &value, bool positive) :
 		m_value(value), m_positive(positive) {
-		if (0 == m_value) {
+		if (m_value.EqualZero()) {
 			m_positive = true;
 		}
 	}
@@ -30,6 +30,9 @@ namespace number {
 	}
 	bool Integer::EqualZero() const {
 		return Integer(0) == *this;
+	}
+	bool Integer::EqualOne() const {
+		return IsPositive() && m_value.EqualOne();
 	}
 	void Integer::SetPositive(bool isPositive) {
 		m_positive = isPositive;
@@ -51,9 +54,6 @@ namespace number {
 		if (!EqualZero()) {
 			m_positive = !m_positive;
 		}
-	}
-	Integer::operator bool() const {
-		return m_value;
 	}
 	Integer Integer::operator-() const {
 		return Integer(m_value, !m_positive);
@@ -113,6 +113,33 @@ namespace number {
 	}
 	bool Integer::operator==(const Integer &other)const {
 		return m_positive == other.m_positive && m_value == other.m_value;
+	}
+	bool Integer::operator!=(const Integer &other) const {
+		return !(*this == other);
+	}
+	bool Integer::operator>(const Integer &other) const {
+		if (IsPositive() && !other.IsPositive()) {
+			return true;
+		}
+		if (!IsPositive() && other.IsPositive()) {
+			return false;
+		}
+		return IsPositive() == m_value > other.Value();
+	}
+	bool Integer::operator<(const Integer &other) const {
+		if (IsPositive() && !other.IsPositive()) {
+			return false;
+		}
+		if (!IsPositive() && other.IsPositive()) {
+			return true;
+		}
+		return IsPositive() != m_value > other.Value();
+	}
+	bool Integer::operator>=(const Integer &other) const {
+		return *this > other || *this == other;
+	}
+	bool Integer::operator<=(const Integer &other) const {
+		return *this < other || *this == other;
 	}
 
 	Integer Integer::PositiveAdd(const Integer &addition) const {

@@ -13,9 +13,11 @@ namespace expression {
 		ClosureNumber(const expression::ClosureNumber &prototype, OPERATOR_TYPE_FLAG flag);
 		ClosureNumber(const number::Integer &value, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD);
 		
+		bool IsPositive() const override;
+
 		const std::string GetString(size_t pos = 0, uint8_t radix = 10) const override;
 
-		bool IsEqual(const Node &other) const override;
+		bool IsEqual(const Node &other, bool ignoreOperator = false) const override;
 		bool EqualZero() const override;
 		bool EqualOne() const override;
 

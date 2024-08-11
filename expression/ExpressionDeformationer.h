@@ -13,23 +13,38 @@ namespace expression {
 		ExpressionDeformationer(const Expression<OperatorType> &expression) :
 			m_expression(expression.OutPutString()) {
 			size_t completed = 0;
-			const Expression<OperatorType> &collect = expression.Collect(1, completed);
+			Expression<OperatorType> collect = expression.Collect(1, completed);
 			if (completed) {
 				Deformation(collect);
 			}
+			else {
+				if (collect.ReduceFraction()) {
+					m_fraction = std::make_unique<ExpressionDeformationer<OPERATOR_TYPE_0>>(collect.GetFractionReduction());
+				}
+				else if (collect.ReduceOpen()) {
+					m_open = std::make_unique<ExpressionDeformationer<OPERATOR_TYPE_1>>(collect.GetOpenReduction());
+				}
+			}
 		}
 
-		const std::string OutPutString(size_t pos) const override {
+		const std::string OutPutString() const override {
+			if (m_fraction) {
+				return m_fraction->OutPutString();
+			}
+			if (m_open) {
+				return m_open->OutPutString();
+			}
+
 			if (m_collects.empty()) {
 				return m_expression;
 			}
 			else {
 				std::stringstream ss;
 				for (const auto &collect : m_collects) {
-					for (size_t i = 0; i < pos; i++) {
+					for (size_t i = 0; i < m_position; i++) {
 						ss << "\t";
 					}
-					ss << m_expression + "\t==>\t" + collect.OutPutString(pos + 1) << std::endl;
+					ss << m_expression + "\t==>\t" + collect.updatePosition(m_position + 1).OutPutString() << std::endl;
 				}
 				return ss.str();
 			}
@@ -74,6 +89,9 @@ namespace expression {
 
 		std::list<ExpressionDeformationer<OperatorType>> m_collects;
 
+		std::unique_ptr<ExpressionDeformationer<OPERATOR_TYPE_0>> m_fraction;
+
+		std::unique_ptr<ExpressionDeformationer<OPERATOR_TYPE_1>> m_open;
 	};
 
 }

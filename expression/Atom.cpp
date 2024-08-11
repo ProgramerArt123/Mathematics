@@ -7,10 +7,10 @@ namespace expression {
 	Atom::Atom(const Atom &prototype){
 		*this = prototype;
 	}
-	const std::string Atom::OutPutString(size_t pos) const {
+	const std::string Atom::OutPutString() const {
 		std::stringstream ss;
-		const std::string &op = m_operator->OutPutString(pos);
-		const std::string &value = GetString(pos);
+		const std::string &op = m_operator->updatePosition(m_position).OutPutString();
+		const std::string &value = GetString(m_position);
 		ss << op;
 		if (op.empty()) {
 			ss << value;

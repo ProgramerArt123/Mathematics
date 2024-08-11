@@ -59,7 +59,10 @@ namespace number {
 		return m_radix;
 	}
 	bool Natural::EqualZero() const {
-		return m_singles.size() == 1 && '0' == m_singles.front();
+		return Natural(0) == *this;
+	}
+	bool Natural::EqualOne() const {
+		return Natural(1) == *this;
 	}
 	void Natural::SetPositive(bool isPositive) {
 		throw "undefine";
@@ -71,9 +74,6 @@ namespace number {
 		std::function<bool(char)> round) const {
 		return GetString(radix);
 	}
-	Natural::operator bool() const {
-		return !(1 == m_singles.size() && '0' == m_singles.front());
-	}
 	Natural Natural::Factorial() const {
 		Natural product(1, GetRadix());
 		for (Natural index(1, GetRadix()); index <= *this; ++index) {
@@ -84,6 +84,9 @@ namespace number {
 	bool Natural::operator==(const Natural &other) const {
 		const Natural &radixOther = other.GetNatural(m_radix);
 		return m_singles == radixOther.m_singles;
+	}
+	bool Natural::operator!=(const Natural &other) const {
+		return !(*this == other);
 	}
 	bool Natural::operator>(const Natural &other) const {
 		const Natural &radixOther = other.GetNatural(m_radix);
@@ -312,8 +315,12 @@ namespace number {
 		*this = *this + Natural(1, GetRadix());
 		return *this;
 	}
+	Natural &Natural::operator--() {
+		*this = *this - Natural(1, GetRadix());
+		return *this;
+	}
 	Natural Natural::GreatestCommonDivisor(const Natural &other) const {
-		return other ? other.GreatestCommonDivisor(*this%other) : *this;
+		return !other.EqualZero() ? other.GreatestCommonDivisor(*this%other) : *this;
 	}
 	Natural Natural::Composition(const Natural &m) const {
 		return Factorial() / (m.Factorial() * (*this - m).Factorial());
@@ -358,7 +365,7 @@ namespace number {
 			}
 			quotient.m_singles.push_front(GetChar(count));
 			if (index < times - 1) {
-				if (quotient.m_is_check_loop && -1 == quotient.m_loop_begin && remainder) {
+				if (quotient.m_is_check_loop && -1 == quotient.m_loop_begin && !remainder.EqualZero()) {
 					const std::string key(remainder.m_singles.cbegin(), remainder.m_singles.cend());
 					if (loop.find(key) != loop.end()) {
 						quotient.m_loop_begin = loop.at(key);

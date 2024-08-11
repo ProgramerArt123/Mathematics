@@ -74,6 +74,9 @@ namespace number {
 	bool Complex::EqualZero() const {
 		return m_real.EqualZero() && m_image.EqualZero();
 	}
+	bool Complex::EqualOne() const {
+		return m_real.EqualOne() && m_image.EqualZero();
+	}
 	void Complex::SetPositive(bool isPositive) {
 		m_real.SetPositive(isPositive);
 		m_image.SetPositive(isPositive);
@@ -245,10 +248,10 @@ namespace number {
 	Complex Complex::Power(const Imaginary &number, const Integer &exponent) {
 		const Fraction &fraction = number.Value().Power(exponent);
 		const Natural &mod = exponent.Value() % Natural(4);
-		if (Natural(0) == mod) {
+		if (mod.EqualZero()) {
 			return Complex(fraction, 0);
 		}
-		else if (Natural(1) == mod) {
+		else if (mod.EqualOne()) {
 			return Complex(0, fraction);
 		}
 		else if (Natural(2) == mod) {

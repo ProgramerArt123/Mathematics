@@ -48,13 +48,16 @@ namespace number {
 	bool Root::EqualZero() const {
 		return m_base.EqualZero();
 	}
+	bool Root::EqualOne() const {
+		return m_base.EqualOne();
+	}
 	void Root::SetPositive(bool isPositive) {
 		m_positive = isPositive;
 	}
 	bool Root::IsPositive() const {
 		return m_positive == !(!m_base.IsPositive() &&
-			1 == m_exponent.Denominator().Value() % Natural(2, m_exponent.Denominator().GetRadix()) &&
-			1 == m_exponent.Numerator().Value() % Natural(2, m_exponent.Denominator().GetRadix()));
+			(m_exponent.Denominator().Value() % Natural(2, m_exponent.Denominator().GetRadix())).EqualOne() &&
+			(m_exponent.Numerator().Value() % Natural(2, m_exponent.Denominator().GetRadix())).EqualOne());
 	}
 
 	const std::string Root::GetDecimal(uint8_t radix, size_t decimalLength,
@@ -63,7 +66,7 @@ namespace number {
 		const Fraction &denominator = GetFraction(m_base.Denominator(), radix, decimalLength);
 		const Fraction fraction(numerator, denominator);
 		std::string sign;
-		if (0 == m_base.Numerator().Value() % Natural(2)) {
+		if ((m_base.Numerator().Value() % Natural(2)).EqualZero()) {
 			sign = "(+/-)";
 		}
 		if (!IsImaginary()) {
@@ -106,25 +109,66 @@ namespace number {
 			Natural rootDenominatorRemainder;
 			const Natural &rootDenominator = powerDenominator.Root(m_exponent.Numerator().Value(), rootDenominatorRemainder);
 
-			m_reduction_coefficient = Fraction(rootNumerator, rootDenominator);
+			if (rootNumeratorRemainder.EqualZero() && rootDenominatorRemainder.EqualZero()){
+				m_reduction_coefficient = Fraction(rootNumerator, rootDenominator);
 
-			const Fraction baseNumerator(Integer(powerNumerator, m_base.Numerator().IsPositive()), powerNumerator - rootNumeratorRemainder);
-			const Fraction baseDenominator(Integer(powerDenominator, m_base.Denominator().IsPositive()), powerDenominator - rootDenominatorRemainder);
-			m_reduction_base = Fraction(baseNumerator, baseDenominator);
+				const Fraction baseNumerator(Integer(powerNumerator, m_base.Numerator().IsPositive()), powerNumerator - rootNumeratorRemainder);
+				const Fraction baseDenominator(Integer(powerDenominator, m_base.Denominator().IsPositive()), powerDenominator - rootDenominatorRemainder);
+				m_reduction_base = Fraction(baseNumerator, baseDenominator);
+			}
+			else {
+				Natural numeratorCoefficient(1);
+				Natural numeratorBase(1);
+				for (Natural root(rootNumerator); root >= Natural(2); -- root) {
+					const Natural &power = root.Power(m_exponent.Numerator().Value());
+					Natural quotient = 1;
+					Natural remainder = 0;
+					powerNumerator.Div(power, quotient, remainder);
+					if (remainder.EqualZero()) {
+						numeratorCoefficient = root;
+						numeratorBase = quotient;
+						break;
+					}
+				}
+
+				Natural denominatorCoefficient(1);
+				Natural denominatorBase(1);
+				for (Natural root(rootDenominator); root >= Natural(2); -- root) {
+					const Natural &power = root.Power(m_exponent.Numerator().Value());
+					Natural quotient = 1;
+					Natural remainder = 0;
+					powerDenominator.Div(power, quotient, remainder);
+					if (remainder.EqualZero()) {
+						denominatorCoefficient = root;
+						denominatorBase = quotient;
+						break;
+					}
+				}
+				
+				if (!numeratorCoefficient.EqualOne() || !denominatorCoefficient.EqualOne()) {
+					m_reduction_coefficient = Fraction(numeratorCoefficient, denominatorCoefficient);
+					m_reduction_base = Fraction(numeratorBase, denominatorBase);
+				}
+				else {
+					m_reduction_coefficient = Fraction(1);
+					m_reduction_base = m_base;
+				}
+			}
 		}
 		else {
-			m_reduction_coefficient = m_reduction_base = Fraction(0);
+			m_reduction_base = Fraction(0);
+			m_reduction_coefficient = Fraction(1);
 		}
 	}
 
 	bool Root::IsFraction() const {
-		return EqualZero() || m_exponent.GetAbs() == Fraction(1) || m_reduction_base.GetAbs() == Fraction(1);
+		return EqualZero() || m_exponent.GetAbs().EqualOne() || m_reduction_base.GetAbs().EqualOne();
 	}
 
 	bool Root::IsImaginary() const {
 		return !m_base.IsPositive() &&
-			1 == m_exponent.Denominator().Value() % Natural(2, m_exponent.Denominator().GetRadix()) &&
-			0 == m_exponent.Numerator().Value() % Natural(2, m_exponent.Denominator().GetRadix());
+			(m_exponent.Denominator().Value() % Natural(2, m_exponent.Denominator().GetRadix())).EqualOne() &&
+			(m_exponent.Numerator().Value() % Natural(2, m_exponent.Denominator().GetRadix())).EqualZero();
 	}
 
 	Fraction Root::GetFraction(const Integer &base, uint8_t radix, size_t decimalLength)const {

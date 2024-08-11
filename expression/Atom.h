@@ -9,9 +9,11 @@ namespace expression {
 		Atom(OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD);
 		Atom(const Atom &prototype);
 
-		const std::string OutPutString(size_t pos = 0) const override;
+		const std::string OutPutString() const override;
 
 		virtual const std::string GetString(size_t pos = 0, uint8_t radix = 10) const = 0;
+
+		virtual bool IsPositive() const = 0;
 
 		const Atom &operator=(const Atom &right);
 	};

@@ -29,6 +29,7 @@ namespace number {
 		void SetRadix(uint8_t radix = 10) override;
 		uint8_t GetRadix() const override;
 		bool EqualZero() const override;
+		bool EqualOne() const override;
 		void SetPositive(bool isPositive)override;
 		bool IsPositive() const override;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,

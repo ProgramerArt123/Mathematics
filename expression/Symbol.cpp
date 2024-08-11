@@ -11,6 +11,9 @@ namespace expression {
 		Atom(flag), m_name(name), m_positive(isPositive){
 
 	}
+	bool Symbol::IsPositive() const {
+		return m_positive;
+	}
 	const std::string Symbol::GetString(size_t pos, uint8_t radix) const {
 		return m_positive ? Name() : "-" + Name();
 	}

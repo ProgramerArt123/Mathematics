@@ -9,7 +9,7 @@
 namespace number {
 	class Number : public Output {
 	public:
-		const std::string OutPutString(size_t pos = 0) const override;
+		const std::string OutPutString() const override;
 
 		virtual const std::string GetString(uint8_t radix = 10) const = 0;
 		virtual const std::string GetDecimal(uint8_t radix, size_t decimalLength,
@@ -21,6 +21,7 @@ namespace number {
 		virtual void SetRadix(uint8_t radix = 10) = 0;
 		virtual uint8_t GetRadix() const = 0;
 		virtual bool EqualZero() const = 0;
+		virtual bool EqualOne() const = 0;
 		virtual void SetPositive(bool isPositive) = 0;
 		virtual bool IsPositive() const = 0;
 

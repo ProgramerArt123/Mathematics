@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include <iostream>
+
 #include "Output.h"
 
 namespace expression {
@@ -56,42 +58,42 @@ namespace expression {
 
 	class OPERATOR_TYPE_ADD : public OPERATOR_TYPE_0 {
 	public:
-		const std::string OutPutString(size_t pos = 0) const override;
+		const std::string OutPutString() const override;
 		OPERATOR_TYPE_FLAG GetFlag() const override;
 		std::unique_ptr<OPERATOR_TYPE> Superposition(const OPERATOR_TYPE &other) const override;
 	};
 
 	class OPERATOR_TYPE_SUB : public OPERATOR_TYPE_0 {
 	public:
-		const std::string OutPutString(size_t pos = 0) const override;
+		const std::string OutPutString() const override;
 		OPERATOR_TYPE_FLAG GetFlag() const override;
 		std::unique_ptr<OPERATOR_TYPE> Superposition(const OPERATOR_TYPE &other) const override;
 	};
 
 	class OPERATOR_TYPE_MUL : public OPERATOR_TYPE_1 {
 	public:
-		const std::string OutPutString(size_t pos = 0) const override;
+		const std::string OutPutString() const override;
 		OPERATOR_TYPE_FLAG GetFlag() const override;
 		std::unique_ptr<OPERATOR_TYPE> Superposition(const OPERATOR_TYPE &other) const override;
 	};
 
 	class OPERATOR_TYPE_DIV : public OPERATOR_TYPE_1 {
 	public:
-		const std::string OutPutString(size_t pos = 0) const override;
+		const std::string OutPutString() const override;
 		OPERATOR_TYPE_FLAG GetFlag() const override;
 		std::unique_ptr<OPERATOR_TYPE> Superposition(const OPERATOR_TYPE &other) const override;
 	};
 
 	class OPERATOR_TYPE_POWER : public OPERATOR_TYPE_2 {
 	public:
-		const std::string OutPutString(size_t pos = 0) const override;
+		const std::string OutPutString() const override;
 		OPERATOR_TYPE_FLAG GetFlag() const override;
 		std::unique_ptr<OPERATOR_TYPE> Superposition(const OPERATOR_TYPE &other) const override;
 	};
 
 	class OPERATOR_TYPE_ROOT : public OPERATOR_TYPE_2 {
 	public:
-		const std::string OutPutString(size_t pos = 0) const override;
+		const std::string OutPutString() const override;
 		OPERATOR_TYPE_FLAG GetFlag() const override;
 		std::unique_ptr<OPERATOR_TYPE> Superposition(const OPERATOR_TYPE &other) const override;
 	};

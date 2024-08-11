@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "Operator.h"
 namespace expression {
 
@@ -40,8 +42,8 @@ namespace expression {
 		return OPERATOR_TYPE_LEVEL_2;
 	}
 	
-	const std::string OPERATOR_TYPE_ADD::OutPutString(size_t pos) const {
-		return pos ? "+" : "";
+	const std::string OPERATOR_TYPE_ADD::OutPutString() const {
+		return m_position ? "+" : "";
 	}
 
 	OPERATOR_TYPE_FLAG OPERATOR_TYPE_ADD::GetFlag() const {
@@ -49,15 +51,11 @@ namespace expression {
 	}
 
 	std::unique_ptr<OPERATOR_TYPE> OPERATOR_TYPE_ADD::Superposition(const OPERATOR_TYPE &other) const {
-		if (OPERATOR_TYPE_FLAG_SUB != other.GetFlag()){
-			return OperatorFactory(expression::OPERATOR_TYPE_FLAG_ADD);
-		}
-		else{
-			return OperatorFactory(expression::OPERATOR_TYPE_FLAG_SUB);
-		}
+		return OperatorFactory(other.GetFlag());
 	}
 
-	const std::string OPERATOR_TYPE_SUB::OutPutString(size_t pos) const {
+	const std::string OPERATOR_TYPE_SUB::OutPutString() const {
+		//assert(m_position);
 		return "-";
 	}
 
@@ -74,8 +72,9 @@ namespace expression {
 		}
 	}
 	
-	const std::string OPERATOR_TYPE_MUL::OutPutString(size_t pos) const {
-		return pos ? "*" : "";
+	const std::string OPERATOR_TYPE_MUL::OutPutString() const {
+		//assert(m_position);
+		return "*";
 	}
 
 	OPERATOR_TYPE_FLAG OPERATOR_TYPE_MUL::GetFlag() const {
@@ -91,7 +90,8 @@ namespace expression {
 		}
 	}
 
-	const std::string OPERATOR_TYPE_DIV::OutPutString(size_t pos) const {
+	const std::string OPERATOR_TYPE_DIV::OutPutString() const {
+		//assert(m_position);
 		return "/";
 	}
 
@@ -108,8 +108,9 @@ namespace expression {
 	}
 
 
-	const std::string OPERATOR_TYPE_POWER::OutPutString(size_t pos) const {
-		return pos ? "^" : "";
+	const std::string OPERATOR_TYPE_POWER::OutPutString() const {
+		//assert(m_position);
+		return "^";
 	}
 
 	OPERATOR_TYPE_FLAG OPERATOR_TYPE_POWER::GetFlag() const {
@@ -124,7 +125,8 @@ namespace expression {
 		}
 	}
 
-	const std::string OPERATOR_TYPE_ROOT::OutPutString(size_t pos) const {
+	const std::string OPERATOR_TYPE_ROOT::OutPutString() const {
+		//assert(m_position);
 		return "@";
 	}
 

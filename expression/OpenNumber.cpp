@@ -12,8 +12,11 @@ namespace expression {
 	}
 	OpenNumber::OpenNumber(const number::Root &value, OPERATOR_TYPE_FLAG flag) : m_value(value), Number(flag){
 	}
+	bool OpenNumber::IsPositive() const {
+		return m_value.IsPositive();
+	}
 	const std::string OpenNumber::GetString(size_t pos, uint8_t radix) const {
-		return m_value.OutPutString(pos);
+		return m_value.updatePosition(pos).OutPutString();
 	}
 	bool OpenNumber::EqualZero() const {
 		return Value().EqualZero();

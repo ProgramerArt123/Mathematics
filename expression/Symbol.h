@@ -10,6 +10,8 @@ namespace expression {
 		Symbol(const expression::Symbol &prototype, OPERATOR_TYPE_FLAG flag);
 		Symbol(const std::string &name, bool isPositive = true, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD);
 
+		bool IsPositive() const override;
+
 		virtual const std::string GetString(size_t pos = 0, uint8_t radix = 10) const override;
 
 		const std::string &Name() const;

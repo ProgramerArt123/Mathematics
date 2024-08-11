@@ -16,8 +16,9 @@ namespace expression {
 		const OPERATOR_TYPE &Operator() const;
 		OPERATOR_TYPE_LEVEL Level() const;
 		OPERATOR_TYPE_FLAG Flag() const;
+		bool IsAdd() const;
 
-		virtual bool IsEqual(const Node &other) const;
+		virtual bool IsEqual(const Node &other, bool ignoreOperator = false) const;
 		virtual bool EqualZero() const = 0;
 		virtual bool EqualOne() const = 0;
 
@@ -25,15 +26,11 @@ namespace expression {
 
 		void SuperpositionFlag(const OPERATOR_TYPE &other);
 
-		bool IsBase() const;
-		void SetBase();
-
 		void SetOperator(OPERATOR_TYPE_FLAG flag);
 	protected:
 
 		std::unique_ptr<OPERATOR_TYPE> m_operator;
 
-		bool m_is_base = false;
 	};
 }
 

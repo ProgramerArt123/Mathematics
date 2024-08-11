@@ -17,14 +17,15 @@ namespace number {
 		void SetRadix(uint8_t radix = 10) override;
 		uint8_t GetRadix() const override;
 		bool EqualZero() const override;
+		bool EqualOne() const override;
 		void SetPositive(bool isPositive) override;
 		bool IsPositive() const override;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
 
-		operator bool() const;
 		Natural Factorial() const;
 		bool operator==(const Natural &other) const;
+		bool operator!=(const Natural &other) const;
 		bool operator>(const Natural &other) const;
 		bool operator<(const Natural &other) const;
 		bool operator>=(const Natural &other) const;
@@ -44,6 +45,7 @@ namespace number {
 		Natural Root(const Natural &exponent) const;
 
 		Natural &operator++();
+		Natural &operator--();
 
 		Natural GreatestCommonDivisor(const Natural &other) const;
 		Natural Composition(const Natural &m) const;

@@ -14,21 +14,9 @@ namespace number {
 	}
 	Fraction::Fraction(const number::Integer &numerator, const number::Integer &denominator) :
 		m_numerator(numerator), m_denominator(denominator) {
-		assert(0 != m_denominator);
+		assert(!m_denominator.EqualZero());
 		m_numerator.SetRadix(m_denominator.GetRadix());
 		Reduce();
-		if (m_numerator.EqualZero()) {
-			m_numerator.SetPositive(true);
-		}
-		else if (m_numerator.IsPositive() ==
-			m_denominator.IsPositive()) {
-			m_denominator.SetPositive(true);
-			m_numerator.SetPositive(true);
-		}
-		else if (!m_denominator.IsPositive()) {
-			m_denominator.SetPositive(true);
-			m_numerator.SetPositive(false);
-		}
 	}
 	Fraction::Fraction(const number::Integer &numerator, const Fraction &denominator) {
 		*this = numerator / denominator;
@@ -50,7 +38,7 @@ namespace number {
 		if (m_numerator.EqualZero()) {
 			return m_numerator.GetString(radix);
 		}
-		else if (number::Integer(1) == m_denominator) {
+		else if (m_denominator.EqualOne()) {
 			return m_numerator.GetString(radix);
 		}
 		else if(m_reduction_integer.EqualZero()){
@@ -69,6 +57,9 @@ namespace number {
 	}
 	bool Fraction::EqualZero() const {
 		return m_numerator.EqualZero();
+	}
+	bool Fraction::EqualOne() const {
+		return IsPositive() && m_numerator.GetAbs() == m_denominator.GetAbs();
 	}
 	void Fraction::SetPositive(bool isPositive) {
 		m_numerator.SetPositive(isPositive);
@@ -104,7 +95,7 @@ namespace number {
 	}
 
 	bool Fraction::IsInteger() const {
-		return Denominator().GetAbs() == number::Integer(1);
+		return Denominator().GetAbs().EqualOne();
 	}
 
 	void Fraction::Opposite() {
@@ -164,6 +155,23 @@ namespace number {
 		m_denominator /= common;
 		m_reduction_integer = m_numerator / m_denominator;
 		m_reduction_numerator = m_numerator % m_denominator;
+
+		if (m_numerator.EqualZero()) {
+			m_numerator.SetPositive(true);
+		}
+		else if (m_numerator.IsPositive() ==
+			m_denominator.IsPositive()) {
+			m_denominator.SetPositive(true);
+			m_numerator.SetPositive(true);
+		}
+		else if (!m_denominator.IsPositive()) {
+			m_denominator.SetPositive(true);
+			m_numerator.SetPositive(false);
+		}
+		m_reduction_numerator.SetPositive(m_numerator.IsPositive());
+		if (m_reduction_integer.GetAbs().EqualZero()) {
+			m_reduction_integer.SetPositive(true);
+		}
 	}
 
 	Fraction Fraction::operator-() const {
@@ -210,7 +218,7 @@ namespace number {
 		return *this = *this / divisor;
 	}
 	Fraction Fraction::operator/(const Fraction &divisor) const {
-		assert(0 != divisor.m_numerator);
+		assert(!divisor.m_numerator.EqualZero());
 		return *this * Fraction(divisor.m_denominator, divisor.m_numerator);
 	}
 	Fraction Fraction::Power(const number::Integer &exponent) const {
@@ -246,7 +254,7 @@ namespace number {
 	}
 	Fraction Fraction::Power(const number::Integer &number, const number::Integer &exponent) {
 		number::Integer product = number.Value().Power(exponent.Value());
-		product.SetPositive(product.IsPositive() || 0 == exponent.Value() % Natural(2));
+		product.SetPositive(product.IsPositive() || (exponent.Value() % Natural(2)).EqualZero());
 		if (exponent.IsPositive()) {
 			return Fraction(product, 1);
 		}

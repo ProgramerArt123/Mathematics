@@ -30,6 +30,9 @@ namespace number {
 	bool Imaginary::EqualZero() const {
 		return m_value.EqualZero();
 	}
+	bool Imaginary::EqualOne() const {
+		return m_value.EqualOne();
+	}
 	void Imaginary::SetPositive(bool isPositive) {
 		m_value.SetPositive(isPositive);
 	}

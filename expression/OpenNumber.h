@@ -12,6 +12,7 @@ namespace expression {
 		OpenNumber(const expression::OpenNumber &prototype);
 		OpenNumber(const expression::OpenNumber &prototype, OPERATOR_TYPE_FLAG flag);
 		OpenNumber(const number::Root &value, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD);
+		bool IsPositive() const override;
 		const std::string GetString(size_t pos = 0, uint8_t radix = 10) const override;
 		bool EqualZero() const override;
 		bool EqualOne() const override;

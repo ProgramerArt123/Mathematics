@@ -15,13 +15,16 @@ namespace expression {
 		SetOperator(flag);
 	}
 	ClosureNumber::ClosureNumber(const number::Integer &value, OPERATOR_TYPE_FLAG flag) :
-		Number(OPERATOR_TYPE_FLAG_ADD), m_value(value) {
+		Number(flag), m_value(value) {
+	}
+	bool ClosureNumber::IsPositive() const {
+		return m_value.IsPositive();
 	}
 	const std::string ClosureNumber::GetString(size_t pos, uint8_t radix) const {
-		return m_value.OutPutString(pos);
+		return m_value.updatePosition(pos).OutPutString();
 	}
-	bool ClosureNumber::IsEqual(const Node &other) const {
-		if (!Node::IsEqual(other)) {
+	bool ClosureNumber::IsEqual(const Node &other, bool ignoreOperator) const {
+		if (!Node::IsEqual(other, ignoreOperator)) {
 			return false;
 		}
 		const ClosureNumber &otherClosure = dynamic_cast<const ClosureNumber&>(other);
@@ -31,10 +34,10 @@ namespace expression {
 		return Value().EqualZero();
 	}
 	bool ClosureNumber::EqualOne() const {
-		return Value() == number::Integer(1);
+		return Value().EqualOne();
 	}
 	void ClosureNumber::Opposite() {
-
+		m_value.Opposite();
 	}
 	const number::Integer &ClosureNumber::Value() const {
 		return m_value;

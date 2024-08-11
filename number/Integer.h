@@ -15,6 +15,7 @@ namespace number {
 		void SetRadix(uint8_t radix = 10) override;
 		uint8_t GetRadix() const override;
 		bool EqualZero() const override;
+		bool EqualOne() const override;
 		void SetPositive(bool isPositive)override;
 		bool IsPositive() const override;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
@@ -24,7 +25,6 @@ namespace number {
 		Integer GetAbs() const;
 		void Opposite();
 
-		operator bool() const;
 		Integer operator-() const;
 		Integer operator+(const Integer &addition) const;
 		Integer operator-(const Integer &subtrahend) const;
@@ -36,7 +36,11 @@ namespace number {
 		Integer &operator*=(const Integer &multiplier);
 		Integer &operator/=(const Integer &divisor);
 		bool operator==(const Integer &other)const;
-
+		bool operator!=(const Integer &other) const;
+		bool operator>(const Integer &other) const;
+		bool operator<(const Integer &other) const;
+		bool operator>=(const Integer &other) const;
+		bool operator<=(const Integer &other) const;
 	private:
 		Integer PositiveAdd(const Integer &addition) const;
 		Integer PositiveSub(const Integer &subtrahend) const;
