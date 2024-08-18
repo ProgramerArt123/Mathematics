@@ -52,17 +52,15 @@ namespace expression {
 			m_nodes = right.m_nodes;
 			m_is_child = right.m_is_child;
 			InitPolymorphism();
-			if (!right.m_polymorphism->IsPositive()) {
-				m_polymorphism->Opposite();
-			}
+			m_polymorphism->SetPositive(right.m_polymorphism->IsPositive());
 			return *this;
 		}
 
 		bool operator==(const Expression<OperatorType> &other) const {
-			if (Size() != other.Size()) {
+			if (m_polymorphism->IsPositive() != other.m_polymorphism->IsPositive()) {
 				return false;
 			}
-			if (!m_polymorphism->IsEqual(*Visit(other.First()))) {
+			if (Size() != other.Size()) {
 				return false;
 			}
 			for (auto& i : m_nodes) {
@@ -231,6 +229,14 @@ namespace expression {
 			}
 			return out;
 		}
+
+
+		Expression<OperatorType> GetOpposite() {
+			Expression<OperatorType> opposite(*this);
+			opposite.Opposite();
+			return opposite;
+		}
+
 		static Expression<OPERATOR_TYPE_0> Absorb(const number::Fraction &number) {
 			const Expression<OPERATOR_TYPE_1> reduction(number.ReductionNumerator(),
 				OPERATOR_TYPE_DIV(), number.Denominator());
@@ -986,16 +992,34 @@ namespace expression {
 			GetAll(leftChildren);
 			std::vector<ExpressionNodes::const_iterator> rightChildren;
 			right.GetAll(rightChildren);
-			expression::Expression<OperatorType> commons;
-			bool isCommonBase = false;
+			std::list<ExpressionNode> commons;
+			bool isOpposite = false;
 			for (auto leftChild = leftChildren.begin(); leftChild != leftChildren.end(); ) {
 				if ([&] {
 					for (auto rightChild = rightChildren.begin(); rightChild != rightChildren.end(); ++rightChild) {
 						if (Visit(**leftChild)->IsEqual(*Visit(**rightChild), true)) {
-							isCommonBase = isCommonBase || Visit(**leftChild)->IsAdd();
-							commons.AppendNode(**leftChild);
-							rightChildren.erase(rightChild);
-							return true;
+							if (Visit(**leftChild)->Flag() == Visit(**rightChild)->Flag()) {
+								commons.push_back(**leftChild);
+								rightChildren.erase(rightChild);
+								return true;
+							}
+							if ((OPERATOR_TYPE_FLAG_ADD == Visit(**leftChild)->Flag() && OPERATOR_TYPE_FLAG_MUL == Visit(**rightChild)->Flag()) ||
+								(OPERATOR_TYPE_FLAG_MUL == Visit(**leftChild)->Flag() && OPERATOR_TYPE_FLAG_ADD == Visit(**rightChild)->Flag())) {
+								commons.push_back(**leftChild);
+								rightChildren.erase(rightChild);
+								return true;
+							}
+						}
+
+						if (OPERATOR_TYPE_LEVEL_1 == OperatorType::LEVEL) {
+							std::unique_ptr<Node> clone = std::move(GetClone(**leftChild));
+							clone->Opposite();
+							if (clone->IsEqual(*Visit(**rightChild), true)) {
+								commons.push_back(**leftChild);
+								rightChildren.erase(rightChild);
+								isOpposite = !isOpposite;
+								return true;
+							}
 						}
 					}
 					return false;
@@ -1006,22 +1030,12 @@ namespace expression {
 					++leftChild;
 				}
 			}
-
-			if (commons.IsEmpty()) {
+			if (commons.empty()) {
 				return std::nullopt;
 			}
-			Expression<OperatorType> collect;
-			if (isCommonBase) {
-				collect.AppendNode(commons);
+			else {
+				return std::get<expression::Expression<OperatorType>>(m_polymorphism->BuildCommon(leftChildren, rightChildren, right.Flag(), commons, isOpposite));
 			}
-			std::visit([&collect, isCommonBase](auto &&c) {
-				collect.AppendChild(c.SetChild());
-			}, m_polymorphism->BuildCommon(leftChildren, rightChildren, right.Flag()));
-			if (!isCommonBase) {
-				commons.SetOperator(Visit(collect.Last())->Flag());
-				collect.AppendNode(commons);
-			}
-			return collect;
 		}
 
 		template<typename ChildOperatorType>
@@ -1090,6 +1104,26 @@ namespace expression {
 			return pNode;
 		}
 
+		static std::unique_ptr<Node> GetClone(const ExpressionNode &original) {
+			if (std::get_if<expression::ClosureNumber>(&original)) {
+				return std::make_unique<expression::ClosureNumber>(std::get<expression::ClosureNumber>(original));
+			}
+			if (std::get_if<expression::Symbol>(&original)) {
+				return std::make_unique<expression::Symbol>(std::get<expression::Symbol>(original));
+			}
+			if (std::get_if<expression::Expression<OPERATOR_TYPE_0>>(&original)) {
+				return std::make_unique<expression::Expression<OPERATOR_TYPE_0>>(std::get<expression::Expression<OPERATOR_TYPE_0>>(original));
+			}
+			if (std::get_if<expression::Expression<OPERATOR_TYPE_1>>(&original)) {
+				return std::make_unique<expression::Expression<OPERATOR_TYPE_1>>(std::get<expression::Expression<OPERATOR_TYPE_1>>(original));
+			}
+			if (std::get_if<expression::Expression<OPERATOR_TYPE_2>>(&original)) {
+				return std::make_unique<expression::Expression<OPERATOR_TYPE_2>>(std::get<expression::Expression<OPERATOR_TYPE_2>>(original));
+			}
+			return nullptr;
+		}
+
+
 		protected:
 
 			class Polymorphism {
@@ -1097,9 +1131,8 @@ namespace expression {
 				virtual size_t CollectSpecial(size_t count) = 0;
 				virtual void GetChildren(std::vector<ExpressionNodes::iterator> &exps) = 0;
 				virtual bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) = 0;
-				virtual std::variant<Expression<OPERATOR_TYPE_0>, Expression<OPERATOR_TYPE_1>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
-					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right) = 0;
-				virtual bool IsEqual(const Node &other) const = 0;
+				virtual std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons, bool isOpposite) = 0;
 				virtual bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) = 0;
 				virtual size_t CollectClosureExp1(size_t count) = 0;
 				virtual size_t CollectClosureExp2(size_t count) = 0;
@@ -1109,6 +1142,7 @@ namespace expression {
 				virtual void SetFractionReduction(const number::Fraction &fraction) = 0;
 				virtual std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const = 0;
 				virtual bool IsPositive() const = 0;
+				virtual void SetPositive(bool isPositive) = 0;
 				virtual void Opposite() = 0;
 
 				template<typename ChildOperatorType>
@@ -1122,9 +1156,9 @@ namespace expression {
 				size_t CollectSpecial(size_t count) override;
 				void GetChildren(std::vector<ExpressionNodes::iterator> &exps) override;
 				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				std::variant<Expression<OPERATOR_TYPE_0>, Expression<OPERATOR_TYPE_1>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
-					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right) override;
-				bool IsEqual(const Node &other) const override;
+				std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons, bool isOpposite) override;
+
 				bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
 				size_t CollectClosureExp1(size_t count) override;
 				size_t CollectClosureExp2(size_t count) override;
@@ -1134,6 +1168,7 @@ namespace expression {
 				void SetFractionReduction(const number::Fraction &fraction) override;
 				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
 				bool IsPositive() const override;
+				void SetPositive(bool isPositive) override;
 				void Opposite() override;
 
 				Expression<OPERATOR_TYPE_1> LevelDown(ExpressionNodes::iterator exp2);
@@ -1148,9 +1183,8 @@ namespace expression {
 				size_t CollectSpecial(size_t count) override;
 				void GetChildren(std::vector<ExpressionNodes::iterator> &exps) override;
 				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				std::variant<Expression<OPERATOR_TYPE_0>, Expression<OPERATOR_TYPE_1>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
-					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right) override;
-				bool IsEqual(const Node &other) const override;
+				std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons, bool isOpposite) override;
 				bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
 				
 				size_t CollectClosureExp1(size_t count) override;
@@ -1161,6 +1195,7 @@ namespace expression {
 				void SetFractionReduction(const number::Fraction &fraction) override;
 				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
 				bool IsPositive() const override;
+				void SetPositive(bool isPositive) override;
 				void Opposite() override;
 
 				template<typename ChildOperatorType>
@@ -1176,9 +1211,8 @@ namespace expression {
 				size_t CollectSpecial(size_t count) override;
 				void GetChildren(std::vector<ExpressionNodes::iterator> &exps) override;
 				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				std::variant<Expression<OPERATOR_TYPE_0>, Expression<OPERATOR_TYPE_1>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
-					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right) override;
-				bool IsEqual(const Node &other) const override;
+				std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons, bool isOpposite) override;
 				bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
 				size_t CollectClosureExp1(size_t count) override;
 				size_t CollectClosureExp2(size_t count) override;
@@ -1188,6 +1222,7 @@ namespace expression {
 				void SetFractionReduction(const number::Fraction &fraction) override;
 				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
 				bool IsPositive() const override;
+				void SetPositive(bool isPositive) override;
 				void Opposite() override;
 
 				const Node *Base() const;

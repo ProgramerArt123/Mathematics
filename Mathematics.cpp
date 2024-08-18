@@ -338,6 +338,12 @@ int main() {
 		expression::Expression<OPERATOR_TYPE_1> e(number::Integer(1), OPERATOR_TYPE_MUL(), e0, OPERATOR_TYPE_DIV(), e2, OPERATOR_TYPE_MUL(), e4, OPERATOR_TYPE_MUL(), e5, OPERATOR_TYPE_MUL(), s);
 		e.CollectForward(std::cout) << std::endl;
 	}
+	{
+		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(2), OPERATOR_TYPE_ROOT(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_1> e1(e0.GetOpposite(), OPERATOR_TYPE_MUL(), number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_0> e(e0, OPERATOR_TYPE_ADD(), e1);
+		e.CollectForward(std::cout) << std::endl;
+	}
 #endif
 	getchar();
 	return 0;

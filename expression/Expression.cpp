@@ -270,13 +270,9 @@ namespace expression {
 		return false;
 	}
 	template<typename OperatorType>
-	std::variant<Expression<OPERATOR_TYPE_0>, Expression<OPERATOR_TYPE_1>> Expression<OperatorType>::Polymorphism0::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
-		const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right) {
-		return Expression<OPERATOR_TYPE_0>();
-	}
-	template<typename OperatorType>
-	bool Expression<OperatorType>::Polymorphism0::IsEqual(const Node &other) const {
-		return true;
+	std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> Expression<OperatorType>::Polymorphism0::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+		const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons, bool isOpposite) {
+		return Expression<OPERATOR_TYPE_1>();
 	}
 	template<typename OperatorType>
 	bool Expression<OperatorType>::Polymorphism0::CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) {
@@ -345,6 +341,9 @@ namespace expression {
 	template<typename OperatorType>
 	bool Expression<OperatorType>::Polymorphism0::IsPositive() const {
 		return true;
+	}
+	template<typename OperatorType>
+	void Expression<OperatorType>::Polymorphism0::SetPositive(bool isPositive) {
 	}
 	template<typename OperatorType>
 	void Expression<OperatorType>::Polymorphism0::Opposite() {
@@ -425,10 +424,9 @@ namespace expression {
 		return false;
 	}
 	template<typename OperatorType>
-	std::variant<Expression<OPERATOR_TYPE_0>, Expression<OPERATOR_TYPE_1>> Expression<OperatorType>::Polymorphism1::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
-		const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right) {
-		Expression<OPERATOR_TYPE_0> child;
-
+	std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> Expression<OperatorType>::Polymorphism1::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+		const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons, bool isOpposite) {
+		
 		Expression<OPERATOR_TYPE_1> childLeft(OPERATOR_TYPE_FLAG_ADD);
 		if (leftChildren.empty()) {
 			childLeft.AppendNode(expression::ClosureNumber(1));
@@ -463,20 +461,26 @@ namespace expression {
 			}
 		}
 
+		if (isOpposite) {
+			childRight.Opposite();
+		}
+
+		Expression<OPERATOR_TYPE_0> child;
 		if (OPERATOR_TYPE_FLAG_SUB == right) {
 			child = Expression<OPERATOR_TYPE_0>(childLeft, OPERATOR_TYPE_SUB(), childRight);
 		}
 		else {
 			child = Expression<OPERATOR_TYPE_0>(childLeft, OPERATOR_TYPE_ADD(), childRight);
 		}
-
 		child.SetOperator(OPERATOR_TYPE_FLAG_MUL);
 
-		return child;
-	}
-	template<typename OperatorType>
-	bool Expression<OperatorType>::Polymorphism1::IsEqual(const Node &other) const {
-		return true;
+		Expression<OPERATOR_TYPE_1> collect;
+		for (auto &common : commons) {
+			collect.AppendNode(common);
+		}
+		collect.AppendChild(child.SetChild());
+		
+		return collect;
 	}
 	template<typename OperatorType>
 	bool Expression<OperatorType>::Polymorphism1::CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) {
@@ -570,6 +574,9 @@ namespace expression {
 		return true;
 	}
 	template<typename OperatorType>
+	void Expression<OperatorType>::Polymorphism1::SetPositive(bool isPositive) {
+	}
+	template<typename OperatorType>
 	void Expression<OperatorType>::Polymorphism1::Opposite() {
 		Visit(m_exp.Last())->Opposite();
 	}
@@ -632,19 +639,16 @@ namespace expression {
 		return false;
 	}
 	template<typename OperatorType>
-	std::variant<Expression<OPERATOR_TYPE_0>, Expression<OPERATOR_TYPE_1>> Expression<OperatorType>::Polymorphism2::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
-		const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right) {
+	std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> Expression<OperatorType>::Polymorphism2::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+		const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons, bool isOpposite) {
 		
 		Expression<OPERATOR_TYPE_1> childLeft;
-
-		bool isBase = false;
 
 		if (leftChildren.empty()) {
 			childLeft.AppendNode(expression::ClosureNumber(1));
 		}
 		else {
 			for (auto &diff : leftChildren) {
-				isBase = isBase || Visit(*diff)->IsAdd();
 				std::visit([&childLeft](auto &&n) {
 					if (OPERATOR_TYPE_FLAG_ROOT == n.Flag()) {
 						childLeft.AppendNode(Reciprocal(n));
@@ -673,7 +677,15 @@ namespace expression {
 			}
 		}
 
-		if (!isBase) {
+		bool isCommonBase = false;
+		for (auto &common : commons) {
+			if (Visit(common)->IsAdd()) {
+				isCommonBase = true;
+				break;
+			}
+		}
+
+		if (isCommonBase) {
 			Expression<OPERATOR_TYPE_0> child;
 			if (OPERATOR_TYPE_FLAG_DIV == right) {
 				child = Expression<OPERATOR_TYPE_0>(childLeft, OPERATOR_TYPE_SUB(), childRight);
@@ -682,7 +694,12 @@ namespace expression {
 				child = Expression<OPERATOR_TYPE_0>(childLeft, OPERATOR_TYPE_ADD(), childRight);
 			}
 			child.SetOperator(OPERATOR_TYPE_FLAG_POWER);
-			return child;
+			Expression<OPERATOR_TYPE_2> collect;
+			for (auto &common : commons) {
+				collect.AppendNode(common);
+			}
+			collect.AppendChild(child.SetChild());
+			return collect;
 		}
 		else {
 			Expression<OPERATOR_TYPE_1> child;
@@ -693,12 +710,15 @@ namespace expression {
 				child = Expression<OPERATOR_TYPE_1>(childLeft, OPERATOR_TYPE_MUL(), childRight);
 			}
 			child.SetOperator(OPERATOR_TYPE_FLAG_POWER);
+			Expression<OPERATOR_TYPE_2> collect;
+			collect.AppendChild(child.SetChild());
+			for (auto &common : commons) {
+				collect.AppendNode(common);
+			}
 			return child;
 		}
-	}
-	template<typename OperatorType>
-	bool Expression<OperatorType>::Polymorphism2::IsEqual(const Node &other) const {
-		return *Base() == other;
+
+
 	}
 	template<typename OperatorType>
 	bool Expression<OperatorType>::Polymorphism2::CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) {
@@ -743,6 +763,10 @@ namespace expression {
 	template<typename OperatorType>
 	bool Expression<OperatorType>::Polymorphism2::IsPositive() const {
 		return m_positive;
+	}
+	template<typename OperatorType>
+	void Expression<OperatorType>::Polymorphism2::SetPositive(bool isPositive) {
+		m_positive = isPositive;
 	}
 	template<typename OperatorType>
 	void Expression<OperatorType>::Polymorphism2::Opposite() {
