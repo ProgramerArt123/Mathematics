@@ -43,8 +43,8 @@ namespace expression {
 			}
 			return summation;
 		}
-		const std::string OutPutString(size_t pos = 0) const override {
-			return GetMonomial().OutPutString(pos);
+		const std::string OutPutString() const override {
+			return GetMonomial().OutPutString();
 		}
 
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,

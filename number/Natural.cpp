@@ -32,21 +32,20 @@ namespace number {
 		assert(2 <= radix && radix <= (11 + ('Z' - 'A')));
 		const Natural bitRadix(radix, GetRadix());
 		const Natural bitZero(0, GetRadix());
-		std::list<char> result;
+		std::list<char> str;
 		Natural remaining(*this);
 		do {
-			Natural quotient(0, m_radix), remainde(0, m_radix);
-			remaining.Div(bitRadix, quotient, remainde);
-			uint8_t built = remainde.GetBuilt();
+			std::pair<Natural, Natural> result(remaining.Div(bitRadix));
+			uint8_t built = result.second.GetBuilt();
 			if (0 <= built && built <= 9) {
-				result.push_front('0' + built);
+				str.push_front('0' + built);
 			}
 			else {
-				result.push_front('A' + (built - 10));
+				str.push_front('A' + (built - 10));
 			}
-			remaining = quotient;
+			remaining = result.first;
 		} while (remaining > bitZero);
-		return std::string(result.cbegin(), result.cend());
+		return std::string(str.cbegin(), str.cend());
 	}
 	void Natural::SetRadix(uint8_t radix) {
 		if (m_radix != radix) {
@@ -211,18 +210,14 @@ namespace number {
 		return *this;
 	}
 	Natural Natural::operator/(const Natural &divisor) const {
-		Natural quotient(0, m_radix), remainder(0, m_radix);
-		Div(divisor, quotient, remainder);
-		return quotient;
+		return Div(divisor).first;
 	}
 	Natural &Natural::operator/=(const Natural &divisor) {
 		*this = *this / divisor;
 		return *this;
 	}
 	Natural Natural::operator%(const Natural &divisor) const {
-		Natural quotient(0, m_radix), remainder(0, m_radix);
-		Div(divisor, quotient, remainder);
-		return remainder;
+		return Div(divisor).second;
 	}
 	Natural Natural::Power(const Natural &exponent) const {
 		const Natural &radixExponent = exponent.GetNatural(m_radix);
@@ -233,64 +228,62 @@ namespace number {
 		return result;
 	}
 
-	Natural Natural::Root2(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, Natural &remainder) const {
+	std::pair<Natural, Natural> Natural::PowerInverse2(const Natural &factor, std::vector<char> &singles, size_t index, char top, char bottom, std::function<Natural(const Natural&, const Natural&)> power) const {
 		char c = GetChar((GetValue(top) + GetValue(bottom)) / 2);
 		singles[index] = c;
 		const Natural value(std::list<char>(singles.cbegin(), singles.cend()), m_radix);
-		const Natural &power = value.Power(exponent);
-		if (power == *this) {
-			return value;
+		const Natural guessValue(power(factor, value));
+		if (guessValue == *this) {
+			return std::make_pair<Natural, Natural>(Natural(value), Natural(0));
 		}
-		else if (power > *this) {
+		else if (guessValue > *this) {
 			if (GetValue(c) > GetValue(bottom)) {
-				return Root2(exponent, singles, index, GetChar(GetValue(c) - 1), bottom, remainder);
+				return PowerInverse2(factor, singles, index, GetChar(GetValue(c) - 1), bottom, power);
 			}
 			else {
 				if (index) {
-					return Root2(exponent, singles, index - 1, GetChar(m_radix - 1), '0', remainder);
+					return PowerInverse2(factor, singles, index - 1, GetChar(m_radix - 1), '0', power);
 				}
 				else {
-					return Natural(std::list<char>(singles.cbegin(), singles.cend()));
+					return std::make_pair<Natural, Natural>(Natural(std::list<char>(singles.cbegin(), singles.cend())), Natural(0));
 				}
 			}
 		}
 		else {
 			if (GetValue(c) < GetValue(top)) {
 				if (GetValue(c) < GetValue(top) - 1) {
-					return Root2(exponent, singles, index, top, c, remainder);
+					return PowerInverse2(factor, singles, index, top, c, power);
 				}
 				else {
-					return Root(exponent, singles, index, top, c, remainder);
+					return PowerInverse(factor, singles, index, top, c, power);
 				}
 			}
 			else {
 				if (index) {
-					return Root2(exponent, singles, index - 1, GetChar(m_radix - 1), '0', remainder);
+					return PowerInverse2(factor, singles, index - 1, GetChar(m_radix - 1), '0', power);
 				}
 				else {
-					return value;
+					return std::make_pair<Natural, Natural>(Natural(value), Natural(0));
 				}
 			}
 		}
 	}
 
-	Natural Natural::Root(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, Natural &remainder) const {
+	std::pair<Natural, Natural> Natural::PowerInverse(const Natural &factor, std::vector<char> &singles, size_t index, char top, char bottom, std::function<Natural(const Natural&, const Natural&)> power) const {
 		char c = top;
 		while (GetValue(c) >= GetValue(bottom)) {
 			singles[index] = c;
 			Natural value(std::list<char>(singles.cbegin(), singles.cend()), m_radix);
-			const Natural &power = value.Power(exponent);
-			if (power == *this) {
-				remainder = 0;
-				return value;
+			const Natural guessValue(power(factor, value));
+			if (guessValue == *this) {
+				return std::make_pair<Natural, Natural>(Natural(value), Natural(0));
 			}
-			else if (power < *this) {
+			else if (guessValue < *this) {
 				if (index) {
-					return Root2(exponent, singles, index - 1, GetChar(m_radix - 1), '0', remainder);
+					return PowerInverse2(factor, singles, index - 1, GetChar(m_radix - 1), '0', power);
 				}
 				else {
-					remainder = *this - power;
-					return value;
+					return std::make_pair<Natural, Natural>(Natural(value), Natural(*this - guessValue));
 				}
 			}
 			else {
@@ -298,18 +291,27 @@ namespace number {
 			}
 		}
 		assert(0);
-		return Natural(0, m_radix);
+		return std::make_pair<Natural, Natural>(Natural(0, m_radix), Natural(0, m_radix));
 	}
 
-	Natural Natural::Root(const Natural &exponent, Natural &remainder) const {
+	std::pair<Natural, Natural> Natural::Root(const Natural &exponent) const {
 		size_t len = (size_t)strtoull(((Natural(m_singles.size(), m_radix) +
 			exponent - Natural(1, m_radix)) / exponent).GetString(m_radix).c_str(), NULL, m_radix);
 		std::vector<char> singles(len, '0');
-		return Root(exponent, singles, len - 1, GetChar(m_radix - 1), '0', remainder);
+		return PowerInverse(exponent, singles, len - 1, GetChar(m_radix - 1), '0',
+			[&exponent](const Natural &factor, const Natural &value) {
+			return value.Power(exponent);
+		});
 	}
-	Natural Natural::Root(const Natural &exponent) const {
-		Natural remainder;
-		return Root(exponent, remainder);
+
+	std::pair<Natural, Natural> Natural::Logarithm(const Natural &base) const {
+		size_t len = (size_t)strtoull(((Natural(m_singles.size(), m_radix) +
+			base - Natural(1, m_radix)) / base).GetString(m_radix).c_str(), NULL, m_radix);
+		std::vector<char> singles(len, '0');
+		return PowerInverse(base, singles, len - 1, GetChar(m_radix - 1), '0',
+			[&base](const Natural &factor, const Natural &value) {
+			return base.Power(value);
+		});
 	}
 	Natural &Natural::operator++() {
 		*this = *this + Natural(1, GetRadix());
@@ -326,7 +328,7 @@ namespace number {
 		return Factorial() / (m.Factorial() * (*this - m).Factorial());
 	}
 
-	void Natural::Div(const Natural &divisor, Natural &quotient, Natural &remainder) const {
+	std::pair<Natural, Natural> Natural::Div(const Natural &divisor) const {
 		if (divisor == Natural(0, GetRadix())) {
 			throw "undefined";
 		}
@@ -334,15 +336,8 @@ namespace number {
 		const Natural &radixDivisor = divisor.GetNatural(m_radix);
 
 		if (*this < radixDivisor) {
-			remainder = *this;
-			quotient = Natural(0, m_radix);
-			return;
+			return std::make_pair<Natural, Natural>(Natural(0, m_radix), Natural(*this));
 		}
-
-		quotient.m_singles.clear();
-		quotient.m_radix = m_radix;
-		remainder.m_singles.clear();
-		remainder.m_radix = m_radix;
 
 		size_t times = m_singles.size() - radixDivisor.m_singles.size() + 1;
 
@@ -354,36 +349,40 @@ namespace number {
 			}
 		}
 
+		std::pair<Natural, Natural> result(std::make_pair<Natural, Natural>(Natural(0, m_radix), Natural(0, m_radix)));
+
 		std::map<std::string, size_t> loop;
-		remainder.m_singles = std::list<char>(begin, m_singles.cend());
+		result.second.m_singles = std::list<char>(begin, m_singles.cend());
 
 		for (size_t index = 0; index < times; index++) {
 			uint8_t count = 0;
-			while (remainder >= radixDivisor) {
+			while (result.second >= radixDivisor) {
 				count++;
-				remainder -= radixDivisor;
+				result.second -= radixDivisor;
 			}
-			quotient.m_singles.push_front(GetChar(count));
+			result.first.m_singles.push_front(GetChar(count));
 			if (index < times - 1) {
-				if (quotient.m_is_check_loop && -1 == quotient.m_loop_begin && !remainder.EqualZero()) {
-					const std::string key(remainder.m_singles.cbegin(), remainder.m_singles.cend());
+				if (-1 == result.first.m_loop_begin && !result.second.EqualZero()) {
+					const std::string key(result.second.m_singles.cbegin(), result.second.m_singles.cend());
 					if (loop.find(key) != loop.end()) {
-						quotient.m_loop_begin = loop.at(key);
-						quotient.m_loop_end = quotient.m_singles.size();
+						result.first.m_loop_begin = loop.at(key);
+						result.first.m_loop_end = result.first.m_singles.size();
 					}
 					else {
 						loop.insert(std::make_pair(std::string(
-							remainder.m_singles.cbegin(), remainder.m_singles.cend()), quotient.m_singles.size()));
+							result.second.m_singles.cbegin(), result.second.m_singles.cend()), result.first.m_singles.size()));
 					}
 				}
 				begin--;
-				remainder.m_singles.push_front(*begin);
-				remainder.Format();
+				result.second.m_singles.push_front(*begin);
+				result.second.Format();
 			}
 		}
-		if (!quotient.m_is_check_loop) {
-			quotient.Format();
+		if (-1 == result.first.m_loop_begin) {
+			result.first.Format();
 		}
+
+		return result;
 	}
 
 
@@ -465,14 +464,8 @@ namespace number {
 		return Natural(radixDecimal, radix);
 	}
 
-
-	Natural &Natural::SetCheckLoop() {
-		m_is_check_loop = true;
-		return *this;
-	}
-
 	std::string Natural::GetLoop() const {
-		if (!m_is_check_loop || -1 == m_loop_begin) {
+		if (-1 == m_loop_begin) {
 			return "";
 		}
 		const std::string singles(m_singles.crbegin(), m_singles.crend());

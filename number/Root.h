@@ -11,10 +11,10 @@ namespace number {
 	class Root : public Number {
 	public:
 		Root();
-		Root(const Integer &base, const Integer &exponent, bool positive = true);
-		Root(const Integer &base, const Fraction &exponent, bool positive = true);
-		Root(const Fraction &base, const Integer &exponent, bool positive = true);
-		Root(const Fraction &base, const Fraction &exponent, bool positive = true);
+		Root(const Integer &power, const Integer &exponent, bool positive = true);
+		Root(const Integer &power, const Fraction &exponent, bool positive = true);
+		Root(const Fraction &power, const Integer &exponent, bool positive = true);
+		Root(const Fraction &power, const Fraction &exponent, bool positive = true);
 
 		const std::string GetString(uint8_t radix = 10) const override;
 		void SetRadix(uint8_t radix = 10) override;
@@ -29,17 +29,17 @@ namespace number {
 		Root operator-() const;
 		bool operator==(const Root &other) const;
 
-		const Fraction &Base()const;
+		const Fraction &Power()const;
 		const Fraction &Exponent()const;
 		const Fraction &ReductionCoefficient()const;
-		const Fraction &ReductionBase()const;
+		const Fraction &ReductionPower()const;
 
 		bool IsFraction() const;
 		bool IsImaginary() const;
 		Fraction GetFraction(const Integer &base, uint8_t radix, size_t decimalLength)const;
 
-		bool EqualBase0(const Root &right) const;
-		bool EqualBase1(const Root &right) const;
+		bool EqualPower0(const Root &right) const;
+		bool EqualPower1(const Root &right) const;
 		Root AddEqual(const number::Root &right) const;
 		Root MulEqual(const number::Root &right, bool isLeftMul, bool isRightMul) const;
 
@@ -51,11 +51,11 @@ namespace number {
 
 		bool m_positive = true;
 
-		Fraction m_base;
+		Fraction m_power;
 		Fraction m_exponent;
 
 		Fraction m_reduction_coefficient;
-		Fraction m_reduction_base;
+		Fraction m_reduction_power;
 
 		void Reduce();
 	};

@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 
-//#define NUMBER_TEST
-#define EXPRESSION_TEST
+#define NUMBER_TEST
+//#define EXPRESSION_TEST
 
 #ifdef NUMBER_TEST
 #include "number/Integer.h"
@@ -9,11 +9,11 @@
 #include "number/Imaginary.h"
 #include "number/Root.h"
 #include "number/Complex.h"
-#include "expression/Series.hpp"
 using namespace number;
 #endif
 
 #ifdef EXPRESSION_TEST
+#include "expression/Series.hpp"
 #include "expression/Expression.hpp"
 #include "expression/ExpressionDeformationer.h"
 using namespace expression;
@@ -69,20 +69,14 @@ int main() {
 		std::cout << "d = " << d.GetDecimal(10, 5, [](char last) {return last >= '5'; }) << std::endl;
 	}
 	{
-		std::cout << "e = " << Series<Fraction>(
-			[](const uint64_t index) {
-			return Fraction(Natural(1, 10), Natural(index - 1).Factorial());
-		}).Summation(20).GetMonomial().GetDecimal(10, 20) << std::endl;
-	}
-	{
 		std::cout << "2^256=" << Fraction::Power(2, 256).GetStringRadix(10) << std::endl;
 	}
 	{
-		std::cout << Natural("39135395").Root(Natural(5, 10)).GetString() << std::endl;
-		std::cout << Natural("10000000000000000000000000000000000").Root(Natural(2, 10)).GetString() << std::endl;
-		std::cout << Natural("100000000000000000000000000000000000").Root(Natural(2, 10)).GetString() << std::endl;
-		std::cout << Natural("10010101010010100010100011", 2).Root(Natural(5, 2)).GetString() << std::endl;
-		std::cout << Natural("25528A3", 16).Root(Natural(5, 16)).GetString() << std::endl;
+		std::cout << Natural("39135395").Root(Natural(5, 10)).first.GetString() << std::endl;
+		std::cout << Natural("10000000000000000000000000000000000").Root(Natural(2, 10)).first.GetString() << std::endl;
+		std::cout << Natural("100000000000000000000000000000000000").Root(Natural(2, 10)).first.GetString() << std::endl;
+		std::cout << Natural("10010101010010100010100011", 2).Root(Natural(5, 2)).first.GetString() << std::endl;
+		std::cout << Natural("25528A3", 16).Root(Natural(5, 16)).first.GetString() << std::endl;
 	}
 	{
 		std::cout << Fraction::Power(2, 0).GetStringRadix(10) << std::endl;
@@ -167,8 +161,19 @@ int main() {
 		std::cout << Complex(Fraction(1, 2), Fraction(1, 2)).Power(3) << std::endl;
 		std::cout << Complex(Fraction(Integer(1, false), 2), Fraction(1, 2)).Power(3) << std::endl;
 	}
+	{
+		std::cout << "10#2 ~ " << Natural(10).Logarithm(Natural(2)).first << std::endl;
+		std::cout << "2#2 = " << Natural(2).Logarithm(Natural(2)).first << std::endl;
+		std::cout << "16#2 = " << Natural(16).Logarithm(Natural(2)).first << std::endl;
+	}
 #endif
 #ifdef EXPRESSION_TEST
+	{
+		std::cout << "e = " << expression::Series<number::Fraction>(
+			[](const uint64_t index) {
+			return number::Fraction(number::Natural(1, 10), number::Natural(index - 1).Factorial());
+		}).Summation(20).GetMonomial().GetDecimal(10, 20) << std::endl;
+	}
 	{
 		expression::Expression<OPERATOR_TYPE_0> e(number::Integer(123), OPERATOR_TYPE_ADD(),
 			number::Integer(456), OPERATOR_TYPE_SUB(), number::Integer(789));

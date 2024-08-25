@@ -106,18 +106,18 @@ namespace number {
 
 	const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
-		Natural quotient(0, m_denominator.GetRadix()), remainder(0, m_denominator.GetRadix());
+		//Natural quotient(0, m_denominator.GetRadix()), remainder(0, m_denominator.GetRadix());, quotient.SetCheckLoop(), remainder
 		std::string numeratorStr = m_numerator.Value().GetString(radix);
 		numeratorStr.append(decimalLength + 1, '0');
-		Natural(numeratorStr, radix).Div(m_denominator.Value(), quotient.SetCheckLoop(), remainder);
-		const std::string &loop = quotient.GetLoop();
-		std::string quotientStr = quotient.GetString(radix);
+		std::pair<Natural, Natural> result(Natural(numeratorStr, radix).Div(m_denominator.Value()));
+		const std::string &loop = result.first.GetLoop();
+		std::string quotientStr = result.first.GetString(radix);
 		if (quotientStr.length() < decimalLength + 2) {
 			quotientStr.insert(0, decimalLength + 2 - quotientStr.length(), '0');
 		}
 		std::string decimalStr = quotientStr.substr(0, quotientStr.length() - decimalLength - 1) +
 			"." + quotientStr.substr(quotientStr.length() - decimalLength - 1);
-		if (remainder.EqualZero()) {
+		if (result.second.EqualZero()) {
 			while ('0' == decimalStr.back()) {
 				decimalStr.pop_back();
 			}

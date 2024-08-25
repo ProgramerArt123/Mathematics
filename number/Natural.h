@@ -41,8 +41,8 @@ namespace number {
 		Natural &operator/=(const Natural &divisor);
 		Natural operator%(const Natural &divisor) const;
 		Natural Power(const Natural &exponent) const;
-		Natural Root(const Natural &exponent, Natural &remainder) const;
-		Natural Root(const Natural &exponent) const;
+		std::pair<Natural, Natural> Root(const Natural &exponent) const;
+		std::pair<Natural, Natural> Logarithm(const Natural &base) const;
 
 		Natural &operator++();
 		Natural &operator--();
@@ -50,10 +50,9 @@ namespace number {
 		Natural GreatestCommonDivisor(const Natural &other) const;
 		Natural Composition(const Natural &m) const;
 
-		void Div(const Natural &divisor, Natural &quotient, Natural &remainder) const;
+		std::pair<Natural, Natural> Div(const Natural &divisor) const;
 		Natural GetNatural(uint8_t radix) const;
 
-		Natural &SetCheckLoop();
 		std::string GetLoop() const;
 	private:
 		Natural(const std::list<char> &singles, uint8_t radix = 10);
@@ -63,13 +62,13 @@ namespace number {
 		static void DivN(uint8_t from, uint8_t to, std::list<char> &singles, char &remainder);
 		static char GetChar(uint8_t value);
 		static uint8_t GetValue(char c);
-		Natural Root2(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, Natural &remainder) const;
-		Natural Root(const Natural &exponent, std::vector<char> &singles, size_t index, char top, char bottom, Natural &remainder) const;
+		std::pair<Natural, Natural> PowerInverse2(const Natural &factor, std::vector<char> &singles, size_t index, char top, char bottom, std::function<Natural(const Natural&, const Natural&)> power) const;
+		std::pair<Natural, Natural> PowerInverse(const Natural &factor, std::vector<char> &singles, size_t index, char top, char bottom, std::function<Natural(const Natural&, const Natural&)> power) const;
+		
 		std::list<char> m_singles;
 
 		uint8_t m_radix = 10;
 
-		bool m_is_check_loop = false;
 		size_t m_loop_begin = -1;
 		size_t m_loop_end = -1;
 	};

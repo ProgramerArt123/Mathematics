@@ -245,10 +245,10 @@ namespace expression {
 		static Expression<OPERATOR_TYPE_1> Absorb(const number::Imaginary &number);
 		static Expression<OPERATOR_TYPE_0> Absorb(const number::Complex &number);
 		static Expression<OPERATOR_TYPE_1> Absorb(const number::Root &number) {
-			const Expression<OPERATOR_TYPE_2> numeratorReduction(number.Base().Numerator(),
+			const Expression<OPERATOR_TYPE_2> numeratorReduction(number.Power().Numerator(),
 				OPERATOR_TYPE_POWER(), number.Exponent().Denominator(),
 				OPERATOR_TYPE_ROOT(), number.Exponent().Numerator());
-			const Expression<OPERATOR_TYPE_2> denominatorReduction(number.Base().Denominator(),
+			const Expression<OPERATOR_TYPE_2> denominatorReduction(number.Power().Denominator(),
 				OPERATOR_TYPE_POWER(), number.Exponent().Denominator(),
 				OPERATOR_TYPE_ROOT(), number.Exponent().Numerator());
 			return Expression<OPERATOR_TYPE_1>(numeratorReduction, OPERATOR_TYPE_DIV(), denominatorReduction);

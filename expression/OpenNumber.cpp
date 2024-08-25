@@ -52,7 +52,7 @@ namespace expression {
 		if (right.m_operator && OPERATOR_TYPE_FLAG_SUB == right.m_operator->GetFlag()) {
 			rightValue = -right.m_value;
 		}
-		if (leftValue.EqualBase0(rightValue)) {
+		if (leftValue.EqualPower0(rightValue)) {
 			return leftValue.AddEqual(rightValue);
 		}
 		else {
@@ -64,16 +64,16 @@ namespace expression {
 		number::Root leftValue = m_value;
 		bool isLeftMul = true;
 		if (m_operator && OPERATOR_TYPE_FLAG_DIV == m_operator->GetFlag()) {
-			leftValue = number::Root(m_value.Base(), -m_value.Exponent(), m_value.IsPositive());
+			leftValue = number::Root(m_value.Power(), -m_value.Exponent(), m_value.IsPositive());
 			isLeftMul = false;
 		}
 		number::Root rightValue = right.m_value;
 		bool isRightMul = true;
 		if (right.m_operator && OPERATOR_TYPE_FLAG_DIV == right.m_operator->GetFlag()) {
-			rightValue = number::Root(right.m_value.Base(), -right.m_value.Exponent(), right.m_value.IsPositive());
+			rightValue = number::Root(right.m_value.Power(), -right.m_value.Exponent(), right.m_value.IsPositive());
 			isRightMul = false;
 		}
-		if (leftValue.EqualBase1(rightValue)) {
+		if (leftValue.EqualPower1(rightValue)) {
 			return leftValue.MulEqual(rightValue, isLeftMul, isRightMul);
 		}
 		else {
