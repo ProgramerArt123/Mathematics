@@ -165,6 +165,7 @@ int main() {
 		std::cout << "10#2 ~ " << Natural(10).Logarithm(Natural(2)).first << std::endl;
 		std::cout << "2#2 = " << Natural(2).Logarithm(Natural(2)).first << std::endl;
 		std::cout << "16#2 = " << Natural(16).Logarithm(Natural(2)).first << std::endl;
+		std::cout << "10#3 ~ " << Natural(10).Logarithm(Natural(3)).first << std::endl;
 	}
 #endif
 #ifdef EXPRESSION_TEST
