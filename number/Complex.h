@@ -1,5 +1,5 @@
-#ifndef __COMPLEX_H__
-#define __COMPLEX_H__
+#ifndef __NUMBER_COMPLEX_H__
+#define __NUMBER_COMPLEX_H__
 
 #include "Number.h"
 #include "Fraction.h"

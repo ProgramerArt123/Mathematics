@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "Natural.h"
+#include "performance/natural/root/Guess.h"
 namespace number {
 	Natural::Natural(uint64_t value, uint8_t radix) :m_radix(radix) {
 		if (value) {
@@ -228,7 +229,7 @@ namespace number {
 		return result;
 	}
 
-	std::pair<Natural, Natural> Natural::PowerInverse2(const Natural &factor, std::vector<char> &singles, size_t index, char top, char bottom, std::function<Natural(const Natural&, const Natural&)> power) const {
+	std::pair<Natural, Natural> Natural::PowerInverseHalf(const Natural &factor, std::vector<char> &singles, size_t index, char top, char bottom, std::function<Natural(const Natural&, const Natural&)> power) const {
 		char c = GetChar((GetValue(top) + GetValue(bottom)) / 2);
 		singles[index] = c;
 		const Natural value(std::list<char>(singles.cbegin(), singles.cend()), m_radix);
@@ -238,11 +239,11 @@ namespace number {
 		}
 		else if (guessValue > *this) {
 			if (GetValue(c) > GetValue(bottom)) {
-				return PowerInverse2(factor, singles, index, GetChar(GetValue(c) - 1), bottom, power);
+				return PowerInverseHalf(factor, singles, index, GetChar(GetValue(c) - 1), bottom, power);
 			}
 			else {
 				if (index) {
-					return PowerInverse2(factor, singles, index - 1, GetChar(m_radix - 1), '0', power);
+					return PowerInverseHalf(factor, singles, index - 1, GetChar(m_radix - 1), '0', power);
 				}
 				else {
 					return std::make_pair<Natural, Natural>(Natural(std::list<char>(singles.cbegin(), singles.cend())), Natural(0));
@@ -252,7 +253,7 @@ namespace number {
 		else {
 			if (GetValue(c) < GetValue(top)) {
 				if (GetValue(c) < GetValue(top) - 1) {
-					return PowerInverse2(factor, singles, index, top, c, power);
+					return PowerInverseHalf(factor, singles, index, top, c, power);
 				}
 				else {
 					return PowerInverse(factor, singles, index, top, c, power);
@@ -260,7 +261,7 @@ namespace number {
 			}
 			else {
 				if (index) {
-					return PowerInverse2(factor, singles, index - 1, GetChar(m_radix - 1), '0', power);
+					return PowerInverseHalf(factor, singles, index - 1, GetChar(m_radix - 1), '0', power);
 				}
 				else {
 					return std::make_pair<Natural, Natural>(Natural(value), Natural(0));
@@ -280,7 +281,7 @@ namespace number {
 			}
 			else if (guessValue < *this) {
 				if (index) {
-					return PowerInverse2(factor, singles, index - 1, GetChar(m_radix - 1), '0', power);
+					return PowerInverseHalf(factor, singles, index - 1, GetChar(m_radix - 1), '0', power);
 				}
 				else {
 					return std::make_pair<Natural, Natural>(Natural(value), Natural(*this - guessValue));
@@ -295,13 +296,8 @@ namespace number {
 	}
 
 	std::pair<Natural, Natural> Natural::Root(const Natural &exponent) const {
-		size_t len = (size_t)strtoull(((Natural(m_singles.size(), m_radix) +
-			exponent - Natural(1, m_radix)) / exponent).GetString(m_radix).c_str(), NULL, m_radix);
-		std::vector<char> singles(len, '0');
-		return PowerInverse(exponent, singles, len - 1, GetChar(m_radix - 1), '0',
-			[&exponent](const Natural &factor, const Natural &value) {
-			return value.Power(exponent);
-		});
+		performance::natural::root::Guess algorithm(*this, exponent);
+		return algorithm.GetResult();
 	}
 
 	std::pair<Natural, Natural> Natural::Logarithm(const Natural &base) const {

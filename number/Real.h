@@ -1,5 +1,5 @@
-#ifndef __REAL_H__
-#define __REAL_H__
+#ifndef __NUMBER_REAL_H__
+#define __NUMBER_REAL_H__
 
 #include "Number.h"
 namespace number {

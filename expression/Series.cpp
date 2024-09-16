@@ -1,5 +1,5 @@
 #include "Series.hpp"
-#include "Complex.h"
+#include "number/Complex.h"
 
 namespace expression {
 	

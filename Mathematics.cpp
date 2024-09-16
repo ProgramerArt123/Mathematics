@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 
 #define NUMBER_TEST
-//#define EXPRESSION_TEST
+#define EXPRESSION_TEST
 
 #ifdef NUMBER_TEST
 #include "number/Integer.h"

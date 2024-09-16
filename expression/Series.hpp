@@ -6,6 +6,7 @@
 #include <functional>
 
 #include "Output.h"
+#include "number/Number.h"
 
 namespace expression {
 	template<typename MonomialValue, typename SeriesValue = MonomialValue>

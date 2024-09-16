@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include "number/Number.h"
-#include "Series.hpp"
 #include "ClosureNumber.hpp"
 
 namespace expression {
@@ -36,6 +35,9 @@ namespace expression {
 	bool ClosureNumber::EqualOne() const {
 		return Value().EqualOne();
 	}
+	bool ClosureNumber::EqualNegativeOne() const {
+		return (-Value()).EqualOne();
+	}
 	void ClosureNumber::Opposite() {
 		m_value.Opposite();
 	}
@@ -43,7 +45,7 @@ namespace expression {
 		return m_value;
 	}
 	const ClosureNumber &ClosureNumber::operator=(const ClosureNumber &right) {
-		Number::operator=(right);
+		expression::Number::operator=(right);
 		m_value = right.m_value;
 		return *this;
 	}

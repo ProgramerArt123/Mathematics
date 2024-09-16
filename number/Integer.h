@@ -1,5 +1,5 @@
-#ifndef __INTEGER_H__
-#define __INTEGER_H__
+#ifndef __NUMBER_INTEGER_H__
+#define __NUMBER_INTEGER_H__
 
 #include <cstdint>
 #include <vector>

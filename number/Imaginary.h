@@ -1,5 +1,5 @@
-#ifndef __IMAGINARY_H__
-#define __IMAGINARY_H__
+#ifndef __NUMBER_IMAGINARY_H__
+#define __NUMBER_IMAGINARY_H__
 
 #include "Number.h"
 #include "Fraction.h"

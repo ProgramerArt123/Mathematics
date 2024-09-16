@@ -22,7 +22,7 @@ namespace expression {
 
 		bool EqualZero() const override;
 		bool EqualOne() const override;
-
+		bool EqualNegativeOne() const override;
 		void Opposite() override;
 	private:
 		std::string m_name;

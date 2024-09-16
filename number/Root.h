@@ -1,5 +1,5 @@
-#ifndef __ROOT_H__
-#define __ROOT_H__
+#ifndef __NUMBER_ROOT_H__
+#define __NUMBER_ROOT_H__
 
 #include "Number.h"
 #include "Integer.h"

@@ -6,10 +6,14 @@
 namespace expression {
 	class Number : public Atom {
 	public:
-		Number(OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD);
+		Number(OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD): Atom(flag) {
+		}
 		Number(const Number &prototype);
 
-		const Number &operator=(const Number &right);
+		const Number &operator=(const Number &right) {
+			Atom::operator=(right);
+			return *this;
+		}
 
 	};
 }

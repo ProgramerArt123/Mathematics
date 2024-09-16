@@ -37,6 +37,9 @@ namespace expression {
 	bool Symbol::EqualOne() const {
 		return false;
 	}
+	bool Symbol::EqualNegativeOne() const {
+		return false;
+	}
 	void Symbol::Opposite() {
 		m_positive = !m_positive;
 	}

@@ -1,11 +1,20 @@
-#ifndef __NATURAL_H__
-#define __NATURAL_H__
+#ifndef __NUMBER_NATURAL_H__
+#define __NUMBER_NATURAL_H__
 
 #include <cstdint>
 #include <list>
 #include <ostream>
 
 #include "Real.h"
+
+namespace performance {
+	namespace natural {
+		namespace root {
+			class Guess;
+		}
+	}
+}
+
 
 namespace number {
 	class Natural : public Real {
@@ -54,6 +63,8 @@ namespace number {
 		Natural GetNatural(uint8_t radix) const;
 
 		std::string GetLoop() const;
+
+		friend class performance::natural::root::Guess;
 	private:
 		Natural(const std::list<char> &singles, uint8_t radix = 10);
 		uint8_t GetBuilt()const;
@@ -62,7 +73,7 @@ namespace number {
 		static void DivN(uint8_t from, uint8_t to, std::list<char> &singles, char &remainder);
 		static char GetChar(uint8_t value);
 		static uint8_t GetValue(char c);
-		std::pair<Natural, Natural> PowerInverse2(const Natural &factor, std::vector<char> &singles, size_t index, char top, char bottom, std::function<Natural(const Natural&, const Natural&)> power) const;
+		std::pair<Natural, Natural> PowerInverseHalf(const Natural &factor, std::vector<char> &singles, size_t index, char top, char bottom, std::function<Natural(const Natural&, const Natural&)> power) const;
 		std::pair<Natural, Natural> PowerInverse(const Natural &factor, std::vector<char> &singles, size_t index, char top, char bottom, std::function<Natural(const Natural&, const Natural&)> power) const;
 		
 		std::list<char> m_singles;
@@ -71,6 +82,7 @@ namespace number {
 
 		size_t m_loop_begin = -1;
 		size_t m_loop_end = -1;
+		
 	};
 }
 #endif

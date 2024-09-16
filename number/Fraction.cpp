@@ -78,7 +78,7 @@ namespace number {
 	const Integer &Fraction::Denominator() const {
 		return m_denominator;
 	}
-	const Integer &Fraction::Integer() const {
+	const Integer &Fraction::ReductionInteger() const {
 		return m_reduction_integer;
 	}
 	Fraction Fraction::GetAbs() const {
@@ -106,7 +106,7 @@ namespace number {
 
 	const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
-		//Natural quotient(0, m_denominator.GetRadix()), remainder(0, m_denominator.GetRadix());, quotient.SetCheckLoop(), remainder
+
 		std::string numeratorStr = m_numerator.Value().GetString(radix);
 		numeratorStr.append(decimalLength + 1, '0');
 		std::pair<Natural, Natural> result(Natural(numeratorStr, radix).Div(m_denominator.Value()));

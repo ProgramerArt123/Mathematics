@@ -1,5 +1,5 @@
-#ifndef __FRACTION_H__
-#define __FRACTION_H__
+#ifndef __NUMBER_FRACTION_H__
+#define __NUMBER_FRACTION_H__
 
 #include <cstdint>
 #include <functional>
@@ -29,7 +29,7 @@ namespace number {
 		const Integer &Numerator() const;
 		const Integer &ReductionNumerator() const;
 		const Integer &Denominator() const;
-		const Integer &Integer() const;
+		const Integer &ReductionInteger() const;
 
 		Fraction GetAbs() const;
 		Fraction GetReciprocal() const;

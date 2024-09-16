@@ -20,6 +20,7 @@ namespace expression {
 		bool IsEqual(const Node &other, bool ignoreOperator = false) const override;
 		bool EqualZero() const override;
 		bool EqualOne() const override;
+		bool EqualNegativeOne() const override;
 
 		void Opposite() override;
 

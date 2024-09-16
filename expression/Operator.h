@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+#include <memory>
+
 #include "Output.h"
 
 namespace expression {

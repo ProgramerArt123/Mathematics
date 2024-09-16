@@ -12,17 +12,17 @@ namespace expression {
 		}
 		ExpressionDeformationer(const Expression<OperatorType> &expression) :
 			m_expression(expression.OutPutString()) {
-			size_t completed = 0;
-			Expression<OperatorType> collect = expression.Collect(1, completed);
-			if (completed) {
-				Deformation(collect);
+			std::optional<Expression<OperatorType>> collect = expression.Collect();
+			if (collect.has_value()) {
+				Deformation(collect.value());
 			}
 			else {
-				if (collect.ReduceFraction()) {
-					m_fraction = std::make_unique<ExpressionDeformationer<OPERATOR_TYPE_0>>(collect.GetFractionReduction());
+				Expression<OperatorType> reduction(expression);
+				if (reduction.ReduceFraction()) {
+					m_fraction = std::make_unique<ExpressionDeformationer<OPERATOR_TYPE_0>>(reduction.GetFractionReduction());
 				}
-				else if (collect.ReduceOpen()) {
-					m_open = std::make_unique<ExpressionDeformationer<OPERATOR_TYPE_1>>(collect.GetOpenReduction());
+				else if (reduction.ReduceOpen()) {
+					m_open = std::make_unique<ExpressionDeformationer<OPERATOR_TYPE_1>>(reduction.GetOpenReduction());
 				}
 			}
 		}
@@ -50,10 +50,10 @@ namespace expression {
 			}
 		}
 		const ExpressionDeformationer<OperatorType> &Deformation(const Expression<OperatorType> &child) {
-			if (1 < child.m_nodes.size())
+			if (1 < child.Size())
 			{
-				std::list < std::pair< Expression<OperatorType>::ExpressionNodes::const_iterator,
-					Expression<OperatorType>::ExpressionNodes::const_iterator > > combines;
+				std::list < std::pair<typename Expression<OperatorType>::ExpressionNodes::const_iterator,
+					typename Expression<OperatorType>::ExpressionNodes::const_iterator > > combines;
 
 				for (auto itorI = child.m_nodes.cbegin(); itorI != child.m_nodes.cend(); itorI++) {
 					for (auto itorJ = itorI; itorJ != child.m_nodes.cend(); itorJ++) {
