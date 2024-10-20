@@ -1,13 +1,14 @@
 ﻿#include <iostream>
 
 #define NUMBER_TEST
-#define EXPRESSION_TEST
+//#define EXPRESSION_TEST
 
 #ifdef NUMBER_TEST
 #include "number/Integer.h"
 #include "number/Fraction.h"
 #include "number/Imaginary.h"
 #include "number/Root.h"
+#include "number/Logarithm.h"
 #include "number/Complex.h"
 using namespace number;
 #endif
@@ -23,11 +24,11 @@ int main() {
 	std::cout << "calculating" << std::endl;
 #ifdef NUMBER_TEST
 	{
-		const Natural a(123, 10);
+		const Natural a(123);
 		std::cout << "a:" << a.GetStringRadix(10) << std::endl;
 		std::cout << "a:" << a.GetStringRadix(2) << std::endl;
 		std::cout << "a:" << a.GetStringRadix(16) << std::endl;
-		const Natural b(456, 10);
+		const Natural b(456);
 		std::cout << "b:" << b << std::endl;
 		std::cout << "a+b:" << a + b << std::endl;
 		const Natural c("100", 10);
@@ -46,7 +47,7 @@ int main() {
 	}
 	{
 		const Fraction a(Natural("1"), Natural("3"));
-		const Integer b(Natural(3, 10));
+		const Integer b(Natural(3));
 		std::cout << "a, b = " << a << "," << b << std::endl;
 		std::cout << "a + b = " << a + b << std::endl;
 		std::cout << "b + a = " << b + a << std::endl;
@@ -72,11 +73,11 @@ int main() {
 		std::cout << "2^256=" << Fraction::Power(2, 256).GetStringRadix(10) << std::endl;
 	}
 	{
-		std::cout << Natural("39135395").Root(Natural(5, 10)).first.GetString() << std::endl;
-		std::cout << Natural("10000000000000000000000000000000000").Root(Natural(2, 10)).first.GetString() << std::endl;
-		std::cout << Natural("100000000000000000000000000000000000").Root(Natural(2, 10)).first.GetString() << std::endl;
-		std::cout << Natural("10010101010010100010100011", 2).Root(Natural(5, 2)).first.GetString() << std::endl;
-		std::cout << Natural("25528A3", 16).Root(Natural(5, 16)).first.GetString() << std::endl;
+		std::cout << Natural("39135395").Root(Natural(5)).first.GetString() << std::endl;
+		std::cout << Natural("10000000000000000000000000000000000").Root(Natural(2)).first.GetString() << std::endl;
+		std::cout << Natural("100000000000000000000000000000000000").Root(Natural(2)).first.GetString() << std::endl;
+		std::cout << Natural("10010101010010100010100011", 2).Root(Natural(5)).first.GetString() << std::endl;
+		std::cout << Natural("25528A3", 16).Root(Natural(5)).first.GetString() << std::endl;
 	}
 	{
 		std::cout << Fraction::Power(2, 0).GetStringRadix(10) << std::endl;
@@ -166,13 +167,21 @@ int main() {
 		std::cout << "2#2 = " << Natural(2).Logarithm(Natural(2)).first << std::endl;
 		std::cout << "16#2 = " << Natural(16).Logarithm(Natural(2)).first << std::endl;
 		std::cout << "10#3 ~ " << Natural(10).Logarithm(Natural(3)).first << std::endl;
+		std::cout << "8192#2 = " << Natural(8192).Logarithm(Natural(2)).first << std::endl;
+		std::cout << "10000#10 = " << Natural(10000).Logarithm(Natural(10)).first << std::endl;
+		std::cout << "10000#100 = " << Natural(10000).Logarithm(Natural(100)).first << std::endl;
+	}
+	{
+		std::cout << number::Logarithm(Fraction(100000000000), Fraction(2)).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Logarithm(Fraction(100000000000, 33), Fraction(3)).GetDecimal(10, 20) << std::endl;
+		std::cout << number::Logarithm(Fraction(2, 3), Fraction(17, 7)).GetDecimal(10, 20) << std::endl;
 	}
 #endif
 #ifdef EXPRESSION_TEST
 	{
 		std::cout << "e = " << expression::Series<number::Fraction>(
 			[](const uint64_t index) {
-			return number::Fraction(number::Natural(1, 10), number::Natural(index - 1).Factorial());
+			return number::Fraction(number::Natural(1), number::Natural(index - 1).Factorial());
 		}).Summation(20).GetMonomial().GetDecimal(10, 20) << std::endl;
 	}
 	{
@@ -348,6 +357,10 @@ int main() {
 		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(2), OPERATOR_TYPE_ROOT(), number::Integer(2));
 		expression::Expression<OPERATOR_TYPE_1> e1(e0.GetOpposite(), OPERATOR_TYPE_MUL(), number::Integer(2));
 		expression::Expression<OPERATOR_TYPE_0> e(e0, OPERATOR_TYPE_ADD(), e1);
+		e.CollectForward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_2> e(number::Integer(9), OPERATOR_TYPE_ROOT(), number::Integer(6));
 		e.CollectForward(std::cout) << std::endl;
 	}
 #endif

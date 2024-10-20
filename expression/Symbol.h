@@ -8,11 +8,11 @@ namespace expression {
 	public:
 		Symbol(const expression::Symbol &prototype);
 		Symbol(const expression::Symbol &prototype, OPERATOR_TYPE_FLAG flag);
-		Symbol(const std::string &name, bool isPositive = true, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD);
+		Symbol(const std::string &name, bool isUnSigned = true, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD);
 
-		bool IsPositive() const override;
+		bool IsUnSigned() const override;
 
-		virtual const std::string GetString(size_t pos = 0, uint8_t radix = 10) const override;
+		virtual const std::string GetString(size_t pos = 0, uint8_t radix = DEFAULT_RADIX) const override;
 
 		const std::string &Name() const;
 
@@ -27,7 +27,7 @@ namespace expression {
 	private:
 		std::string m_name;
 
-		bool m_positive = true;
+		bool m_unsigned = true;
 
 	};
 }

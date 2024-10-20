@@ -8,22 +8,20 @@
 namespace number {
 	class Integer : public Real {
 	public:
-		Integer(uint64_t value = 0, bool positive = true);
-		Integer(const Natural &value, bool positive = true);
-		Integer(const std::string &value, bool positive = true);
+		Integer(uint64_t value = 0, bool isUnSigned = true);
+		Integer(const Natural &value, bool isUnSigned = true);
+		Integer(const std::string &value, bool isUnSigned = true);
 		const std::string GetString(uint8_t radix = 10) const override;
-		void SetRadix(uint8_t radix = 10) override;
-		uint8_t GetRadix() const override;
 		bool EqualZero() const override;
 		bool EqualOne() const override;
-		void SetPositive(bool isPositive)override;
+		void SetUnSigned(bool isUnSigned)override;
 		bool IsPositive() const override;
+		void Opposite() override;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
 
-		Natural Value() const;
+		const Natural &Value() const;
 		Integer GetAbs() const;
-		void Opposite();
 
 		Integer operator-() const;
 		Integer operator+(const Integer &addition) const;
@@ -45,7 +43,7 @@ namespace number {
 		Integer PositiveAdd(const Integer &addition) const;
 		Integer PositiveSub(const Integer &subtrahend) const;
 
-		bool m_positive = true;
+		bool m_unsigned = true;
 
 		Natural m_value;
 	};

@@ -7,9 +7,17 @@
 
 #include "Real.h"
 
+
+#define DEFAULT_RADIX 10
+
+
 namespace performance {
 	namespace natural {
+		class Algorithm;
 		namespace root {
+			class Guess;
+		}
+		namespace logarithm {
 			class Guess;
 		}
 	}
@@ -19,18 +27,19 @@ namespace performance {
 namespace number {
 	class Natural : public Real {
 	public:
-		Natural(uint64_t value = 0, uint8_t radix = 10);
-		Natural(const std::string &value, uint8_t radix = 10);
+		Natural(uint64_t value = 0);
+		Natural(const std::string &value, uint8_t radix = DEFAULT_RADIX);
 
-		const std::string GetString(uint8_t radix = 10) const override;
-		void SetRadix(uint8_t radix = 10) override;
-		uint8_t GetRadix() const override;
+		const std::string GetString(uint8_t radix = DEFAULT_RADIX) const override;
 		bool EqualZero() const override;
 		bool EqualOne() const override;
-		void SetPositive(bool isPositive) override;
+		void SetUnSigned(bool isUnSigned) override;
 		bool IsPositive() const override;
+		void Opposite() override;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
+
+		bool IsOdd() const;
 
 		Natural Factorial() const;
 		bool operator==(const Natural &other) const;
@@ -52,6 +61,7 @@ namespace number {
 		Natural Power(const Natural &exponent) const;
 		std::pair<Natural, Natural> Root(const Natural &exponent) const;
 		std::pair<Natural, Natural> Logarithm(const Natural &base) const;
+		const std::list<Natural> &GetFactors();
 
 		Natural &operator++();
 		Natural &operator--();
@@ -60,25 +70,27 @@ namespace number {
 		Natural Composition(const Natural &m) const;
 
 		std::pair<Natural, Natural> Div(const Natural &divisor) const;
-		Natural GetNatural(uint8_t radix) const;
 
 		std::string GetLoop() const;
 
+		size_t Orders() const;
+
+		friend class performance::natural::Algorithm;
 		friend class performance::natural::root::Guess;
+		friend class performance::natural::logarithm::Guess;
 	private:
-		Natural(const std::list<char> &singles, uint8_t radix = 10);
+		Natural(const std::list<char> &singles, uint8_t radix = DEFAULT_RADIX);
 		uint8_t GetBuilt()const;
 		Natural &Format();
 		static uint16_t ToBuilt(char a, char b, uint8_t radix);
 		static void DivN(uint8_t from, uint8_t to, std::list<char> &singles, char &remainder);
 		static char GetChar(uint8_t value);
 		static uint8_t GetValue(char c);
-		std::pair<Natural, Natural> PowerInverseHalf(const Natural &factor, std::vector<char> &singles, size_t index, char top, char bottom, std::function<Natural(const Natural&, const Natural&)> power) const;
-		std::pair<Natural, Natural> PowerInverse(const Natural &factor, std::vector<char> &singles, size_t index, char top, char bottom, std::function<Natural(const Natural&, const Natural&)> power) const;
-		
+		static std::list<char> GetRadixSingles(uint8_t from, uint8_t to, const std::list<char> &singles);
+
 		std::list<char> m_singles;
 
-		uint8_t m_radix = 10;
+		std::list<Natural> m_factors;
 
 		size_t m_loop_begin = -1;
 		size_t m_loop_end = -1;

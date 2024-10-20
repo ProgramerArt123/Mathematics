@@ -21,23 +21,20 @@ namespace number {
 		}
 	}
 
-	void Imaginary::SetRadix(uint8_t radix) {
-		m_value.SetRadix(radix);
-	}
-	uint8_t Imaginary::GetRadix() const {
-		return m_value.GetRadix();
-	}
 	bool Imaginary::EqualZero() const {
 		return m_value.EqualZero();
 	}
 	bool Imaginary::EqualOne() const {
 		return m_value.EqualOne();
 	}
-	void Imaginary::SetPositive(bool isPositive) {
-		m_value.SetPositive(isPositive);
+	void Imaginary::SetUnSigned(bool isUnSigned) {
+		m_value.SetUnSigned(isUnSigned);
 	}
 	bool Imaginary::IsPositive() const {
 		return m_value.IsPositive();
+	}
+	void Imaginary::Opposite() {
+		m_value.Opposite();
 	}
 	const std::string Imaginary::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
@@ -48,7 +45,7 @@ namespace number {
 	}
 	Imaginary Imaginary::operator-() const {
 		Imaginary negative(*this);
-		negative.SetPositive(!negative.IsPositive());
+		negative.Opposite();
 		return negative;
 	}
 	bool Imaginary::operator==(const Imaginary &other) const {

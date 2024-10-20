@@ -1,16 +1,16 @@
-#ifndef __PERFORMANCE_NATURAL_ROOT_INTERFACE_H__
-#define __PERFORMANCE_NATURAL_ROOT_INTERFACE_H__
+#ifndef __PERFORMANCE_NATURAL_LOGARITHM_INTERFACE_H__
+#define __PERFORMANCE_NATURAL_LOGARITHM_INTERFACE_H__
 
 #include <utility>
 #include "number/Natural.h"
 
 namespace performance {
 	namespace natural {
-		namespace root {
+		namespace logarithm {
 			class Interface{
 			public:
-				Interface(const number::Natural &power, const number::Natural &exponent)
-					: m_power(power), m_exponent(exponent) {
+				Interface(const number::Natural &power, const number::Natural &base)
+					: m_power(power), m_base(base) {
 				}
 				std::pair<number::Natural, number::Natural> GetResult() const
 				{
@@ -18,7 +18,7 @@ namespace performance {
 				}
 			protected:
 				const number::Natural &m_power;
-				const number::Natural &m_exponent;
+				const number::Natural &m_base;
 				std::pair<number::Natural, number::Natural> m_result;
 			};
 		}

@@ -311,11 +311,11 @@ namespace expression {
 		return std::nullopt;
 	}
 	template<typename OperatorType>
-	bool Expression<OperatorType>::Polymorphism0::IsPositive() const {
+	bool Expression<OperatorType>::Polymorphism0::IsUnSigned() const {
 		return true;
 	}
 	template<typename OperatorType>
-	void Expression<OperatorType>::Polymorphism0::SetPositive(bool isPositive) {
+	void Expression<OperatorType>::Polymorphism0::SetUnSigned(bool isUnSigned) {
 	}
 	template<typename OperatorType>
 	void Expression<OperatorType>::Polymorphism0::Opposite() {
@@ -539,11 +539,11 @@ namespace expression {
 		return *m_reduction;
 	}
 	template<typename OperatorType>
-	bool Expression<OperatorType>::Polymorphism1::IsPositive() const {
+	bool Expression<OperatorType>::Polymorphism1::IsUnSigned() const {
 		return true;
 	}
 	template<typename OperatorType>
-	void Expression<OperatorType>::Polymorphism1::SetPositive(bool isPositive) {
+	void Expression<OperatorType>::Polymorphism1::SetUnSigned(bool isUnSigned) {
 	}
 	template<typename OperatorType>
 	void Expression<OperatorType>::Polymorphism1::Opposite() {
@@ -671,7 +671,7 @@ namespace expression {
 			for (auto &common : commons) {
 				collect.AppendNode(common);
 			}
-			return child;
+			return collect;
 		}
 
 
@@ -716,16 +716,16 @@ namespace expression {
 		return std::nullopt;
 	}
 	template<typename OperatorType>
-	bool Expression<OperatorType>::Polymorphism2::IsPositive() const {
-		return m_positive;
+	bool Expression<OperatorType>::Polymorphism2::IsUnSigned() const {
+		return m_unsigned;
 	}
 	template<typename OperatorType>
-	void Expression<OperatorType>::Polymorphism2::SetPositive(bool isPositive) {
-		m_positive = isPositive;
+	void Expression<OperatorType>::Polymorphism2::SetUnSigned(bool isUnSigned) {
+		m_unsigned = isUnSigned;
 	}
 	template<typename OperatorType>
 	void Expression<OperatorType>::Polymorphism2::Opposite() {
-		m_positive = !m_positive;
+		m_unsigned = !m_unsigned;
 	}
 	template<typename OperatorType>
 	const Node *Expression<OperatorType>::Polymorphism2::Origin() const {

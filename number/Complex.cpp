@@ -64,25 +64,22 @@ namespace number {
 		}
 	}
 
-	void Complex::SetRadix(uint8_t radix) {
-		m_real.SetRadix(radix);
-		m_image.SetRadix(radix);
-	}
-	uint8_t Complex::GetRadix() const {
-		return m_real.GetRadix();
-	}
 	bool Complex::EqualZero() const {
 		return m_real.EqualZero() && m_image.EqualZero();
 	}
 	bool Complex::EqualOne() const {
 		return m_real.EqualOne() && m_image.EqualZero();
 	}
-	void Complex::SetPositive(bool isPositive) {
-		m_real.SetPositive(isPositive);
-		m_image.SetPositive(isPositive);
+	void Complex::SetUnSigned(bool isUnSigned) {
+		m_real.SetUnSigned(isUnSigned);
+		m_image.SetUnSigned(isUnSigned);
 	}
 	bool Complex::IsPositive() const {
 		return m_real.IsPositive() && m_image.IsPositive();
+	}
+	void Complex::Opposite() {
+		m_real.Opposite();
+		m_image.Opposite();
 	}
 	const std::string Complex::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
@@ -116,7 +113,7 @@ namespace number {
 	}
 	Complex Complex::operator-() const {
 		Complex negative(*this);
-		negative.SetPositive(!negative.IsPositive());
+		negative.Opposite();
 		return negative;
 	}
 	bool Complex::operator==(const Complex &other) const {

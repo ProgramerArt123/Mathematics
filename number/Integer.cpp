@@ -4,29 +4,23 @@
 #include "Fraction.h"
 #include "Integer.h"
 namespace number {
-	Integer::Integer(uint64_t value, bool positive) :
-		Integer(Natural(value, 10), positive) {
+	Integer::Integer(uint64_t value, bool isUnSigned) :
+		Integer(Natural(value), isUnSigned) {
 
 	}
 
-	Integer::Integer(const Natural &value, bool positive) :
-		m_value(value), m_positive(positive) {
+	Integer::Integer(const Natural &value, bool isUnSigned) :
+		m_value(value), m_unsigned(isUnSigned) {
 		if (m_value.EqualZero()) {
-			m_positive = true;
+			m_unsigned = true;
 		}
 	}
-	Integer::Integer(const std::string &value, bool positive) :
-		Integer(Natural(value, 10), positive) {
+	Integer::Integer(const std::string &value, bool isUnSigned) :
+		Integer(Natural(value, 10), isUnSigned) {
 
 	}
 	const std::string Integer::GetString(uint8_t radix)const {
-		return m_positive ? m_value.GetString(radix) : "-" + m_value.GetString(radix);
-	}
-	void Integer::SetRadix(uint8_t radix) {
-		m_value = m_value.GetNatural(radix);
-	}
-	uint8_t Integer::GetRadix() const {
-		return m_value.GetRadix();
+		return m_unsigned ? m_value.GetString(radix) : "-" + m_value.GetString(radix);
 	}
 	bool Integer::EqualZero() const {
 		return Integer(0) == *this;
@@ -34,33 +28,33 @@ namespace number {
 	bool Integer::EqualOne() const {
 		return IsPositive() && m_value.EqualOne();
 	}
-	void Integer::SetPositive(bool isPositive) {
-		m_positive = isPositive;
+	void Integer::SetUnSigned(bool isUnSigned) {
+		m_unsigned = isUnSigned;
 	}
 	bool Integer::IsPositive() const {
-		return m_positive;
+		return m_unsigned;
+	}
+	void Integer::Opposite() {
+		if (!EqualZero()) {
+			m_unsigned = !m_unsigned;
+		}
 	}
 	const std::string Integer::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
 		return GetString(radix);
 	}
-	Natural Integer::Value() const {
+	const Natural &Integer::Value() const {
 		return m_value;
 	}
 	Integer Integer::GetAbs() const {
 		return IsPositive() ? *this : -*this;
 	}
-	void Integer::Opposite() {
-		if (!EqualZero()) {
-			m_positive = !m_positive;
-		}
-	}
 	Integer Integer::operator-() const {
-		return Integer(m_value, !m_positive);
+		return Integer(m_value, !m_unsigned);
 	}
 	Integer Integer::operator+(const Integer &addition) const {
-		if (m_positive) {
-			if (addition.m_positive) {
+		if (m_unsigned) {
+			if (addition.m_unsigned) {
 				return PositiveAdd(addition);
 			}
 			else {
@@ -68,7 +62,7 @@ namespace number {
 			}
 		}
 		else {
-			if (addition.m_positive) {
+			if (addition.m_unsigned) {
 				return addition.PositiveSub(*this);
 			}
 			else {
@@ -81,17 +75,17 @@ namespace number {
 	}
 	Integer Integer::operator*(const Integer &multiplier) const {
 		Integer product = m_value * multiplier.m_value;
-		product.m_positive = m_positive == multiplier.m_positive;
+		product.m_unsigned = m_unsigned == multiplier.m_unsigned;
 		return product;
 	}
 	Integer Integer::operator/(const Integer &divisor) const {
 		Integer quotient = m_value / divisor.m_value;
-		quotient.m_positive = m_positive == divisor.m_positive;
+		quotient.m_unsigned = m_unsigned == divisor.m_unsigned;
 		return quotient;
 	}
 	Integer Integer::operator%(const Integer &divisor) const {
 		Integer remainder = m_value % divisor.m_value;
-		remainder.m_positive = m_positive == divisor.m_positive;
+		remainder.m_unsigned = m_unsigned == divisor.m_unsigned;
 		return remainder;
 	}
 
@@ -112,7 +106,7 @@ namespace number {
 		return *this;
 	}
 	bool Integer::operator==(const Integer &other)const {
-		return m_positive == other.m_positive && m_value == other.m_value;
+		return m_unsigned == other.m_unsigned && m_value == other.m_value;
 	}
 	bool Integer::operator!=(const Integer &other) const {
 		return !(*this == other);

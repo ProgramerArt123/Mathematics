@@ -11,18 +11,17 @@ namespace number {
 	class Root : public Number {
 	public:
 		Root();
-		Root(const Integer &power, const Integer &exponent, bool positive = true);
-		Root(const Integer &power, const Fraction &exponent, bool positive = true);
-		Root(const Fraction &power, const Integer &exponent, bool positive = true);
-		Root(const Fraction &power, const Fraction &exponent, bool positive = true);
+		Root(const Integer &power, const Integer &exponent, bool isUnSigned = true);
+		Root(const Integer &power, const Fraction &exponent, bool isUnSigned = true);
+		Root(const Fraction &power, const Integer &exponent, bool isUnSigned = true);
+		Root(const Fraction &power, const Fraction &exponent, bool isUnSigned = true);
 
 		const std::string GetString(uint8_t radix = 10) const override;
-		void SetRadix(uint8_t radix = 10) override;
-		uint8_t GetRadix() const override;
 		bool EqualZero() const override;
 		bool EqualOne() const override;
-		void SetPositive(bool isPositive) override;
+		void SetUnSigned(bool isUnSigned) override;
 		bool IsPositive() const override;
+		void Opposite() override;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
 
@@ -43,13 +42,11 @@ namespace number {
 		Root AddEqual(const number::Root &right) const;
 		Root MulEqual(const number::Root &right, bool isLeftMul, bool isRightMul) const;
 
-		void Opposite();
-
 		friend Root Power(const Fraction &base, const Fraction &exponent);
-
+		static bool CheckReduce(const Fraction &power, const Fraction &exponent);
 	private:
 
-		bool m_positive = true;
+		bool m_unsigned = true;
 
 		Fraction m_power;
 		Fraction m_exponent;
@@ -58,6 +55,9 @@ namespace number {
 		Fraction m_reduction_power;
 
 		void Reduce();
+		void ReduceExponent();
+		void ReduceCoefficient();
+		std::pair<Natural, Natural> CalcuCoefficient(const Natural &maxRoot, const Natural &power) const;
 	};
 }
 #endif

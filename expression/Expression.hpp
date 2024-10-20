@@ -51,12 +51,12 @@ namespace expression {
 			m_nodes = right.m_nodes;
 			m_is_child = right.m_is_child;
 			InitPolymorphism();
-			m_polymorphism->SetPositive(right.m_polymorphism->IsPositive());
+			m_polymorphism->SetUnSigned(right.m_polymorphism->IsUnSigned());
 			return *this;
 		}
 
 		bool operator==(const Expression<OperatorType> &other) const {
-			if (m_polymorphism->IsPositive() != other.m_polymorphism->IsPositive()) {
+			if (m_polymorphism->IsUnSigned() != other.m_polymorphism->IsUnSigned()) {
 				return false;
 			}
 			if (Size() != other.Size()) {
@@ -117,17 +117,17 @@ namespace expression {
 		const std::string OutPutString() const override {
 			std::stringstream ss;
 			ss << m_operator->updatePosition(m_position).OutPutString();
-			if (!m_polymorphism->IsPositive()) {
+			if (!m_polymorphism->IsUnSigned()) {
 				ss << "-";
 			}
-			if (m_is_child || !m_polymorphism->IsPositive()) {
+			if (m_is_child || !m_polymorphism->IsUnSigned()) {
 				ss << "(";
 			}
 			size_t index = 0;
 			for (auto& node : m_nodes) {
 				ss << Visit(node)->updatePosition(index++).OutPutString();
 			}
-			if (m_is_child || !m_polymorphism->IsPositive()) {
+			if (m_is_child || !m_polymorphism->IsUnSigned()) {
 				ss << ")";
 			}
 			std::string s = ss.str();
@@ -581,12 +581,10 @@ namespace expression {
 					if (OPERATOR_TYPE_FLAG_DIV != denominator.Flag()) {
 						return false;
 					}
-					const number::Fraction fraction(numerator.Value(), denominator.Value());
-					if (fraction.ReductionNumerator() == numerator.Value() &&
-						fraction.ReductionInteger() == number::Integer(0)) {
+					if (number::Fraction::CheckReduce(numerator.Value(), denominator.Value())) {
 						return false;
 					}
-					m_polymorphism->SetFractionReduction(fraction);
+					m_polymorphism->SetFractionReduction(number::Fraction(numerator.Value(), denominator.Value()));
 					return true;
 				});
 			}
@@ -605,17 +603,13 @@ namespace expression {
 					if (OPERATOR_TYPE_FLAG_ROOT != exponent.Flag()) {
 						return false;
 					}
-					const number::Root root(base.Value(), exponent.Value());
-					if (root.ReductionPower() == base.Value() &&
-						root.ReductionCoefficient().EqualOne()) {
+					if (number::Root::CheckReduce(base.Value(), exponent.Value())) {
 						return false;
 					}
-
+					const number::Root root(base.Value(), exponent.Value());
 					const Expression<OPERATOR_TYPE_2> reduction(root.ReductionPower().Numerator(),
 						OPERATOR_TYPE_ROOT(), root.Exponent().Numerator());
-
 					m_polymorphism->SetOpenReduction(root.ReductionCoefficient().Numerator(), reduction);
-
 					return true;
 				});
 			}
@@ -1084,8 +1078,8 @@ namespace expression {
 				virtual std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const = 0;
 				virtual void SetFractionReduction(const number::Fraction &fraction) = 0;
 				virtual std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const = 0;
-				virtual bool IsPositive() const = 0;
-				virtual void SetPositive(bool isPositive) = 0;
+				virtual bool IsUnSigned() const = 0;
+				virtual void SetUnSigned(bool isUnSigned) = 0;
 				virtual void Opposite() = 0;
 
 				template<typename ChildOperatorType>
@@ -1110,8 +1104,8 @@ namespace expression {
 				std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const override;
 				void SetFractionReduction(const number::Fraction &fraction) override;
 				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
-				bool IsPositive() const override;
-				void SetPositive(bool isPositive) override;
+				bool IsUnSigned() const override;
+				void SetUnSigned(bool isUnSigned) override;
 				void Opposite() override;
 
 				Expression<OPERATOR_TYPE_1> LevelDown(ExpressionNodes::iterator exp2);
@@ -1137,8 +1131,8 @@ namespace expression {
 				std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const override;
 				void SetFractionReduction(const number::Fraction &fraction) override;
 				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
-				bool IsPositive() const override;
-				void SetPositive(bool isPositive) override;
+				bool IsUnSigned() const override;
+				void SetUnSigned(bool isUnSigned) override;
 				void Opposite() override;
 
 				template<typename ChildOperatorType>
@@ -1164,10 +1158,10 @@ namespace expression {
 				std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const override;
 				void SetFractionReduction(const number::Fraction &fraction) override;
 				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
-				bool IsPositive() const override;
-				void SetPositive(bool isPositive) override;
+				bool IsUnSigned() const override;
+				void SetUnSigned(bool isUnSigned) override;
 				void Opposite() override;
-
+				
 				const Node *Origin() const;
 
 				template<typename ChildOperatorType>
@@ -1178,7 +1172,7 @@ namespace expression {
 			private:
 				Expression<OPERATOR_TYPE_2> &m_exp;
 				std::unique_ptr<Expression<OPERATOR_TYPE_1>> m_reduction;
-				bool m_positive = true;
+				bool m_unsigned = true;
 			};
 			
 			void InitPolymorphism() {

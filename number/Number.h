@@ -23,13 +23,11 @@ namespace number {
 			std::function<bool(char)> round = [](char last) {return false; }) const {
 			return GetDecimal(radix, decimalLength, round) + "[radix=" + std::to_string(radix) + "]";
 		}
-		virtual void SetRadix(uint8_t radix = 10) = 0;
-		virtual uint8_t GetRadix() const = 0;
 		virtual bool EqualZero() const = 0;
 		virtual bool EqualOne() const = 0;
-		virtual void SetPositive(bool isPositive) = 0;
+		virtual void SetUnSigned(bool isUnSigned) = 0;
 		virtual bool IsPositive() const = 0;
-
+		virtual void Opposite() = 0;
 	};
 }
 

@@ -12,12 +12,11 @@ namespace number {
 		Imaginary(const Integer &value);
 		Imaginary(const Fraction &value);
 		const std::string GetString(uint8_t radix = 10) const override;
-		void SetRadix(uint8_t radix = 10) override;
-		uint8_t GetRadix() const override;
 		bool EqualZero() const override;
 		bool EqualOne() const override;
-		void SetPositive(bool isPositive) override;
+		void SetUnSigned(bool isUnSigned) override;
 		bool IsPositive() const override;
+		void Opposite() override;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
 

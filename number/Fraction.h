@@ -17,12 +17,11 @@ namespace number {
 
 		Fraction &SetPointPos(size_t point);
 		const std::string GetString(uint8_t radix = 10) const override;
-		void SetRadix(uint8_t radix = 10) override;
-		uint8_t GetRadix() const override;
 		bool EqualZero() const override;
 		bool EqualOne() const override;
-		void SetPositive(bool isPositive) override;
+		void SetUnSigned(bool isUnSigned) override;
 		bool IsPositive() const override;
+		void Opposite() override;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
 
@@ -34,7 +33,6 @@ namespace number {
 		Fraction GetAbs() const;
 		Fraction GetReciprocal() const;
 		bool IsInteger() const;
-		void Opposite();
 
 		Fraction operator-() const;
 		bool operator<(const Fraction &other) const;
@@ -65,7 +63,7 @@ namespace number {
 		friend Fraction operator/(const number::Integer &number, const Fraction &divisor);
 
 		static Fraction Power(const number::Integer &number, const number::Integer &exponent);
-
+		static bool CheckReduce(const Integer &numerator, const Integer &denominator);
 	private:
 
 		number::Integer m_numerator;

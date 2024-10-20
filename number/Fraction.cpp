@@ -15,7 +15,6 @@ namespace number {
 	Fraction::Fraction(const number::Integer &numerator, const number::Integer &denominator) :
 		m_numerator(numerator), m_denominator(denominator) {
 		assert(!m_denominator.EqualZero());
-		m_numerator.SetRadix(m_denominator.GetRadix());
 		Reduce();
 	}
 	Fraction::Fraction(const number::Integer &numerator, const Fraction &denominator) {
@@ -31,7 +30,6 @@ namespace number {
 		std::string denominator = "1";
 		denominator.append(point, '0');
 		m_denominator = number::Integer(Natural(denominator));
-		m_denominator.SetRadix(m_numerator.GetRadix());
 		return *this;
 	}
 	const std::string Fraction::GetString(uint8_t radix) const {
@@ -48,26 +46,33 @@ namespace number {
 			return m_reduction_integer.GetString(radix) + "[" + m_reduction_numerator.GetString(radix) + "/" + m_denominator.GetString(radix) + "]";
 		}
 	}
-	void Fraction::SetRadix(uint8_t radix) {
-		m_numerator.SetRadix(radix);
-		m_denominator.SetRadix(radix);
-	}
-	uint8_t Fraction::GetRadix() const {
-		return m_denominator.GetRadix();
-	}
 	bool Fraction::EqualZero() const {
-		return m_numerator.EqualZero();
+		return m_reduction_integer.EqualZero() && m_reduction_numerator.EqualZero();
 	}
 	bool Fraction::EqualOne() const {
-		return IsPositive() && m_numerator.GetAbs() == m_denominator.GetAbs();
+		if (!IsPositive()) {
+			return false;
+		}
+		if (m_reduction_integer.EqualZero() && m_reduction_numerator.GetAbs() == m_denominator.GetAbs()) {
+			return true;
+		}
+		if (m_reduction_integer.EqualOne() && m_reduction_numerator.EqualZero()) {
+			return true;
+		}
+		return false;
 	}
-	void Fraction::SetPositive(bool isPositive) {
-		m_numerator.SetPositive(isPositive);
-		m_denominator.SetPositive(true);
+	void Fraction::SetUnSigned(bool isUnSigned) {
+		m_numerator.SetUnSigned(isUnSigned);
+		m_denominator.SetUnSigned(true);
 	}
 	bool Fraction::IsPositive() const {
 		return m_numerator.IsPositive() ==
 			m_denominator.IsPositive();
+	}
+	void Fraction::Opposite() {
+		m_numerator.Opposite();
+		m_reduction_integer.Opposite();
+		m_reduction_numerator.Opposite();
 	}
 	const Integer &Fraction::Numerator() const {
 		return m_numerator;
@@ -96,12 +101,6 @@ namespace number {
 
 	bool Fraction::IsInteger() const {
 		return Denominator().GetAbs().EqualOne();
-	}
-
-	void Fraction::Opposite() {
-		m_numerator.Opposite();
-		m_reduction_integer.Opposite();
-		m_reduction_numerator.Opposite();
 	}
 
 	const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength,
@@ -141,7 +140,7 @@ namespace number {
 				std::string denominator = "1";
 				denominator.append(decimalLength + 1, '0');
 				return ((Fraction(number::Integer(Natural(quotientStr, radix), IsPositive()))
-					+ Natural(1, radix)) / Natural(denominator, radix)).GetDecimal(radix, decimalLength, round);
+					+ Natural(1)) / Natural(denominator, radix)).GetDecimal(radix, decimalLength, round);
 			}
 		}
 		else {
@@ -157,26 +156,26 @@ namespace number {
 		m_reduction_numerator = m_numerator % m_denominator;
 
 		if (m_numerator.EqualZero()) {
-			m_numerator.SetPositive(true);
+			m_numerator.SetUnSigned(true);
 		}
 		else if (m_numerator.IsPositive() ==
 			m_denominator.IsPositive()) {
-			m_denominator.SetPositive(true);
-			m_numerator.SetPositive(true);
+			m_denominator.SetUnSigned(true);
+			m_numerator.SetUnSigned(true);
 		}
 		else if (!m_denominator.IsPositive()) {
-			m_denominator.SetPositive(true);
-			m_numerator.SetPositive(false);
+			m_denominator.SetUnSigned(true);
+			m_numerator.SetUnSigned(false);
 		}
-		m_reduction_numerator.SetPositive(m_numerator.IsPositive());
+		m_reduction_numerator.SetUnSigned(m_numerator.IsPositive());
 		if (m_reduction_integer.GetAbs().EqualZero()) {
-			m_reduction_integer.SetPositive(true);
+			m_reduction_integer.SetUnSigned(true);
 		}
 	}
 
 	Fraction Fraction::operator-() const {
 		Fraction negative(*this);
-		negative.SetPositive(!negative.IsPositive());
+		negative.Opposite();
 		return negative;
 	}
 	bool Fraction::operator<(const Fraction &other) const {
@@ -254,12 +253,17 @@ namespace number {
 	}
 	Fraction Fraction::Power(const number::Integer &number, const number::Integer &exponent) {
 		number::Integer product = number.Value().Power(exponent.Value());
-		product.SetPositive(product.IsPositive() || (exponent.Value() % Natural(2)).EqualZero());
+		product.SetUnSigned(product.IsPositive() || !exponent.Value().IsOdd());
 		if (exponent.IsPositive()) {
 			return Fraction(product, 1);
 		}
 		else {
 			return Fraction(1, product);
 		}
+	}
+	bool Fraction::CheckReduce(const Integer &numerator, const Integer &denominator) {
+		const number::Fraction reduce(numerator.Value(), denominator.Value());
+		return reduce.ReductionInteger().EqualZero() &&
+			reduce.ReductionNumerator() == numerator.Value();
 	}
 }

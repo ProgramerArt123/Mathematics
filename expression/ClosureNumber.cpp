@@ -16,7 +16,7 @@ namespace expression {
 	ClosureNumber::ClosureNumber(const number::Integer &value, OPERATOR_TYPE_FLAG flag) :
 		Number(flag), m_value(value) {
 	}
-	bool ClosureNumber::IsPositive() const {
+	bool ClosureNumber::IsUnSigned() const {
 		return m_value.IsPositive();
 	}
 	const std::string ClosureNumber::GetString(size_t pos, uint8_t radix) const {
