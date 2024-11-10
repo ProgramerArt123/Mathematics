@@ -17,46 +17,67 @@ namespace number {
 		assert(!m_denominator.EqualZero());
 		Reduce();
 	}
-	Fraction::Fraction(const number::Integer &numerator, const Fraction &denominator) {
-		*this = numerator / denominator;
+	Fraction::Fraction(const number::Integer &numerator, const Fraction &denominator) :
+		m_numerator(numerator*denominator.Denominator()),
+		m_denominator(denominator.Numerator()) {
+		assert(!m_denominator.EqualZero());
+		Reduce();
 	}
-	Fraction::Fraction(const Fraction &numerator, const number::Integer &denominator) {
-		*this = numerator / denominator;
+
+	Fraction::Fraction(const Fraction &numerator, const number::Integer &denominator) :
+		m_numerator(numerator.Numerator()),
+		m_denominator(denominator*numerator.Denominator()) {
+		assert(!m_denominator.EqualZero());
+		Reduce();
 	}
-	Fraction::Fraction(const Fraction &numerator, const Fraction &denominator) {
-		*this = numerator / denominator;
+	Fraction::Fraction(const Fraction &numerator, const Fraction &denominator) :
+		m_numerator(numerator.Numerator()*denominator.Denominator()),
+		m_denominator(denominator.Numerator()*numerator.Denominator()) {
+		assert(!m_denominator.EqualZero());
+		Reduce();
 	}
-	Fraction &Fraction::SetPointPos(size_t point) {
-		std::string denominator = "1";
-		denominator.append(point, '0');
-		m_denominator = number::Integer(Natural(denominator));
-		return *this;
+	Fraction Fraction::Point(size_t point) const{
+		return Fraction(m_numerator, m_denominator*Natural(1).CalcPower(point));
 	}
 	const std::string Fraction::GetString(uint8_t radix) const {
-		if (m_numerator.EqualZero()) {
-			return m_numerator.GetString(radix);
-		}
-		else if (m_denominator.EqualOne()) {
-			return m_numerator.GetString(radix);
-		}
-		else if(m_reduction_integer.EqualZero()){
-			return m_reduction_numerator.GetString(radix) + "/" + m_denominator.GetString(radix);
+		if(m_reduction_integer.EqualZero()){
+			if (m_reduction_numerator.EqualZero() || m_reduction_denominator.EqualPositiveOne()) {
+				return m_reduction_numerator.GetString(radix);
+			}
+			else if (m_reduction_denominator.EqualNegativeOne()) {
+				return (-m_reduction_numerator).GetString(radix);
+			}
+			else {
+				return m_reduction_numerator.GetString(radix) + "/" + m_reduction_denominator.GetString(radix);
+			}
 		}
 		else {
-			return m_reduction_integer.GetString(radix) + "[" + m_reduction_numerator.GetString(radix) + "/" + m_denominator.GetString(radix) + "]";
+			return m_reduction_integer.GetString(radix) + "[" + Fraction(Numerator() % Denominator(), Denominator()).GetString(radix) + "]";
 		}
 	}
 	bool Fraction::EqualZero() const {
 		return m_reduction_integer.EqualZero() && m_reduction_numerator.EqualZero();
 	}
-	bool Fraction::EqualOne() const {
+	bool Fraction::EqualPositiveOne() const {
 		if (!IsPositive()) {
 			return false;
 		}
-		if (m_reduction_integer.EqualZero() && m_reduction_numerator.GetAbs() == m_denominator.GetAbs()) {
+		if (m_reduction_integer.EqualZero() && m_reduction_numerator.GetAbs() == m_reduction_denominator.GetAbs()) {
 			return true;
 		}
-		if (m_reduction_integer.EqualOne() && m_reduction_numerator.EqualZero()) {
+		if (m_reduction_integer.EqualPositiveOne() && m_reduction_numerator.EqualZero()) {
+			return true;
+		}
+		return false;
+	}
+	bool Fraction::EqualNegativeOne() const {
+		if (IsPositive()) {
+			return false;
+		}
+		if (m_reduction_integer.EqualZero() && m_reduction_numerator.GetAbs() == m_reduction_denominator.GetAbs()) {
+			return true;
+		}
+		if (m_reduction_integer.EqualPositiveOne() && m_reduction_numerator.EqualZero()) {
 			return true;
 		}
 		return false;
@@ -64,6 +85,7 @@ namespace number {
 	void Fraction::SetUnSigned(bool isUnSigned) {
 		m_numerator.SetUnSigned(isUnSigned);
 		m_denominator.SetUnSigned(true);
+		Reduce();
 	}
 	bool Fraction::IsPositive() const {
 		return m_numerator.IsPositive() ==
@@ -71,8 +93,8 @@ namespace number {
 	}
 	void Fraction::Opposite() {
 		m_numerator.Opposite();
-		m_reduction_integer.Opposite();
 		m_reduction_numerator.Opposite();
+		m_reduction_integer.Opposite();
 	}
 	const Integer &Fraction::Numerator() const {
 		return m_numerator;
@@ -82,6 +104,9 @@ namespace number {
 	}
 	const Integer &Fraction::Denominator() const {
 		return m_denominator;
+	}
+	const Integer &Fraction::ReductionDenominator() const {
+		return m_reduction_denominator;
 	}
 	const Integer &Fraction::ReductionInteger() const {
 		return m_reduction_integer;
@@ -100,77 +125,62 @@ namespace number {
 	}
 
 	bool Fraction::IsInteger() const {
-		return Denominator().GetAbs().EqualOne();
+		return ReductionDenominator().EqualPositiveOne() || ReductionDenominator().EqualNegativeOne();
 	}
 
 	const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
-
-		std::string numeratorStr = m_numerator.Value().GetString(radix);
-		numeratorStr.append(decimalLength + 1, '0');
-		std::pair<Natural, Natural> result(Natural(numeratorStr, radix).Div(m_denominator.Value()));
+		std::pair<Natural, Natural> result(m_numerator.Value().CalcPower(decimalLength + 1).Div(m_denominator.Value()));
 		const std::string &loop = result.first.GetLoop();
-		std::string quotientStr = result.first.GetString(radix);
-		if (quotientStr.length() < decimalLength + 2) {
-			quotientStr.insert(0, decimalLength + 2 - quotientStr.length(), '0');
+		std::string quotient = result.first.GetString(radix);
+		if (quotient.length() < decimalLength + 2) {
+			quotient.insert(0, decimalLength + 2 - quotient.length(), '0');
 		}
-		std::string decimalStr = quotientStr.substr(0, quotientStr.length() - decimalLength - 1) +
-			"." + quotientStr.substr(quotientStr.length() - decimalLength - 1);
+		std::string decimal = quotient.substr(0, quotient.length() - decimalLength - 1) +
+			"." + quotient.substr(quotient.length() - decimalLength - 1);
 		if (result.second.EqualZero()) {
-			while ('0' == decimalStr.back()) {
-				decimalStr.pop_back();
+			while ('0' == decimal.back()) {
+				decimal.pop_back();
 			}
-			if ('.' == decimalStr.back()) {
-				decimalStr.pop_back();
+			if ('.' == decimal.back()) {
+				decimal.pop_back();
 			}
 		}
-		if (decimalStr.find('.') != std::string::npos &&
-			decimalStr.size() - decimalStr.find('.') > decimalLength) {
-			const char last = decimalStr.back();
-			decimalStr.pop_back();
+		if (decimal.find('.') != std::string::npos &&
+			decimal.size() - decimal.find('.') > decimalLength) {
+			const char last = decimal.back();
+			decimal.pop_back();
 			if (!round(last)) {
 				if (!loop.empty()) {
-					return IsPositive() ? decimalStr + loop : "-" + decimalStr + loop;
+					return IsPositive() ? decimal + loop : "-" + decimal + loop;
 				}
 				else {
-					return IsPositive() ? decimalStr + "..." : "-" + decimalStr + "...";
+					return IsPositive() ? decimal + "..." : "-" + decimal + "...";
 				}
 			}
 			else {
-				std::string denominator = "1";
-				denominator.append(decimalLength + 1, '0');
-				return ((Fraction(number::Integer(Natural(quotientStr, radix), IsPositive()))
-					+ Natural(1)) / Natural(denominator, radix)).GetDecimal(radix, decimalLength, round);
+				return ((Fraction(number::Integer(Natural(quotient, radix), IsPositive()))
+					+ Natural(1)) / Natural(1).CalcPower(decimalLength + 1)).GetDecimal(radix, decimalLength, round);
 			}
 		}
 		else {
-			return IsPositive() ? decimalStr + loop : "-" + decimalStr + loop;
+			return IsPositive() ? decimal + loop : "-" + decimal + loop;
 		}
 	}
 
 	void Fraction::Reduce() {
-		const number::Integer &common = m_denominator.Value().GreatestCommonDivisor(m_numerator.Value());
-		m_numerator /= common;
-		m_denominator /= common;
-		m_reduction_integer = m_numerator / m_denominator;
-		m_reduction_numerator = m_numerator % m_denominator;
 
-		if (m_numerator.EqualZero()) {
-			m_numerator.SetUnSigned(true);
-		}
-		else if (m_numerator.IsPositive() ==
-			m_denominator.IsPositive()) {
-			m_denominator.SetUnSigned(true);
-			m_numerator.SetUnSigned(true);
-		}
-		else if (!m_denominator.IsPositive()) {
-			m_denominator.SetUnSigned(true);
-			m_numerator.SetUnSigned(false);
-		}
-		m_reduction_numerator.SetUnSigned(m_numerator.IsPositive());
-		if (m_reduction_integer.GetAbs().EqualZero()) {
-			m_reduction_integer.SetUnSigned(true);
-		}
+		m_numerator.SetUnSigned(IsPositive());
+		m_denominator.SetUnSigned(true);
+
+		const number::Integer &common = m_denominator.Value().GreatestCommonDivisor(m_numerator.Value());
+		
+		m_reduction_numerator = m_numerator / common;
+		m_reduction_denominator = m_denominator / common;
+
+		m_reduction_integer = m_reduction_numerator / m_reduction_denominator;
+		m_reduction_numerator = m_reduction_numerator % m_reduction_denominator;
+
 	}
 
 	Fraction Fraction::operator-() const {
@@ -188,9 +198,22 @@ namespace number {
 		return m_numerator * other.m_denominator <
 			other.m_numerator * m_denominator;
 	}
+	bool Fraction::operator>(const Fraction &other) const {
+		if (IsPositive() > other.IsPositive()) {
+			return true;
+		}
+		else if (IsPositive() < other.IsPositive()) {
+			return false;
+		}
+		return m_numerator * other.m_denominator >
+			other.m_numerator * m_denominator;
+	}
 	bool Fraction::operator==(const Fraction &other) const {
 		return m_numerator * other.m_denominator ==
 			other.m_numerator * m_denominator;
+	}
+	bool Fraction::operator!=(const Fraction &other) const {
+		return !(*this == other);
 	}
 	Fraction Fraction::operator+(const Fraction &addition) const {
 		return Fraction((m_numerator * addition.m_denominator) +
@@ -226,7 +249,9 @@ namespace number {
 	bool operator==(const Integer &number, const Fraction &rational) {
 		return Fraction(number) == rational;
 	}
-
+	bool operator!=(const number::Integer &number, const Fraction &rational) {
+		return !(number == rational);
+	}
 	Fraction operator+(const Fraction &number, const Integer &addition) {
 		return number + Fraction(addition);
 	}

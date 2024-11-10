@@ -18,7 +18,8 @@ namespace number {
 
 		const std::string GetString(uint8_t radix = 10) const override;
 		bool EqualZero() const override;
-		bool EqualOne() const override;
+		bool EqualPositiveOne() const override;
+		bool EqualNegativeOne() const override;
 		void SetUnSigned(bool isUnSigned) override;
 		bool IsPositive() const override;
 		void Opposite() override;
@@ -32,10 +33,11 @@ namespace number {
 		const Fraction &Exponent()const;
 		const Fraction &ReductionCoefficient()const;
 		const Fraction &ReductionPower()const;
+		const Fraction &ReductionExponent()const;
 
 		bool IsFraction() const;
 		bool IsImaginary() const;
-		Fraction GetFraction(const Integer &base, uint8_t radix, size_t decimalLength)const;
+		Fraction GetFraction(const Integer &base, size_t decimalLength)const;
 
 		bool EqualPower0(const Root &right) const;
 		bool EqualPower1(const Root &right) const;
@@ -51,12 +53,17 @@ namespace number {
 		Fraction m_power;
 		Fraction m_exponent;
 
-		Fraction m_reduction_coefficient;
-		Fraction m_reduction_power;
+		Fraction m_reduction_power = Integer(0);
+		Fraction m_reduction_exponent = Integer(1);
+		Fraction m_reduction_coefficient = Integer(1);
 
 		void Reduce();
 		void ReduceExponent();
-		void ReduceCoefficient();
+		void ReducePower();
+
+		bool ValueEqualPositiveOne() const;
+		bool ValueEqualNegativeOne() const;
+
 		std::pair<Natural, Natural> CalcuCoefficient(const Natural &maxRoot, const Natural &power) const;
 	};
 }

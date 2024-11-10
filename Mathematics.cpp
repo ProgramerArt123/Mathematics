@@ -58,16 +58,14 @@ int main() {
 		std::cout << "3 / 1 = " << Fraction(Natural("3"), Natural("1")).GetDecimalRadix(10, 10) << std::endl;
 		std::cout << "5 / 4 = " << Fraction(Natural("5"), Natural("4")).GetDecimalRadix(10, 10) << std::endl;
 		std::cout << "0 / 1 = " << Fraction(Natural("0"), Natural("1")).GetDecimalRadix(10, 10) << std::endl;
-		std::cout << Fraction(Natural("123456789")).SetPointPos(0).GetDecimalRadix(10, 10) << std::endl;
-		std::cout << Fraction(Natural("123456789")).SetPointPos(18).GetDecimalRadix(10, 32) << std::endl;
+		std::cout << Fraction(Natural("123456789")).Point(0).GetDecimalRadix(10, 10) << std::endl;
+		std::cout << Fraction(Natural("123456789")).Point(18).GetDecimalRadix(10, 32) << std::endl;
 		Fraction c(Natural("999999"));
-		c.SetPointPos(6);
-		std::cout << "c = " << c.GetDecimal(10, 10) << std::endl;
-		std::cout << "c = " << c.GetDecimal(10, 5) << std::endl;
-		std::cout << "c = " << c.GetDecimal(10, 5, [](char last) {return last >= '5'; }) << std::endl;
+		std::cout << "c = " << c.Point(6).GetDecimal(10, 10) << std::endl;
+		std::cout << "c = " << c.Point(6).GetDecimal(10, 5) << std::endl;
+		std::cout << "c = " << c.Point(6).GetDecimal(10, 5, [](char last) {return last >= '5'; }) << std::endl;
 		Fraction d(Natural("888888"));
-		d.SetPointPos(6);
-		std::cout << "d = " << d.GetDecimal(10, 5, [](char last) {return last >= '5'; }) << std::endl;
+		std::cout << "d = " << d.Point(6).GetDecimal(10, 5, [](char last) {return last >= '5'; }) << std::endl;
 	}
 	{
 		std::cout << "2^256=" << Fraction::Power(2, 256).GetStringRadix(10) << std::endl;

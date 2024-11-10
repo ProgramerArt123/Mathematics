@@ -20,7 +20,7 @@ namespace expression {
 
 		virtual bool IsEqual(const Node &other, bool ignoreOperator = false) const;
 		virtual bool EqualZero() const = 0;
-		virtual bool EqualOne() const = 0;
+		virtual bool EqualPositiveOne() const = 0;
 		virtual bool EqualNegativeOne() const = 0;
 		
 		virtual void Opposite() = 0;

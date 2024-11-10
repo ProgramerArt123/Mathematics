@@ -18,7 +18,8 @@ namespace number {
 
 		const std::string GetString(uint8_t radix = 10) const override;
 		bool EqualZero() const override;
-		bool EqualOne() const override;
+		bool EqualPositiveOne() const override;
+		bool EqualNegativeOne() const override;
 		void SetUnSigned(bool isUnSigned) override;
 		bool IsPositive() const override;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
@@ -29,8 +30,9 @@ namespace number {
 
 		const Fraction &Power()const;
 		const Fraction &Base()const;
-		const Fraction &ReductionCoefficient()const;
 		const Fraction &ReductionPower()const;
+		const Fraction &ReductionBase()const;
+		const Fraction &ReductionCoefficient()const;
 
 		bool IsFraction() const;
 		Fraction GetFraction(const Integer &power, uint8_t radix, size_t decimalLength)const;
@@ -42,10 +44,14 @@ namespace number {
 		Fraction m_power;
 		Fraction m_base;
 
-		Fraction m_reduction_coefficient;
-		Fraction m_reduction_power;
+		Fraction m_reduction_power = Integer(1);
+		Fraction m_reduction_base = Integer(2);
+		Fraction m_reduction_coefficient = Integer(1);
 
 		void Reduce();
+		void ReduceExponent();
+		void ReducePower();
+		Fraction GetFraction(const Integer &power, const Integer &base, size_t powerPointLength, int approximation)const;
 	};
 }
 #endif

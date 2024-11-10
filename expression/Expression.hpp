@@ -150,11 +150,11 @@ namespace expression {
 			}
 			return true;
 		}
-		bool EqualOne() const override {
+		bool EqualPositiveOne() const override {
 			if (1 != m_nodes.size()) {
 				return false;
 			}
-			return Visit(m_nodes.front())->EqualOne();
+			return Visit(m_nodes.front())->EqualPositiveOne();
 		}
 		bool EqualNegativeOne() const override {
 			if (1 != m_nodes.size()) {

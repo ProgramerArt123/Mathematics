@@ -2,7 +2,7 @@
 
 #include "ChangeBase.h"
 
-#define CHANGE_TO_RADIX 2
+#define CHANGE_TO_RADIX 10
 
 namespace performance {
 	namespace natural {
@@ -12,25 +12,25 @@ namespace performance {
 				const std::string &powerChange = power.GetString(CHANGE_TO_RADIX);
 				size_t powerExponent = powerChange.size() - 1;
 				const std::string &baseChange = base.GetString(CHANGE_TO_RADIX);
-				size_t baseExponent = baseChange.size() - 1;
+				size_t baseExponent = baseChange.size() > 1 ? baseChange.size() - 1 : 1;
 				size_t exponent = powerExponent / baseExponent;
-				const number::Natural &checkPower = m_base.Power(exponent);
-				m_result = Correct(exponent, checkPower);
+				Algorithm::CorrectExponent correct(exponent, base);
+				m_result = Correct(correct);
 			}
-			std::pair<number::Natural, number::Natural> ChangeBase::Correct(size_t exponent, const number::Natural &power, bool up) {
-				if (power > m_power) {
-					if (up) {
-						return std::make_pair(exponent - 1, 0);
+			std::pair<number::Natural, number::Natural> ChangeBase::Correct(Algorithm::CorrectExponent &exponent) {
+				if (exponent.Power() > m_power) {
+					if (exponent.IsIncrease()) {
+						return std::make_pair(exponent.Exponent() - 1, m_power - m_base.Power(exponent.Exponent() - 1));
 					}
 					else {
-						return Correct(exponent - 1, power / m_base);
+						return Correct(exponent.Decrease());
 					}
 				}
-				else if (power < m_power) {
-					return Correct(exponent + 1, power * m_base, true);
+				else if (exponent.Power() < m_power) {
+					return Correct(exponent.Increase());
 				}
 				else {
-					return std::make_pair(exponent, 0);
+					return std::make_pair(exponent.Exponent(), 0);
 				}
 			}
 		}

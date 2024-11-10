@@ -34,7 +34,7 @@ namespace expression {
 	bool Symbol::EqualZero() const {
 		return false;
 	}
-	bool Symbol::EqualOne() const {
+	bool Symbol::EqualPositiveOne() const {
 		return false;
 	}
 	bool Symbol::EqualNegativeOne() const {

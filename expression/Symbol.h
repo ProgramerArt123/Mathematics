@@ -12,7 +12,7 @@ namespace expression {
 
 		bool IsUnSigned() const override;
 
-		virtual const std::string GetString(size_t pos = 0, uint8_t radix = DEFAULT_RADIX) const override;
+		virtual const std::string GetString(size_t pos = 0, uint8_t radix = LITERAL_DEFAULT_RADIX) const override;
 
 		const std::string &Name() const;
 
@@ -21,7 +21,7 @@ namespace expression {
 		bool operator==(const Symbol &other) const;
 
 		bool EqualZero() const override;
-		bool EqualOne() const override;
+		bool EqualPositiveOne() const override;
 		bool EqualNegativeOne() const override;
 		void Opposite() override;
 	private:

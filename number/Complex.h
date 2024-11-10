@@ -27,7 +27,8 @@ namespace number {
 
 		const std::string GetString(uint8_t radix = 10) const override;
 		bool EqualZero() const override;
-		bool EqualOne() const override;
+		bool EqualPositiveOne() const override;
+		bool EqualNegativeOne() const override;
 		void SetUnSigned(bool isUnSigned)override;
 		bool IsPositive() const override;
 		void Opposite() override;

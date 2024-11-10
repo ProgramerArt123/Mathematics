@@ -15,11 +15,11 @@ namespace expression {
 		
 		bool IsUnSigned() const override;
 
-		const std::string GetString(size_t pos = 0, uint8_t radix = DEFAULT_RADIX) const override;
+		const std::string GetString(size_t pos = 0, uint8_t radix = LITERAL_DEFAULT_RADIX) const override;
 
 		bool IsEqual(const Node &other, bool ignoreOperator = false) const override;
 		bool EqualZero() const override;
-		bool EqualOne() const override;
+		bool EqualPositiveOne() const override;
 		bool EqualNegativeOne() const override;
 
 		void Opposite() override;

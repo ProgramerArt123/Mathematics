@@ -67,8 +67,11 @@ namespace number {
 	bool Complex::EqualZero() const {
 		return m_real.EqualZero() && m_image.EqualZero();
 	}
-	bool Complex::EqualOne() const {
-		return m_real.EqualOne() && m_image.EqualZero();
+	bool Complex::EqualPositiveOne() const {
+		return m_real.EqualPositiveOne() && m_image.EqualZero();
+	}
+	bool Complex::EqualNegativeOne() const {
+		return m_real.EqualNegativeOne() && m_image.EqualZero();
 	}
 	void Complex::SetUnSigned(bool isUnSigned) {
 		m_real.SetUnSigned(isUnSigned);
@@ -248,7 +251,7 @@ namespace number {
 		if (mod.EqualZero()) {
 			return Complex(fraction, 0);
 		}
-		else if (mod.EqualOne()) {
+		else if (mod.EqualPositiveOne()) {
 			return Complex(0, fraction);
 		}
 		else if (Natural(2) == mod) {

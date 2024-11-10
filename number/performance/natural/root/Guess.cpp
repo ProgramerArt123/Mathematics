@@ -12,16 +12,16 @@ namespace performance {
 				m_result = Algorithm::PowerInverseHalf(m_power, exponent,
 					singles,
 					order - 1,
-					m_power.GetChar(DEFAULT_RADIX - 1),
+					m_power.GetChar(LITERAL_DEFAULT_RADIX - 1),
 					'0',
 					[&exponent](const number::Natural &factor, const number::Natural &value) {
 						return value.Power(exponent);
 					});
 			}
 			size_t Guess::MaxOrders() const {
-				return (size_t)strtoull(((number::Natural(m_power.Orders()) +
+				return (size_t)strtoull(((number::Natural(m_power.CalcOrders()) +
 					m_exponent - number::Natural(1)) / m_exponent).GetString().c_str(),
-					NULL, DEFAULT_RADIX);
+					NULL, LITERAL_DEFAULT_RADIX);
 			}
 		}
 	}

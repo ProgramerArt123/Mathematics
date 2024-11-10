@@ -15,10 +15,11 @@ namespace number {
 		Fraction(const Fraction &numerator, const Integer &denominator);
 		Fraction(const Fraction &numerator, const Fraction &denominator);
 
-		Fraction &SetPointPos(size_t point);
+		Fraction Point(size_t point) const;
 		const std::string GetString(uint8_t radix = 10) const override;
 		bool EqualZero() const override;
-		bool EqualOne() const override;
+		bool EqualPositiveOne() const override;
+		bool EqualNegativeOne() const override;
 		void SetUnSigned(bool isUnSigned) override;
 		bool IsPositive() const override;
 		void Opposite() override;
@@ -28,6 +29,7 @@ namespace number {
 		const Integer &Numerator() const;
 		const Integer &ReductionNumerator() const;
 		const Integer &Denominator() const;
+		const Integer &ReductionDenominator() const;
 		const Integer &ReductionInteger() const;
 
 		Fraction GetAbs() const;
@@ -36,7 +38,9 @@ namespace number {
 
 		Fraction operator-() const;
 		bool operator<(const Fraction &other) const;
+		bool operator>(const Fraction &other) const;
 		bool operator==(const Fraction &other) const;
+		bool operator!=(const Fraction &other) const;
 
 		Fraction operator+(const Fraction &addition) const;
 		Fraction operator-(const Fraction &subtrahend) const;
@@ -51,6 +55,7 @@ namespace number {
 		Fraction &operator/=(const Fraction &divisor);
 
 		friend bool operator==(const number::Integer &number, const Fraction &rational);
+		friend bool operator!=(const number::Integer &number, const Fraction &rational);
 
 		friend Fraction operator+(const Fraction &number, const number::Integer &addition);
 		friend Fraction operator-(const Fraction &number, const number::Integer &subtrahend);
@@ -69,8 +74,9 @@ namespace number {
 		number::Integer m_numerator;
 		number::Integer m_denominator;
 
-		number::Integer m_reduction_integer;
 		number::Integer m_reduction_numerator;
+		number::Integer m_reduction_denominator;
+		number::Integer m_reduction_integer;
 
 		void Reduce();
 

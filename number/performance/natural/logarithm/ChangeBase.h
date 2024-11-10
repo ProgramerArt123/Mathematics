@@ -3,6 +3,8 @@
 
 #include "Interface.h"
 
+#include "number/performance/natural/Algorithm.h"
+
 namespace performance {
 	namespace natural {
 		namespace logarithm {
@@ -10,7 +12,7 @@ namespace performance {
 			public:
 				ChangeBase(const number::Natural &power, const number::Natural &base);
 			private:
-				std::pair<number::Natural, number::Natural> Correct(size_t exponent, const number::Natural &power, bool up = false);
+				std::pair<number::Natural, number::Natural> Correct(Algorithm::CorrectExponent &exponent);
 			};
 		}
 	}

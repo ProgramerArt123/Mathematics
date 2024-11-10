@@ -13,7 +13,8 @@ namespace number {
 		Integer(const std::string &value, bool isUnSigned = true);
 		const std::string GetString(uint8_t radix = 10) const override;
 		bool EqualZero() const override;
-		bool EqualOne() const override;
+		bool EqualPositiveOne() const override;
+		bool EqualNegativeOne() const override;
 		void SetUnSigned(bool isUnSigned)override;
 		bool IsPositive() const override;
 		void Opposite() override;
@@ -39,6 +40,8 @@ namespace number {
 		bool operator<(const Integer &other) const;
 		bool operator>=(const Integer &other) const;
 		bool operator<=(const Integer &other) const;
+
+		friend Integer NaturalSubExtend(const Natural &natural, const Natural &subtrahend);
 	private:
 		Integer PositiveAdd(const Integer &addition) const;
 		Integer PositiveSub(const Integer &subtrahend) const;

@@ -7,9 +7,8 @@
 
 #include "Real.h"
 
-
-#define DEFAULT_RADIX 10
-
+#define LITERAL_DEFAULT_RADIX 10
+#define CALC_DEFAULT_RADIX 10
 
 namespace performance {
 	namespace natural {
@@ -28,11 +27,12 @@ namespace number {
 	class Natural : public Real {
 	public:
 		Natural(uint64_t value = 0);
-		Natural(const std::string &value, uint8_t radix = DEFAULT_RADIX);
+		Natural(const std::string &value, uint8_t radix = LITERAL_DEFAULT_RADIX);
 
-		const std::string GetString(uint8_t radix = DEFAULT_RADIX) const override;
+		const std::string GetString(uint8_t radix = LITERAL_DEFAULT_RADIX) const override;
 		bool EqualZero() const override;
-		bool EqualOne() const override;
+		bool EqualPositiveOne() const override;
+		bool EqualNegativeOne() const override;
 		void SetUnSigned(bool isUnSigned) override;
 		bool IsPositive() const override;
 		void Opposite() override;
@@ -73,13 +73,17 @@ namespace number {
 
 		std::string GetLoop() const;
 
-		size_t Orders() const;
+		size_t CalcOrders() const;
+		Natural CalcOrders(size_t length) const;
+		Natural CalcPower(size_t exponent) const;
+		Natural CalcApproximation(size_t length) const;
+		std::pair<Natural, size_t> CalcBase() const;
 
 		friend class performance::natural::Algorithm;
 		friend class performance::natural::root::Guess;
 		friend class performance::natural::logarithm::Guess;
 	private:
-		Natural(const std::list<char> &singles, uint8_t radix = DEFAULT_RADIX);
+		Natural(const std::list<char> &singles, uint8_t radix = LITERAL_DEFAULT_RADIX);
 		uint8_t GetBuilt()const;
 		Natural &Format();
 		static uint16_t ToBuilt(char a, char b, uint8_t radix);

@@ -13,8 +13,8 @@ namespace number {
 	Natural::Natural(uint64_t value) {
 		if (value) {
 			while (value) {
-				m_singles.push_back(GetChar(value % DEFAULT_RADIX));
-				value /= DEFAULT_RADIX;
+				m_singles.push_back(GetChar(value % CALC_DEFAULT_RADIX));
+				value /= CALC_DEFAULT_RADIX;
 			}
 		}
 		else {
@@ -25,9 +25,8 @@ namespace number {
 		Natural(std::list<char>(value.crbegin(), value.crend()), radix) {
 
 	}
-
 	Natural::Natural(const std::list<char> &singles, uint8_t radix) {
-		const std::list<char> &radixSingles = Natural::GetRadixSingles(radix, DEFAULT_RADIX, singles);
+		const std::list<char> &radixSingles = Natural::GetRadixSingles(radix, CALC_DEFAULT_RADIX, singles);
 		m_singles.assign(radixSingles.begin(), radixSingles.end());
 		if (m_singles.empty()) {
 			m_singles.push_back('0');
@@ -35,44 +34,38 @@ namespace number {
 	}
 	const std::string Natural::GetString(uint8_t radix) const {
 		assert(2 <= radix && radix <= (11 + ('Z' - 'A')));
-		const Natural bitRadix(radix);
-		const Natural bitZero(0);
-		std::list<char> str;
-		Natural remaining(*this);
-		do {
-			std::pair<Natural, Natural> result(remaining.Div(bitRadix));
-			uint8_t built = result.second.GetBuilt();
-			if (0 <= built && built <= 9) {
-				str.push_front('0' + built);
-			}
-			else {
-				str.push_front('A' + (built - 10));
-			}
-			remaining = result.first;
-		} while (remaining > bitZero);
-		return std::string(str.cbegin(), str.cend());
+		if (CALC_DEFAULT_RADIX != radix) {
+			const std::list<char> &radixSingles = Natural::GetRadixSingles(CALC_DEFAULT_RADIX, radix, m_singles);
+			return std::string(radixSingles.crbegin(), radixSingles.crend());
+		}
+		else {
+			return std::string(m_singles.crbegin(), m_singles.crend());
+		}
 	}
 	bool Natural::EqualZero() const {
 		return Natural(0) == *this;
 	}
-	bool Natural::EqualOne() const {
+	bool Natural::EqualPositiveOne() const {
 		return Natural(1) == *this;
 	}
+	bool Natural::EqualNegativeOne() const {
+		return false;
+	}
 	void Natural::SetUnSigned(bool isUnSigned) {
-		throw "undefine";
+		throw "undefined";
 	}
 	bool Natural::IsPositive() const {
 		return true;
 	}
 	void Natural::Opposite() {
-		throw "undefine";
+		throw "undefined";
 	}
 	const std::string Natural::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
 		return GetString(radix);
 	}
 	bool Natural::IsOdd() const {
-		return (*this % Natural(2)).EqualOne();
+		return (*this % Natural(2)).EqualPositiveOne();
 	}
 	Natural Natural::Factorial() const {
 		Natural product(1);
@@ -88,10 +81,10 @@ namespace number {
 		return !(*this == other);
 	}
 	bool Natural::operator>(const Natural &other) const {
-		if (Orders() < other.Orders()) {
+		if (CalcOrders() < other.CalcOrders()) {
 			return false;
 		}
-		else if (Orders() > other.Orders()) {
+		else if (CalcOrders() > other.CalcOrders()) {
 			return true;
 		}
 		else {
@@ -130,9 +123,9 @@ namespace number {
 			if (aBit != addition.m_singles.cend()) {
 				aBitValue = GetValue(*aBit);
 			}
-			if (bitValue + aBitValue + isCarray >= DEFAULT_RADIX) {
+			if (bitValue + aBitValue + isCarray >= CALC_DEFAULT_RADIX) {
 				result.push_back(
-					GetChar((bitValue + aBitValue + isCarray) % DEFAULT_RADIX));
+					GetChar((bitValue + aBitValue + isCarray) % CALC_DEFAULT_RADIX));
 				isCarray = true;
 			}
 			else {
@@ -148,7 +141,7 @@ namespace number {
 		if (isCarray) {
 			result.push_back('1');
 		}
-		return Natural(result).Format();
+		return Natural(result, CALC_DEFAULT_RADIX).Format();
 	}
 	Natural &Natural::operator+=(const Natural &addition) {
 		*this = *this + addition;
@@ -167,7 +160,7 @@ namespace number {
 			}
 			if (bitValue - sBitValue - isCarray < 0) {
 				result.push_back(
-					GetChar(DEFAULT_RADIX + bitValue - sBitValue - isCarray));
+					GetChar(CALC_DEFAULT_RADIX + bitValue - sBitValue - isCarray));
 				isCarray = true;
 			}
 			else {
@@ -179,7 +172,7 @@ namespace number {
 				sBit++;
 		}
 		assert(!isCarray);
-		return Natural(result).Format();
+		return Natural(result, CALC_DEFAULT_RADIX).Format();
 	}
 	Natural &Natural::operator-=(const Natural &subtrahend) {
 		*this = *this - subtrahend;
@@ -276,11 +269,11 @@ namespace number {
 			return std::make_pair<Natural, Natural>(Natural(0), Natural(*this));
 		}
 
-		size_t times = Orders() - divisor.Orders() + 1;
+		size_t times = CalcOrders() - divisor.CalcOrders() + 1;
 
 		auto begin = m_singles.cbegin();
 		{
-			size_t count = Orders() - divisor.Orders();
+			size_t count = CalcOrders() - divisor.CalcOrders();
 			for (size_t index = 0; index < count; index++) {
 				begin++;
 			}
@@ -298,25 +291,23 @@ namespace number {
 				result.second -= divisor;
 			}
 			result.first.m_singles.push_front(GetChar(count));
+			result.first.Format();
 			if (index < times - 1) {
 				if (-1 == result.first.m_loop_begin && !result.second.EqualZero()) {
 					const std::string key(result.second.m_singles.cbegin(), result.second.m_singles.cend());
 					if (loop.find(key) != loop.end()) {
 						result.first.m_loop_begin = loop.at(key);
-						result.first.m_loop_end = result.first.Orders();
+						result.first.m_loop_end = result.first.CalcOrders();
 					}
 					else {
 						loop.insert(std::make_pair(std::string(
-							result.second.m_singles.cbegin(), result.second.m_singles.cend()), result.first.Orders()));
+							result.second.m_singles.cbegin(), result.second.m_singles.cend()), result.first.CalcOrders()));
 					}
 				}
 				begin--;
 				result.second.m_singles.push_front(*begin);
 				result.second.Format();
 			}
-		}
-		if (-1 == result.first.m_loop_begin) {
-			result.first.Format();
 		}
 
 		return result;
@@ -326,7 +317,7 @@ namespace number {
 	uint8_t Natural::GetBuilt()const {
 		uint8_t built = 0;
 		uint8_t weight = 1;
-		for (auto single = m_singles.cbegin(); single != m_singles.cend(); single++, weight *= DEFAULT_RADIX) {
+		for (auto single = m_singles.cbegin(); single != m_singles.cend(); single++, weight *= CALC_DEFAULT_RADIX) {
 			built += GetValue(*single) * weight;
 		}
 		return built;
@@ -400,8 +391,45 @@ namespace number {
 		const std::string singles(m_singles.crbegin(), m_singles.crend());
 		return "......{" + singles.substr(m_loop_begin + 1, m_loop_end - m_loop_begin) + "}";
 	}
-	size_t Natural::Orders() const {
+	size_t Natural::CalcOrders() const {
 		return m_singles.size();
+	}
+	Natural Natural::CalcOrders(size_t length) const {
+		if (CalcOrders() < length) {
+			Natural orders(*this);
+			while (orders.CalcOrders() < length) {
+				orders.m_singles.push_back('0');
+			}
+			return orders;
+		}
+		else {
+			return *this;
+		}
+	}
+	Natural Natural::CalcPower(size_t exponent) const {
+		Natural power(*this);
+		for (size_t e = 0; e < exponent; ++e) {
+			power.m_singles.push_front('0');
+		}
+		return power;
+	}
+	Natural Natural::CalcApproximation(size_t length) const {
+		Natural approximation(*this);
+		size_t index = 0;
+		for (auto &single : approximation.m_singles) {
+			if (index++ >= length) {
+				single = '0';
+			}
+		}
+		return approximation;
+	}
+	std::pair<Natural, size_t> Natural::CalcBase() const {
+		size_t exponent = 0;
+		Natural base(*this);
+		while ('0' == base.m_singles.front()) {
+			base.m_singles.pop_front();
+		}
+		return std::make_pair(base, exponent);
 	}
 	char Natural::GetChar(uint8_t value) {
 		if (value <= 9) {

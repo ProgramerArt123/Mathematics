@@ -750,7 +750,7 @@ namespace expression {
 	}
 	template<typename OperatorType>
 	bool Expression<OperatorType>::Polymorphism2::IsOriginEqualOne(const ExpressionNode &node){
-		return Visit(node)->IsAdd() && Visit(node)->EqualOne();
+		return Visit(node)->IsAdd() && Visit(node)->EqualPositiveOne();
 	}
 	template<typename OperatorType>
 	bool Expression<OperatorType>::Polymorphism2::IsDriverEqualZero(const ExpressionNode &node){

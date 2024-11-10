@@ -23,10 +23,13 @@ namespace number {
 		return m_unsigned ? m_value.GetString(radix) : "-" + m_value.GetString(radix);
 	}
 	bool Integer::EqualZero() const {
-		return Integer(0) == *this;
+		return m_value.EqualZero();
 	}
-	bool Integer::EqualOne() const {
-		return IsPositive() && m_value.EqualOne();
+	bool Integer::EqualPositiveOne() const {
+		return IsPositive() && m_value.EqualPositiveOne();
+	}
+	bool Integer::EqualNegativeOne() const {
+		return !IsPositive() && m_value.EqualPositiveOne();
 	}
 	void Integer::SetUnSigned(bool isUnSigned) {
 		m_unsigned = isUnSigned;
@@ -135,7 +138,9 @@ namespace number {
 	bool Integer::operator<=(const Integer &other) const {
 		return *this < other || *this == other;
 	}
-
+	Integer NaturalSubExtend(const Natural &natural, const Natural &subtrahend) {
+		return Integer(natural) - Integer(subtrahend);
+	}
 	Integer Integer::PositiveAdd(const Integer &addition) const {
 		return Integer(m_value + addition.m_value);
 	}

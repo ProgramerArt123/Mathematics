@@ -12,18 +12,18 @@ namespace performance {
 				m_result = Algorithm::PowerInverseHalf(m_power, base,
 					singles,
 					order - 1,
-					m_power.GetChar(DEFAULT_RADIX - 1),
+					m_power.GetChar(LITERAL_DEFAULT_RADIX - 1),
 					'0',
 					[&base](const number::Natural &factor, const number::Natural &value) {
 						return base.Power(value);
 					});
 			}
 			size_t Guess::MaxOrders() const {
-				if (m_base.Orders() > 1) {
-					return number::Natural((m_power.Orders() - 1) / (m_base.Orders() - 1)).GetString().length();
+				if (m_base.CalcOrders() > 1) {
+					return number::Natural((m_power.CalcOrders() - 1) / (m_base.CalcOrders() - 1)).GetString().length();
 				}
 				else {
-					return m_power.Orders() > 2 ? m_power.Orders() - 2 : 1;
+					return m_power.CalcOrders() > 2 ? m_power.CalcOrders() - 2 : 1;
 				}
 			}
 		}

@@ -32,11 +32,11 @@ namespace expression {
 	bool ClosureNumber::EqualZero() const {
 		return Value().EqualZero();
 	}
-	bool ClosureNumber::EqualOne() const {
-		return Value().EqualOne();
+	bool ClosureNumber::EqualPositiveOne() const {
+		return Value().EqualPositiveOne();
 	}
 	bool ClosureNumber::EqualNegativeOne() const {
-		return (-Value()).EqualOne();
+		return (-Value()).EqualNegativeOne();
 	}
 	void ClosureNumber::Opposite() {
 		m_value.Opposite();

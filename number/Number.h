@@ -24,7 +24,8 @@ namespace number {
 			return GetDecimal(radix, decimalLength, round) + "[radix=" + std::to_string(radix) + "]";
 		}
 		virtual bool EqualZero() const = 0;
-		virtual bool EqualOne() const = 0;
+		virtual bool EqualPositiveOne() const = 0;
+		virtual bool EqualNegativeOne() const = 0;
 		virtual void SetUnSigned(bool isUnSigned) = 0;
 		virtual bool IsPositive() const = 0;
 		virtual void Opposite() = 0;

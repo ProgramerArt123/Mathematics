@@ -24,8 +24,11 @@ namespace number {
 	bool Imaginary::EqualZero() const {
 		return m_value.EqualZero();
 	}
-	bool Imaginary::EqualOne() const {
-		return m_value.EqualOne();
+	bool Imaginary::EqualPositiveOne() const {
+		return m_value.EqualPositiveOne();
+	}
+	bool Imaginary::EqualNegativeOne() const {
+		return m_value.EqualNegativeOne();
 	}
 	void Imaginary::SetUnSigned(bool isUnSigned) {
 		m_value.SetUnSigned(isUnSigned);

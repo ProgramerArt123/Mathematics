@@ -13,7 +13,7 @@ namespace expression {
 
 		const std::string OutPutString() const override;
 
-		virtual const std::string GetString(size_t pos = 0, uint8_t radix = DEFAULT_RADIX) const = 0;
+		virtual const std::string GetString(size_t pos = 0, uint8_t radix = LITERAL_DEFAULT_RADIX) const = 0;
 
 		virtual bool IsUnSigned() const = 0;
 

@@ -18,7 +18,7 @@ namespace performance {
 				}
 				else {
 					if (index) {
-						return PowerInverseHalf(power, factor, singles, index - 1, number::Natural::GetChar(DEFAULT_RADIX - 1), '0', calculate);
+						return PowerInverseHalf(power, factor, singles, index - 1, number::Natural::GetChar(LITERAL_DEFAULT_RADIX - 1), '0', calculate);
 					}
 					else {
 						return std::make_pair<number::Natural, number::Natural>(number::Natural(std::list<char>(singles.cbegin(), singles.cend())), number::Natural(0));
@@ -36,7 +36,7 @@ namespace performance {
 				}
 				else {
 					if (index) {
-						return PowerInverseHalf(power, factor, singles, index - 1, number::Natural::GetChar(DEFAULT_RADIX - 1), '0', calculate);
+						return PowerInverseHalf(power, factor, singles, index - 1, number::Natural::GetChar(LITERAL_DEFAULT_RADIX - 1), '0', calculate);
 					}
 					else {
 						return std::make_pair<number::Natural, number::Natural>(number::Natural(value), number::Natural(power - guessValue));
@@ -56,7 +56,7 @@ namespace performance {
 				}
 				else if (guessValue < power) {
 					if (index) {
-						return PowerInverseHalf(power, factor, singles, index - 1, number::Natural::GetChar(DEFAULT_RADIX - 1), '0', calculate);
+						return PowerInverseHalf(power, factor, singles, index - 1, number::Natural::GetChar(LITERAL_DEFAULT_RADIX - 1), '0', calculate);
 					}
 					else {
 						return std::make_pair<number::Natural, number::Natural>(number::Natural(value), number::Natural(power - guessValue));
@@ -70,5 +70,35 @@ namespace performance {
 			return std::make_pair<number::Natural, number::Natural>(number::Natural(0), number::Natural(0));
 		}
 
+
+
+		Algorithm::CorrectExponent::CorrectExponent(size_t exponent, const number::Natural &base, size_t point) :
+			m_begin_exponent(exponent), m_exponent(exponent), m_base(base), m_point(point) {
+			m_point_power = m_base.Power(exponent);
+		}
+		Algorithm::CorrectExponent &Algorithm::CorrectExponent::Increase() {
+			m_point_power *= m_base;
+			m_exponent++;
+			m_increase = true;
+			return *this;
+		}
+		Algorithm::CorrectExponent &Algorithm::CorrectExponent::Decrease() {
+			m_point_power /= m_base;
+			m_exponent--;
+			m_increase = false;
+			return *this;
+		}
+		size_t Algorithm::CorrectExponent::Exponent() const {
+			return m_exponent;
+		}
+		bool Algorithm::CorrectExponent::IsIncrease() const {
+			return m_increase;
+		}
+		const number::Natural Algorithm::CorrectExponent::Power() const {
+			return PointPower() / number::Natural(1).CalcPower(m_exponent*m_point);
+		}
+		const number::Natural &Algorithm::CorrectExponent::PointPower() const {
+			return m_point_power;
+		}
 	}
 }
