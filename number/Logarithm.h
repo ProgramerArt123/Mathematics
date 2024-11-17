@@ -51,7 +51,8 @@ namespace number {
 		void Reduce();
 		void ReduceExponent();
 		void ReducePower();
-		Fraction GetFraction(const Integer &power, const Integer &base, size_t powerPointLength, int approximation)const;
+		Fraction GetFraction(const Integer &power, const Integer &base, bool point, int approximation)const;
+		Fraction GetFraction(const Integer &power, const Integer &base)const;
 	};
 }
 #endif

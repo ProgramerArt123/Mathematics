@@ -151,43 +151,46 @@ namespace number {
 	}
 
 	Fraction Logarithm::GetFraction(const Integer &power, uint8_t radix, size_t decimalLength)const {
-		if (m_base.IsInteger()) {
-			return GetFraction(power, m_base.Numerator(), 0, 0);
+		const Fraction &numerator = GetFraction(m_base.Numerator(), power);
+		Fraction denominator(0);
+		if (!m_base.IsInteger()) {
+			denominator = GetFraction(m_base.Denominator(), power);
 		}
-		else {
-			const Fraction &numerator = GetFraction(m_base.Numerator(), power, 0, 0);
-			const Fraction &denominator = GetFraction(m_base.Denominator(), power, 0, 0);
-			return Fraction(numerator - denominator).GetReciprocal();
-		}
+		return Fraction(numerator - denominator).GetReciprocal();
 	}
 
 	void Logarithm::Opposite() {
 		m_power.Opposite();
 	}
 
-	Fraction Logarithm::GetFraction(const Integer &power, const Integer &base, size_t powerPointLength, int approximation) const {
+	Fraction Logarithm::GetFraction(const Integer &power, const Integer &base, bool point, int approximation) const {
 		assert(Integer(0) < base && Integer(1) != base);
-		performance::natural::Algorithm::CorrectExponent correct(1, power.Value(), powerPointLength);
+		performance::natural::Algorithm::CorrectExponent correct(1, power.Value(), point ? APPROXIMATION_LENGTH : 0);
 		while (correct.Power() < base.Value()) {
 			correct.Increase();
 		}
 		const Natural &correctPower = correct.Power();
 		const std::pair<Natural, Natural> &logarithm = correctPower.Logarithm(base.Value());
-		Fraction remainder;
-		if (0 == powerPointLength) {
-			remainder = Fraction(correctPower.CalcPower(APPROXIMATION_LENGTH), correctPower - logarithm.second);
-		}
-		else {
-			const Natural &correctPointPower = correct.PointPower();
-			remainder = Fraction(correctPointPower / (Natural(1).CalcPower(
-				correctPointPower.CalcOrders() - correctPower.CalcOrders() - APPROXIMATION_LENGTH)),
-				correctPower - logarithm.second);
-		}
 		if (approximation < APPROXIMATION_DEPTH) {
-			return Fraction(logarithm.first + GetFraction(remainder.ReductionInteger(), base, APPROXIMATION_LENGTH, approximation + 1), correct.Exponent());
+			Fraction remainder;
+			if (!point) {
+				remainder = Fraction(correctPower.CalcPower(APPROXIMATION_LENGTH), correctPower - logarithm.second);
+			}
+			else {
+				remainder = Fraction(correct.PointPower(), correctPower - logarithm.second);
+			}
+			return Fraction(logarithm.first + GetFraction(remainder.ReductionInteger(), base, true, approximation + 1), correct.Exponent());
 		}
 		else {
 			return Fraction(logarithm.first, correct.Exponent());
+		}
+	}
+	Fraction Logarithm::GetFraction(const Integer &power, const Integer &base)const {
+		if (power >= base) {
+			return GetFraction(power, base, false, 0);
+		}
+		else {
+			return GetFraction(base, power, false, 0).GetReciprocal();
 		}
 	}
 }

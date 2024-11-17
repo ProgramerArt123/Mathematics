@@ -416,9 +416,10 @@ namespace number {
 	Natural Natural::CalcApproximation(size_t length) const {
 		Natural approximation(*this);
 		size_t index = 0;
-		for (auto &single : approximation.m_singles) {
+		for (auto single = approximation.m_singles.rbegin();
+			single != approximation.m_singles.rend(); ++single) {
 			if (index++ >= length) {
-				single = '0';
+				*single = '0';
 			}
 		}
 		return approximation;
