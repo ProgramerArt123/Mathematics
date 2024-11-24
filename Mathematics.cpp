@@ -174,6 +174,9 @@ int main() {
 		std::cout << number::Logarithm(Fraction(100000000000, 33), Fraction(3)).GetDecimal(10, 20) << std::endl;
 		std::cout << number::Logarithm(Fraction(2, 3), Fraction(17, 7)).GetDecimal(10, 20) << std::endl;
 	}
+	{
+		std::cout << number::Logarithm(Fraction(81), Fraction(36)).GetDecimal(10, 20) << std::endl;
+	}
 #endif
 #ifdef EXPRESSION_TEST
 	{

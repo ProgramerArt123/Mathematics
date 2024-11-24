@@ -101,27 +101,34 @@ namespace number {
 		return m_reduction_base;
 	}
 	void Logarithm::Reduce() {
-		//if (!m_power.EqualPositiveOne()) {
-		//	ReduceExponent();
-		//	ReducePower();
-		//}
+		if (!m_power.EqualPositiveOne()) {
+			ReduceExponent();
+			ReducePower();
+		}
 	}
 	void Logarithm::ReduceExponent() {
-		Natural min = m_base.Numerator().Value();
-		if (m_base.Denominator().Value() < min) {
-			min = m_base.Denominator().Value();
+		Natural exponent(2);
+		while (true) {
+			const Natural &power = Natural(2).Power(exponent);
+			if (power >= m_base.Numerator().Value()) {
+				break;
+			}
+			if (power >= m_base.Denominator().Value()) {
+				break;
+			}
+			if (power >= m_power.Numerator().Value()) {
+				break;
+			}
+			if (power >= m_power.Denominator().Value()) {
+				break;
+			}
+			++exponent;
 		}
-		if (m_power.Numerator().Value() < min) {
-			min = m_power.Numerator().Value();
-		}
-		if (m_power.Denominator().Value() < min) {
-			min = m_power.Denominator().Value();
-		}
-		for (;min >= 2; --min) {
-			const std::pair<Natural, Natural> &baseNumerator = m_base.Numerator().Value().Root(min);
-			const std::pair<Natural, Natural> &baseDenominator = m_base.Denominator().Value().Root(min);
-			const std::pair<Natural, Natural> &powerNumerator = m_power.Numerator().Value().Root(min);
-			const std::pair<Natural, Natural> &powerDenominator = m_power.Denominator().Value().Root(min);
+		for (; exponent >= 2; --exponent) {
+			const std::pair<Natural, Natural> &baseNumerator = m_base.Numerator().Value().Root(exponent);
+			const std::pair<Natural, Natural> &baseDenominator = m_base.Denominator().Value().Root(exponent);
+			const std::pair<Natural, Natural> &powerNumerator = m_power.Numerator().Value().Root(exponent);
+			const std::pair<Natural, Natural> &powerDenominator = m_power.Denominator().Value().Root(exponent);
 			if (baseNumerator.second.EqualZero() && baseDenominator.second.EqualZero() &&
 				powerNumerator.second.EqualZero() && powerDenominator.second.EqualZero()) {
 				m_reduction_base = Fraction(baseNumerator.first, baseDenominator.first);
@@ -131,15 +138,23 @@ namespace number {
 		}
 	}
 	void Logarithm::ReducePower() {
-		Natural min = m_power.Numerator().Value();
-		if (m_power.Denominator().Value() < min) {
-			min = m_power.Denominator().Value();
+		Natural exponent(2);
+		while (true) {
+			const Natural &power = Natural(2).Power(exponent);
+			if (power >= m_reduction_power.Numerator().Value()) {
+				break;
+			}
+			if (power >= m_reduction_power.Denominator().Value()) {
+				break;
+			}
+			++exponent;
 		}
-		for (; min >= 2; --min) {
-			const std::pair<Natural, Natural> &powerNumerator = m_power.Numerator().Value().Root(min);
-			const std::pair<Natural, Natural> &powerDenominator = m_power.Denominator().Value().Root(min);
+
+		for (; exponent >= 2; --exponent) {
+			const std::pair<Natural, Natural> &powerNumerator = m_reduction_power.Numerator().Value().Root(exponent);
+			const std::pair<Natural, Natural> &powerDenominator = m_reduction_power.Denominator().Value().Root(exponent);
 			if (powerNumerator.second.EqualZero() && powerDenominator.second.EqualZero()) {
-				m_reduction_coefficient = Integer(min);
+				m_reduction_coefficient = Integer(exponent);
 				m_reduction_power = Fraction(powerNumerator.first, powerDenominator.first);
 				break;
 			}

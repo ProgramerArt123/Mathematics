@@ -269,48 +269,20 @@ namespace number {
 			return std::make_pair<Natural, Natural>(Natural(0), Natural(*this));
 		}
 
-		size_t times = CalcOrders() - divisor.CalcOrders() + 1;
-
-		auto begin = m_singles.cbegin();
-		{
-			size_t count = CalcOrders() - divisor.CalcOrders();
-			for (size_t index = 0; index < count; index++) {
-				begin++;
-			}
-		}
-
-		std::pair<Natural, Natural> result(std::make_pair<Natural, Natural>(Natural(0), Natural(0)));
-
-		std::map<std::string, size_t> loop;
-		result.second.m_singles = std::list<char>(begin, m_singles.cend());
-
-		for (size_t index = 0; index < times; index++) {
+		Natural quotient(0);
+		Natural dividend(0);
+		
+		for (auto single = m_singles.crbegin(); single != m_singles.crend(); single++) {
+			dividend = dividend.CalcPower(1) + GetValue(*single);
 			uint8_t count = 0;
-			while (result.second >= divisor) {
+			while (dividend >= divisor) {
 				count++;
-				result.second -= divisor;
+				dividend -= divisor;
 			}
-			result.first.m_singles.push_front(GetChar(count));
-			result.first.Format();
-			if (index < times - 1) {
-				if (-1 == result.first.m_loop_begin && !result.second.EqualZero()) {
-					const std::string key(result.second.m_singles.cbegin(), result.second.m_singles.cend());
-					if (loop.find(key) != loop.end()) {
-						result.first.m_loop_begin = loop.at(key);
-						result.first.m_loop_end = result.first.CalcOrders();
-					}
-					else {
-						loop.insert(std::make_pair(std::string(
-							result.second.m_singles.cbegin(), result.second.m_singles.cend()), result.first.CalcOrders()));
-					}
-				}
-				begin--;
-				result.second.m_singles.push_front(*begin);
-				result.second.Format();
-			}
+			quotient = quotient.CalcPower(1) + count;
 		}
 
-		return result;
+		return std::make_pair(quotient.Format(), dividend.Format());
 	}
 
 
@@ -384,13 +356,6 @@ namespace number {
 		return radixDecimal;
 	}
 
-	std::string Natural::GetLoop() const {
-		if (-1 == m_loop_begin) {
-			return "";
-		}
-		const std::string singles(m_singles.crbegin(), m_singles.crend());
-		return "......{" + singles.substr(m_loop_begin + 1, m_loop_end - m_loop_begin) + "}";
-	}
 	size_t Natural::CalcOrders() const {
 		return m_singles.size();
 	}

@@ -71,8 +71,6 @@ namespace number {
 
 		std::pair<Natural, Natural> Div(const Natural &divisor) const;
 
-		std::string GetLoop() const;
-
 		size_t CalcOrders() const;
 		Natural CalcOrders(size_t length) const;
 		Natural CalcPower(size_t exponent) const;
@@ -95,9 +93,6 @@ namespace number {
 		std::list<char> m_singles;
 
 		std::list<Natural> m_factors;
-
-		size_t m_loop_begin = -1;
-		size_t m_loop_end = -1;
 		
 	};
 }

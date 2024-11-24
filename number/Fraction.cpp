@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iostream>
+#include <map>
 #include "Integer.h"
 #include "Complex.h"
 #include "Fraction.h"
@@ -130,41 +131,42 @@ namespace number {
 
 	const std::string Fraction::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
-		std::pair<Natural, Natural> result(m_numerator.Value().CalcPower(decimalLength + 1).Div(m_denominator.Value()));
-		const std::string &loop = result.first.GetLoop();
-		std::string quotient = result.first.GetString(radix);
-		if (quotient.length() < decimalLength + 2) {
-			quotient.insert(0, decimalLength + 2 - quotient.length(), '0');
+
+		if (IsInteger()) {
+			return m_reduction_integer.GetDecimal(radix, decimalLength, round);
 		}
-		std::string decimal = quotient.substr(0, quotient.length() - decimalLength - 1) +
-			"." + quotient.substr(quotient.length() - decimalLength - 1);
-		if (result.second.EqualZero()) {
-			while ('0' == decimal.back()) {
-				decimal.pop_back();
-			}
-			if ('.' == decimal.back()) {
-				decimal.pop_back();
-			}
-		}
-		if (decimal.find('.') != std::string::npos &&
-			decimal.size() - decimal.find('.') > decimalLength) {
-			const char last = decimal.back();
-			decimal.pop_back();
-			if (!round(last)) {
-				if (!loop.empty()) {
-					return IsPositive() ? decimal + loop : "-" + decimal + loop;
+
+		std::pair<Natural, Natural> quotient(m_numerator.Value().Div(m_denominator.Value()));
+
+		std::string decimal = quotient.first.GetDecimal(radix, decimalLength, round) + ".";
+
+		std::map<std::string, size_t> remainders;
+		size_t loopBegin = SIZE_MAX, loopEnd = SIZE_MAX;
+
+		for (size_t index = 0; index < decimalLength; index++) {
+			const Natural &dividend = quotient.second.CalcPower(1);
+			if (SIZE_MAX == loopBegin) {
+				const std::string &dividendStr = dividend.GetString();
+				if (remainders.find(dividendStr) != remainders.end()) {
+					loopBegin = remainders.at(dividendStr);
+					loopEnd = decimal.length();
 				}
 				else {
-					return IsPositive() ? decimal + "..." : "-" + decimal + "...";
+					remainders.emplace(dividendStr, decimal.length());
 				}
 			}
-			else {
-				return ((Fraction(number::Integer(Natural(quotient, radix), IsPositive()))
-					+ Natural(1)) / Natural(1).CalcPower(decimalLength + 1)).GetDecimal(radix, decimalLength, round);
+			quotient = dividend.Div(m_denominator.Value());
+			decimal += quotient.first.GetDecimal(radix, decimalLength, round);
+			if (quotient.second.EqualZero()) {
+				break;
 			}
 		}
-		else {
+		if (SIZE_MAX != loopBegin) {
+			const std::string &loop = "{" + decimal.substr(loopBegin, loopEnd - loopBegin) + "}";
 			return IsPositive() ? decimal + loop : "-" + decimal + loop;
+		}
+		else {
+			return IsPositive() ? decimal + "..." : "-" + decimal + "...";
 		}
 	}
 
