@@ -5,157 +5,157 @@
 
 namespace expression {
 	Expression<OPERATOR_TYPE_1> Absorb(const number::Imaginary &number) {
-		return Expression<OPERATOR_TYPE_1>(Absorb(number.Value()), OPERATOR_TYPE_MUL(), Symbol("i"));
+		return Expression<OPERATOR_TYPE_1>(Absorb(number.Value()), MUL, Symbol("i"));
 	}
 	Expression<OPERATOR_TYPE_0> Absorb(const number::Complex &number) {
-		return Expression<OPERATOR_TYPE_0>(Absorb(number.Real()), OPERATOR_TYPE_ADD(), Absorb(number.Image()));
+		return Expression<OPERATOR_TYPE_0>(Absorb(number.Real()), ADD, Absorb(number.Image()));
 	}
 	
 	Expression<OPERATOR_TYPE_2> Power(const number::Complex &number, const number::Complex &exponent) {
-		return Expression<OPERATOR_TYPE_2>(Absorb(number), OPERATOR_TYPE_POWER(), Absorb(exponent));
+		return Expression<OPERATOR_TYPE_2>(Absorb(number), POWER, Absorb(exponent));
 	}
 	Expression<OPERATOR_TYPE_2> Power(const expression::ClosureNumber &number, const expression::ClosureNumber &exponent) {
-		return Expression<OPERATOR_TYPE_2>(number.Value(), OPERATOR_TYPE_POWER(), exponent.Value());
+		return Expression<OPERATOR_TYPE_2>(number.Value(), POWER, exponent.Value());
 	}
 	Expression<OPERATOR_TYPE_2> Root(const expression::ClosureNumber &number, const expression::ClosureNumber &exponent) {
-		return Expression<OPERATOR_TYPE_2>(number.Value(), OPERATOR_TYPE_ROOT(), exponent.Value());
+		return Expression<OPERATOR_TYPE_2>(number.Value(), ROOT, exponent.Value());
 	}
 	Expression<OPERATOR_TYPE_0> operator+(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::Expression<OPERATOR_TYPE_0> &addition) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_ADD(), addition);
+		return Expression<OPERATOR_TYPE_0>(number, ADD, addition);
 	}
 	Expression<OPERATOR_TYPE_0> operator+(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::Expression<OPERATOR_TYPE_1> &addition){
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_ADD(), addition);
+		return Expression<OPERATOR_TYPE_0>(number, ADD, addition);
 	}
 	Expression<OPERATOR_TYPE_0> operator+(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::Expression<OPERATOR_TYPE_2> &addition) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_ADD(), addition);
+		return Expression<OPERATOR_TYPE_0>(number, ADD, addition);
 	}
 	Expression<OPERATOR_TYPE_0> operator+(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::Expression<OPERATOR_TYPE_0> &addition) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_ADD(), addition);
+		return Expression<OPERATOR_TYPE_0>(number, ADD, addition);
 	}
 	Expression<OPERATOR_TYPE_0> operator+(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::Expression<OPERATOR_TYPE_1> &addition) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_ADD(), addition);
+		return Expression<OPERATOR_TYPE_0>(number, ADD, addition);
 	}
 	Expression<OPERATOR_TYPE_0> operator+(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::Expression<OPERATOR_TYPE_2> &addition) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_ADD(), addition);
+		return Expression<OPERATOR_TYPE_0>(number, ADD, addition);
 	}
 	Expression<OPERATOR_TYPE_0> operator+(const expression::Expression<OPERATOR_TYPE_2> &number, const expression::Expression<OPERATOR_TYPE_0> &addition) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_ADD(), addition);
+		return Expression<OPERATOR_TYPE_0>(number, ADD, addition);
 	}
 	Expression<OPERATOR_TYPE_0> operator+(const expression::Expression<OPERATOR_TYPE_2> &number, const expression::Expression<OPERATOR_TYPE_1> &addition) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_ADD(), addition);
+		return Expression<OPERATOR_TYPE_0>(number, ADD, addition);
 	}
 	Expression<OPERATOR_TYPE_0> operator+(const expression::Expression<OPERATOR_TYPE_2> &number, const expression::Expression<OPERATOR_TYPE_2> &addition) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_ADD(), addition);
+		return Expression<OPERATOR_TYPE_0>(number, ADD, addition);
 	}
 
 	Expression<OPERATOR_TYPE_0> operator-(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::Expression<OPERATOR_TYPE_0> &subtrahend) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_SUB(), subtrahend);
+		return Expression<OPERATOR_TYPE_0>(number, SUB, subtrahend);
 	}
 	Expression<OPERATOR_TYPE_0> operator-(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::Expression<OPERATOR_TYPE_1> &subtrahend) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_SUB(), subtrahend);
+		return Expression<OPERATOR_TYPE_0>(number, SUB, subtrahend);
 	}
 	Expression<OPERATOR_TYPE_0> operator-(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::Expression<OPERATOR_TYPE_2> &subtrahend) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_SUB(), subtrahend);
+		return Expression<OPERATOR_TYPE_0>(number, SUB, subtrahend);
 	}
 	Expression<OPERATOR_TYPE_0> operator-(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::Expression<OPERATOR_TYPE_0> &subtrahend) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_SUB(), subtrahend);
+		return Expression<OPERATOR_TYPE_0>(number, SUB, subtrahend);
 	}
 	Expression<OPERATOR_TYPE_0> operator-(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::Expression<OPERATOR_TYPE_1> &subtrahend) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_SUB(), subtrahend);
+		return Expression<OPERATOR_TYPE_0>(number, SUB, subtrahend);
 	}
 	Expression<OPERATOR_TYPE_0> operator-(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::Expression<OPERATOR_TYPE_2> &subtrahend) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_SUB(), subtrahend);
+		return Expression<OPERATOR_TYPE_0>(number, SUB, subtrahend);
 	}
 	Expression<OPERATOR_TYPE_0> operator-(const expression::Expression<OPERATOR_TYPE_2> &number, const expression::Expression<OPERATOR_TYPE_0> &subtrahend) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_SUB(), subtrahend);
+		return Expression<OPERATOR_TYPE_0>(number, SUB, subtrahend);
 	}
 	Expression<OPERATOR_TYPE_0> operator-(const expression::Expression<OPERATOR_TYPE_2> &number, const expression::Expression<OPERATOR_TYPE_1> &subtrahend) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_SUB(), subtrahend);
+		return Expression<OPERATOR_TYPE_0>(number, SUB, subtrahend);
 	}
 	Expression<OPERATOR_TYPE_0> operator-(const expression::Expression<OPERATOR_TYPE_2> &number, const expression::Expression<OPERATOR_TYPE_2> &subtrahend) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_SUB(), subtrahend);
+		return Expression<OPERATOR_TYPE_0>(number, SUB, subtrahend);
 	}
 	Expression<OPERATOR_TYPE_1> operator*(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::Expression<OPERATOR_TYPE_0> &multiplier) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_MUL(), multiplier);
+		return Expression<OPERATOR_TYPE_1>(number, MUL, multiplier);
 	}
 	Expression<OPERATOR_TYPE_1> operator*(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::Expression<OPERATOR_TYPE_1> &multiplier) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_MUL(), multiplier);
+		return Expression<OPERATOR_TYPE_1>(number, MUL, multiplier);
 	}
 	Expression<OPERATOR_TYPE_1> operator*(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::Expression<OPERATOR_TYPE_2> &multiplier) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_MUL(), multiplier);
+		return Expression<OPERATOR_TYPE_1>(number, MUL, multiplier);
 	}
 	Expression<OPERATOR_TYPE_1> operator*(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::Expression<OPERATOR_TYPE_0> &multiplier) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_MUL(), multiplier);
+		return Expression<OPERATOR_TYPE_1>(number, MUL, multiplier);
 	}
 	Expression<OPERATOR_TYPE_1> operator*(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::Expression<OPERATOR_TYPE_1> &multiplier) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_MUL(), multiplier);
+		return Expression<OPERATOR_TYPE_1>(number, MUL, multiplier);
 	}
 	Expression<OPERATOR_TYPE_1> operator*(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::Expression<OPERATOR_TYPE_2> &multiplier) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_MUL(), multiplier);
+		return Expression<OPERATOR_TYPE_1>(number, MUL, multiplier);
 	}
 	Expression<OPERATOR_TYPE_1> operator*(const expression::Expression<OPERATOR_TYPE_2> &number, const expression::Expression<OPERATOR_TYPE_0> &multiplier) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_MUL(), multiplier);
+		return Expression<OPERATOR_TYPE_1>(number, MUL, multiplier);
 	}
 	Expression<OPERATOR_TYPE_1> operator*(const expression::Expression<OPERATOR_TYPE_2> &number, const expression::Expression<OPERATOR_TYPE_1> &multiplier) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_MUL(), multiplier);
+		return Expression<OPERATOR_TYPE_1>(number, MUL, multiplier);
 	}
 	Expression<OPERATOR_TYPE_1> operator*(const expression::Expression<OPERATOR_TYPE_2> &number, const expression::Expression<OPERATOR_TYPE_2> &multiplier) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_MUL(), multiplier);
+		return Expression<OPERATOR_TYPE_1>(number, MUL, multiplier);
 	}
 	Expression<OPERATOR_TYPE_1> operator/(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::Expression<OPERATOR_TYPE_0> &divisor) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_DIV(), divisor);
+		return Expression<OPERATOR_TYPE_1>(number, DIV, divisor);
 	}
 	Expression<OPERATOR_TYPE_1> operator/(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::Expression<OPERATOR_TYPE_1> &divisor) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_DIV(), divisor);
+		return Expression<OPERATOR_TYPE_1>(number, DIV, divisor);
 	}
 	Expression<OPERATOR_TYPE_1> operator/(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::Expression<OPERATOR_TYPE_2> &divisor) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_DIV(), divisor);
+		return Expression<OPERATOR_TYPE_1>(number, DIV, divisor);
 	}
 	Expression<OPERATOR_TYPE_1> operator/(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::Expression<OPERATOR_TYPE_0> &divisor) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_DIV(), divisor);
+		return Expression<OPERATOR_TYPE_1>(number, DIV, divisor);
 	}
 	Expression<OPERATOR_TYPE_1> operator/(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::Expression<OPERATOR_TYPE_1> &divisor) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_DIV(), divisor);
+		return Expression<OPERATOR_TYPE_1>(number, DIV, divisor);
 	}
 	Expression<OPERATOR_TYPE_1> operator/(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::Expression<OPERATOR_TYPE_2> &divisor) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_DIV(), divisor);
+		return Expression<OPERATOR_TYPE_1>(number, DIV, divisor);
 	}
 	Expression<OPERATOR_TYPE_1> operator/(const expression::Expression<OPERATOR_TYPE_2> &number, const expression::Expression<OPERATOR_TYPE_0> &divisor) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_DIV(), divisor);
+		return Expression<OPERATOR_TYPE_1>(number, DIV, divisor);
 	}
 	Expression<OPERATOR_TYPE_1> operator/(const expression::Expression<OPERATOR_TYPE_2> &number, const expression::Expression<OPERATOR_TYPE_1> &divisor) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_DIV(), divisor);
+		return Expression<OPERATOR_TYPE_1>(number, DIV, divisor);
 	}
 	Expression<OPERATOR_TYPE_1> operator/(const expression::Expression<OPERATOR_TYPE_2> &number, const expression::Expression<OPERATOR_TYPE_2> &divisor) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_DIV(), divisor);
+		return Expression<OPERATOR_TYPE_1>(number, DIV, divisor);
 	}
 	Expression<OPERATOR_TYPE_0> operator+(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::ClosureNumber &addition) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_ADD(), addition);
+		return Expression<OPERATOR_TYPE_0>(number, ADD, addition);
 	}
 
 	Expression<OPERATOR_TYPE_0> operator+(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::ClosureNumber &addition) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_ADD(), addition);
+		return Expression<OPERATOR_TYPE_0>(number, ADD, addition);
 	}
 
 	Expression<OPERATOR_TYPE_0> operator-(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::ClosureNumber &subtrahend) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_SUB(), subtrahend);
+		return Expression<OPERATOR_TYPE_0>(number, SUB, subtrahend);
 	}
 	Expression<OPERATOR_TYPE_0> operator-(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::ClosureNumber &subtrahend) {
-		return Expression<OPERATOR_TYPE_0>(number, OPERATOR_TYPE_SUB(), subtrahend);
+		return Expression<OPERATOR_TYPE_0>(number, SUB, subtrahend);
 	}
 
 	Expression<OPERATOR_TYPE_1> operator*(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::ClosureNumber &multiplier) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_MUL(), multiplier);
+		return Expression<OPERATOR_TYPE_1>(number, MUL, multiplier);
 	}
 	Expression<OPERATOR_TYPE_1> operator*(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::ClosureNumber &multiplier) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_MUL(), multiplier);
+		return Expression<OPERATOR_TYPE_1>(number, MUL, multiplier);
 	}
 	
 	Expression<OPERATOR_TYPE_1> operator/(const expression::Expression<OPERATOR_TYPE_0> &number, const expression::ClosureNumber &divisor) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_DIV(), divisor);
+		return Expression<OPERATOR_TYPE_1>(number, DIV, divisor);
 	}
 	Expression<OPERATOR_TYPE_1> operator/(const expression::Expression<OPERATOR_TYPE_1> &number, const expression::ClosureNumber &divisor) {
-		return Expression<OPERATOR_TYPE_1>(number, OPERATOR_TYPE_DIV(), divisor);
+		return Expression<OPERATOR_TYPE_1>(number, DIV, divisor);
 	}
 
 	Expression<OPERATOR_TYPE_1> Collect(const expression::Expression<OPERATOR_TYPE_1> &exp, size_t count) {
@@ -188,7 +188,6 @@ namespace expression {
 		}
 		std::vector<ExpressionNodes::const_iterator> nodes;
 		m_exp.GetAll(nodes);
-		size_t completed = 0;
 		for (auto &node : nodes) {
 			if (Visit(*node)->EqualZero()) {
 				m_exp.RemoveNode(node);
@@ -295,7 +294,7 @@ namespace expression {
 		return false;
 	}
 	template<typename OperatorType>
-	void Expression<OperatorType>::Polymorphism0::SetOpenReduction(const ClosureNumber &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) {
+	void Expression<OperatorType>::Polymorphism0::SetOpenReduction(const number::Fraction &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) {
 
 	}
 	template<typename OperatorType>
@@ -523,7 +522,7 @@ namespace expression {
 		return false;
 	}
 	template<typename OperatorType>
-	void Expression<OperatorType>::Polymorphism1::SetOpenReduction(const ClosureNumber &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) {
+	void Expression<OperatorType>::Polymorphism1::SetOpenReduction(const number::Fraction &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) {
 
 	}
 	template<typename OperatorType>
@@ -644,10 +643,10 @@ namespace expression {
 		if (isCommonBase) {
 			Expression<OPERATOR_TYPE_0> child;
 			if (OPERATOR_TYPE_FLAG_DIV == right) {
-				child = Expression<OPERATOR_TYPE_0>(childLeft, OPERATOR_TYPE_SUB(), childRight);
+				child = Expression<OPERATOR_TYPE_0>(childLeft, SUB, childRight);
 			}
 			else {
-				child = Expression<OPERATOR_TYPE_0>(childLeft, OPERATOR_TYPE_ADD(), childRight);
+				child = Expression<OPERATOR_TYPE_0>(childLeft, ADD, childRight);
 			}
 			child.SetOperator(OPERATOR_TYPE_FLAG_POWER);
 			Expression<OPERATOR_TYPE_2> collect;
@@ -660,10 +659,10 @@ namespace expression {
 		else {
 			Expression<OPERATOR_TYPE_1> child;
 			if (OPERATOR_TYPE_FLAG_DIV == right) {
-				child = Expression<OPERATOR_TYPE_1>(childLeft, OPERATOR_TYPE_DIV(), childRight);
+				child = Expression<OPERATOR_TYPE_1>(childLeft, DIV, childRight);
 			}
 			else {
-				child = Expression<OPERATOR_TYPE_1>(childLeft, OPERATOR_TYPE_MUL(), childRight);
+				child = Expression<OPERATOR_TYPE_1>(childLeft, MUL, childRight);
 			}
 			child.SetOperator(OPERATOR_TYPE_FLAG_POWER);
 			Expression<OPERATOR_TYPE_2> collect;
@@ -699,9 +698,10 @@ namespace expression {
 		return false;
 	}
 	template<typename OperatorType>
-	void Expression<OperatorType>::Polymorphism2::SetOpenReduction(const ClosureNumber &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) {
-		m_reduction->AddChild(reduction, OPERATOR_TYPE_MUL());
-		m_reduction->AddClosure(coefficient);
+	void Expression<OperatorType>::Polymorphism2::SetOpenReduction(const number::Fraction &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) {
+		m_reduction->AddChild(reduction, MUL);
+		m_reduction->AddClosure(coefficient.Denominator(), DIV);
+		m_reduction->AddClosure(coefficient.Numerator());
 	}
 	template<typename OperatorType>
 	std::optional<const Expression<OPERATOR_TYPE_1>> Expression<OperatorType>::Polymorphism2::GetOpenReduction() const {

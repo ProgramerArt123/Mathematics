@@ -24,6 +24,9 @@ namespace expression {
 		case expression::OPERATOR_TYPE_FLAG_ROOT:
 			return std::make_unique<OPERATOR_TYPE_ROOT>();
 			break;
+		case expression::OPERATOR_TYPE_FLAG_LOGARITHM:
+			return std::make_unique<OPERATOR_TYPE_LOGARITHM>();
+			break;
 		default:
 			return nullptr;
 			break;
@@ -136,6 +139,23 @@ namespace expression {
 	std::unique_ptr<OPERATOR_TYPE> OPERATOR_TYPE_ROOT::Superposition(const OPERATOR_TYPE &other) const {
 		if (OPERATOR_TYPE_FLAG_ROOT != other.GetFlag()) {
 			return OperatorFactory(expression::OPERATOR_TYPE_FLAG_ROOT);
+		}
+		else {
+			return OperatorFactory(expression::OPERATOR_TYPE_FLAG_POWER);
+		}
+	}
+
+	const std::string OPERATOR_TYPE_LOGARITHM::OutPutString() const {
+		//assert(m_position);
+		return "#";
+	}
+
+	OPERATOR_TYPE_FLAG OPERATOR_TYPE_LOGARITHM::GetFlag() const {
+		return OPERATOR_TYPE_FLAG_LOGARITHM;
+	}
+	std::unique_ptr<OPERATOR_TYPE> OPERATOR_TYPE_LOGARITHM::Superposition(const OPERATOR_TYPE &other) const {
+		if (OPERATOR_TYPE_FLAG_LOGARITHM != other.GetFlag()) {
+			return OperatorFactory(expression::OPERATOR_TYPE_FLAG_LOGARITHM);
 		}
 		else {
 			return OperatorFactory(expression::OPERATOR_TYPE_FLAG_POWER);

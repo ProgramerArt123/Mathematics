@@ -16,33 +16,33 @@ namespace expression {
 		Series(std::function<MonomialValue(const uint64_t index)> monomial) :
 			m_monomial(monomial) {
 		}
-		Series<MonomialValue> Summation(size_t length = 0) const{
-			Series<MonomialValue> sum(*this);
+		Series<MonomialValue> Approximation(size_t length = 0) const{
+			Series<MonomialValue> approximation(*this);
 			size_t realLength = m_max_length;
 			if (length) {
-				realLength = length < sum.m_max_length ? length : sum.m_max_length;
+				realLength = length < approximation.m_max_length ? length : approximation.m_max_length;
 			}
-			if (sum.m_polynomial.size() < realLength) {
-				for (size_t index = sum.m_polynomial.size() + 1; index <= realLength; index++) {
-					sum.m_polynomial.push_back(sum.m_monomial(index));
+			if (approximation.m_polynomial.size() < realLength) {
+				for (size_t index = approximation.m_polynomial.size() + 1; index <= realLength; index++) {
+					approximation.m_polynomial.push_back(approximation.m_monomial(index));
 				}
 			}
-			else if (sum.m_polynomial.size() > realLength) {
-				sum.m_polynomial.resize(realLength);
+			else if (approximation.m_polynomial.size() > realLength) {
+				approximation.m_polynomial.resize(realLength);
 			}
-			return sum;
+			return approximation;
 		}
 		SeriesValue GetMonomial() const {
-			SeriesValue summation;
+			SeriesValue monomial;
 			for (size_t index = 0; index < m_polynomial.size(); index++) {
 				if (m_updates.find(index) == m_updates.end()) {
-					summation = summation + m_polynomial[index];
+					monomial = GetMonomial(monomial, m_polynomial[index]);
 				}
 				else {
-					summation = summation + m_updates.at(index);
+					monomial = GetMonomial(monomial, m_updates.at(index));
 				}
 			}
-			return summation;
+			return monomial;
 		}
 		const std::string OutPutString() const override {
 			return GetMonomial().OutPutString();
@@ -73,6 +73,10 @@ namespace expression {
 		std::map<size_t, MonomialValue> m_updates;
 		std::function<MonomialValue(const uint64_t index)> m_monomial;
 		size_t m_max_length = SIZE_MAX;
+
+		static const SeriesValue GetMonomial(const SeriesValue &monomial, const SeriesValue &append) {
+			return monomial + append;
+		}
 	};
 }
 

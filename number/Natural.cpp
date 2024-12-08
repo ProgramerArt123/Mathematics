@@ -65,7 +65,7 @@ namespace number {
 		return GetString(radix);
 	}
 	bool Natural::IsOdd() const {
-		return (*this % Natural(2)).EqualPositiveOne();
+		return 1 == GetValue(m_singles.front()) % 2;
 	}
 	Natural Natural::Factorial() const {
 		Natural product(1);
@@ -360,16 +360,11 @@ namespace number {
 		return m_singles.size();
 	}
 	Natural Natural::CalcOrders(size_t length) const {
-		if (CalcOrders() < length) {
-			Natural orders(*this);
-			while (orders.CalcOrders() < length) {
-				orders.m_singles.push_back('0');
-			}
-			return orders;
+		Natural orders(*this);
+		while (orders.CalcOrders() < length) {
+			orders.m_singles.push_back('0');
 		}
-		else {
-			return *this;
-		}
+		return orders;
 	}
 	Natural Natural::CalcPower(size_t exponent) const {
 		Natural power(*this);

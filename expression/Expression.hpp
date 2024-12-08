@@ -22,6 +22,7 @@
 #include "Symbol.h"
 #include "Operator.h"
 #include "number/Root.h"
+#include "number/Logarithm.h"
 
 
 namespace expression {
@@ -170,16 +171,13 @@ namespace expression {
 			if (collect.CollectChild()) {
 				return collect;
 			}
-			if (collect.CheckCollectChild()) {
+			if (collect.CollectFlat()) {
 				return collect;
 			}
 			if (collect.CollectSpecial()) {
 				return collect;
 			}
 			if (collect.CollectClosure()) {
-				return collect;
-			}
-			if (collect.EliminationChild()) {
 				return collect;
 			}
 			if (collect.CollectFraction()) {
@@ -204,7 +202,7 @@ namespace expression {
 					if (current.value().ReduceFraction()) {
 						std::cout << " --> "; current.value().GetFractionReduction().CollectForward(out);
 					}
-					else if (current.value().ReduceOpen()) {
+					else if (current.value().ReduceRoot() || current.value().ReduceLogarithm()) {
 						std::cout << " --> "; current.value().GetOpenReduction().CollectForward(out);
 					}
 					break;
@@ -244,8 +242,8 @@ namespace expression {
 
 		static Expression<OPERATOR_TYPE_0> Absorb(const number::Fraction &number) {
 			const Expression<OPERATOR_TYPE_1> reduction(number.ReductionNumerator(),
-				OPERATOR_TYPE_DIV(), number.Denominator());
-			return Expression<OPERATOR_TYPE_0>(number.ReductionInteger(), OPERATOR_TYPE_ADD(), reduction);
+				DIV, number.Denominator());
+			return Expression<OPERATOR_TYPE_0>(number.ReductionInteger(), ADD, reduction);
 		}
 		static Expression<OPERATOR_TYPE_1> Absorb(const number::Imaginary &number);
 		static Expression<OPERATOR_TYPE_0> Absorb(const number::Complex &number);
@@ -498,25 +496,25 @@ namespace expression {
 		}
 
 		template<typename ChildOperatorType>
-		bool CheckCollectChild() {
+		bool CollectFlat() {
 			std::vector<ExpressionNodes::iterator> exps;
 			GetAll<expression::Expression<ChildOperatorType>>(exps);
 			for (auto exp : exps) {
-				if (CheckCollectChild<ChildOperatorType>(exp)) {
+				if (CollectFlat<ChildOperatorType>(exp)) {
 					return true;
 				}
 			}
 			return false;
 		}
 
-		bool CheckCollectChild() {
-			if (CheckCollectChild<OPERATOR_TYPE_0>()) {
+		bool CollectFlat() {
+			if (CollectFlat<OPERATOR_TYPE_0>()) {
 				return true;
 			}
-			if (CheckCollectChild<OPERATOR_TYPE_1>()) {
+			if (CollectFlat<OPERATOR_TYPE_1>()) {
 				return true;
 			}
-			if (CheckCollectChild<OPERATOR_TYPE_2>()) {
+			if (CollectFlat<OPERATOR_TYPE_2>()) {
 				return true;
 			}
 			return false;
@@ -531,6 +529,9 @@ namespace expression {
 				return true;
 			}
 			if (CollectRootClosure()) {
+				return true;
+			}
+			if (CollectLogarithmClosure()) {
 				return true;
 			}
 			if (CollectMulClosure()) {
@@ -595,21 +596,44 @@ namespace expression {
 			return m_polymorphism->GetOpenReduction().value();
 		}
 
-		bool ReduceOpen() {
+		bool ReduceRoot() {
 			if constexpr (std::is_same<OPERATOR_TYPE_2, OperatorType>::value) {
 				return Reduce([&]() {
-					auto &base = std::get<expression::ClosureNumber>(m_nodes.front());
+					auto &power = std::get<expression::ClosureNumber>(m_nodes.front());
 					auto &exponent = std::get<expression::ClosureNumber>(m_nodes.back());
 					if (OPERATOR_TYPE_FLAG_ROOT != exponent.Flag()) {
 						return false;
 					}
-					if (number::Root::CheckReduce(base.Value(), exponent.Value())) {
+					const std::optional<number::Root> &root = number::Root::CheckReduce(power.Value(), exponent.Value());
+					if (!root.has_value()) {
 						return false;
 					}
-					const number::Root root(base.Value(), exponent.Value());
-					const Expression<OPERATOR_TYPE_2> reduction(root.ReductionPower().Numerator(),
-						OPERATOR_TYPE_ROOT(), root.Exponent().Numerator());
-					m_polymorphism->SetOpenReduction(root.ReductionCoefficient().Numerator(), reduction);
+					const Expression<OPERATOR_TYPE_0> &reductionPower = Absorb(root.value().ReductionPower());
+					const Expression<OPERATOR_TYPE_0> &reductionExponent = Absorb(root.value().ReductionExponent());
+					const Expression<OPERATOR_TYPE_2> reduction(reductionPower, ROOT, reductionExponent);
+					m_polymorphism->SetOpenReduction(root.value().ReductionCoefficient(), reduction);
+					return true;
+				});
+			}
+			return false;
+		}
+
+		bool ReduceLogarithm() {
+			if constexpr (std::is_same<OPERATOR_TYPE_2, OperatorType>::value) {
+				return Reduce([&]() {
+					auto &power = std::get<expression::ClosureNumber>(m_nodes.front());
+					auto &base = std::get<expression::ClosureNumber>(m_nodes.back());
+					if (OPERATOR_TYPE_FLAG_LOGARITHM != base.Flag()) {
+						return false;
+					}
+					const std::optional<number::Logarithm> &logarithm = number::Logarithm::CheckReduce(power.Value(), base.Value());
+					if (!logarithm.has_value()) {
+						return false;
+					}
+					const Expression<OPERATOR_TYPE_0> &reductionPower = Absorb(logarithm.value().ReductionPower());
+					const Expression<OPERATOR_TYPE_0> &reductionBase = Absorb(logarithm.value().ReductionBase());
+					const Expression<OPERATOR_TYPE_2> reduction(reductionPower, LOGARITHM, reductionBase);
+					m_polymorphism->SetOpenReduction(logarithm.value().ReductionCoefficient(), reduction);
 					return true;
 				});
 			}
@@ -641,6 +665,31 @@ namespace expression {
 					const number::Root root(collect.Value(), closure.Value());
 					if (root.IsFraction()) {
 						const number::Fraction &coefficient = root.ReductionCoefficient();
+						if (coefficient.IsInteger()) {
+							collect = coefficient.Numerator();
+						}
+						else {
+							collect = coefficient.Denominator();
+							++reciprocalsCount;
+						}
+						return true;
+					}
+					else {
+						return false;
+					}
+				}
+				else {
+					return false;
+				}
+			});
+		}
+
+		bool CollectLogarithmClosure() {
+			return CollectExp2([](expression::ClosureNumber &collect, const expression::ClosureNumber &closure, size_t &reciprocalsCount) {
+				if (OPERATOR_TYPE_FLAG_LOGARITHM == closure.Flag()) {
+					const number::Logarithm logarithm(collect.Value(), closure.Value());
+					if (logarithm.IsFraction()) {
+						const number::Fraction &coefficient = logarithm.ReductionCoefficient();
 						if (coefficient.IsInteger()) {
 							collect = coefficient.Numerator();
 						}
@@ -728,26 +777,13 @@ namespace expression {
 		}
 
 		bool CollectChild() {
-			if (CollectOperatorTypeChild<OPERATOR_TYPE_0>()) {
+			if (CollectChild<OPERATOR_TYPE_0>()) {
 				return true;
 			}
-			if (CollectOperatorTypeChild<OPERATOR_TYPE_1>()) {
+			if (CollectChild<OPERATOR_TYPE_1>()) {
 				return true;
 			}
-			if (CollectOperatorTypeChild<OPERATOR_TYPE_2>()) {
-				return true;
-			}
-			return false;
-		}
-
-		bool EliminationChild() {
-			if (EliminationOperatorTypeChild<OPERATOR_TYPE_0>()) {
-				return true;
-			}
-			if (EliminationOperatorTypeChild<OPERATOR_TYPE_1>()) {
-				return true;
-			}
-			if (EliminationOperatorTypeChild<OPERATOR_TYPE_2>()) {
+			if (CollectChild<OPERATOR_TYPE_2>()) {
 				return true;
 			}
 			return false;
@@ -833,7 +869,7 @@ namespace expression {
 		}
 
 		template<typename ChildOperatorType>
-		bool CheckCollectChild(const ExpressionNodes::iterator child) {
+		bool CollectFlat(const ExpressionNodes::iterator child) {
 			if (std::get<Expression<ChildOperatorType>>(*child).IsSingle()) {
 				FlatSingle<ChildOperatorType>(child);
 				return true;
@@ -985,7 +1021,7 @@ namespace expression {
 		}
 
 		template<typename ChildOperatorType>
-		bool CollectOperatorTypeChild() {
+		bool CollectChild() {
 			std::vector<ExpressionNodes::iterator> exps;
 			GetAll<expression::Expression<ChildOperatorType>>(exps);
 			for (size_t index = 0; index < exps.size(); ++index) {
@@ -1002,7 +1038,7 @@ namespace expression {
 						Visit(*exps.at(index))->SetOperator(flag);
 						return true;
 					}
-					else if (exp.ReduceOpen()) {
+					else if (exp.ReduceRoot() || exp.ReduceLogarithm()) {
 						*exps.at(index) = exp.GetOpenReduction();
 						Visit(*exps.at(index))->SetOperator(flag);
 						return true;
@@ -1012,19 +1048,6 @@ namespace expression {
 			return false;
 		}
 
-		template<typename ChildOperatorType>
-		bool EliminationOperatorTypeChild() {
-			std::vector<ExpressionNodes::iterator> exps;
-			GetAll<expression::Expression<ChildOperatorType>>(exps);
-			for (size_t index = 0; index < exps.size(); ++index) {
-				Expression<ChildOperatorType> &exp = std::get<Expression<ChildOperatorType>>(*exps[index]);
-				if (exp.EliminationChild()) {
-					return true;
-				}
-			}
-			return false;
-		}
-		
 		static const Node *Visit(const ExpressionNode &node) {
 			const Node *pNode = nullptr;
 			std::visit([&pNode](auto &&n) {
@@ -1074,7 +1097,7 @@ namespace expression {
 				virtual bool CollectClosureExp1() = 0;
 				virtual bool CollectClosureExp2() = 0;
 				virtual bool CollectClosure(ClosureNumber &closure) = 0;
-				virtual void SetOpenReduction(const ClosureNumber &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) = 0;
+				virtual void SetOpenReduction(const number::Fraction &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) = 0;
 				virtual std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const = 0;
 				virtual void SetFractionReduction(const number::Fraction &fraction) = 0;
 				virtual std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const = 0;
@@ -1100,7 +1123,7 @@ namespace expression {
 				bool CollectClosureExp1() override;
 				bool CollectClosureExp2() override;
 				bool CollectClosure(ClosureNumber &closure) override;
-				void SetOpenReduction(const ClosureNumber &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) override;
+				void SetOpenReduction(const number::Fraction &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) override;
 				std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const override;
 				void SetFractionReduction(const number::Fraction &fraction) override;
 				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
@@ -1127,7 +1150,7 @@ namespace expression {
 				bool CollectClosureExp1() override;
 				bool CollectClosureExp2() override;
 				bool CollectClosure(ClosureNumber &closure) override;
-				void SetOpenReduction(const ClosureNumber &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) override;
+				void SetOpenReduction(const number::Fraction &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) override;
 				std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const override;
 				void SetFractionReduction(const number::Fraction &fraction) override;
 				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
@@ -1154,7 +1177,7 @@ namespace expression {
 				bool CollectClosureExp1() override;
 				bool CollectClosureExp2() override;
 				bool CollectClosure(ClosureNumber &closure) override;
-				void SetOpenReduction(const ClosureNumber &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) override;
+				void SetOpenReduction(const number::Fraction &coefficient, const Expression<OPERATOR_TYPE_2> &reduction) override;
 				std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const override;
 				void SetFractionReduction(const number::Fraction &fraction) override;
 				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;

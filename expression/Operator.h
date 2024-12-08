@@ -23,7 +23,8 @@ namespace expression {
 		OPERATOR_TYPE_FLAG_MUL,
 		OPERATOR_TYPE_FLAG_DIV,
 		OPERATOR_TYPE_FLAG_POWER,
-		OPERATOR_TYPE_FLAG_ROOT
+		OPERATOR_TYPE_FLAG_ROOT,
+		OPERATOR_TYPE_FLAG_LOGARITHM
 	};
 
 	class OPERATOR_TYPE : public Output {
@@ -100,6 +101,21 @@ namespace expression {
 		std::unique_ptr<OPERATOR_TYPE> Superposition(const OPERATOR_TYPE &other) const override;
 	};
 
+	class OPERATOR_TYPE_LOGARITHM : public OPERATOR_TYPE_2 {
+	public:
+		const std::string OutPutString() const override;
+		OPERATOR_TYPE_FLAG GetFlag() const override;
+		std::unique_ptr<OPERATOR_TYPE> Superposition(const OPERATOR_TYPE &other) const override;
+	};
 }
+
+#define ADD OPERATOR_TYPE_ADD()
+#define SUB OPERATOR_TYPE_SUB()
+#define MUL OPERATOR_TYPE_MUL()
+#define DIV OPERATOR_TYPE_DIV()
+#define POWER OPERATOR_TYPE_POWER()
+#define ROOT OPERATOR_TYPE_ROOT()
+#define LOGARITHM OPERATOR_TYPE_LOGARITHM()
+
 
 #endif

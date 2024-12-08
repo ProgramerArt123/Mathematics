@@ -77,6 +77,8 @@ namespace number {
 		Natural CalcApproximation(size_t length) const;
 		std::pair<Natural, size_t> CalcBase() const;
 
+		static uint8_t GetValue(char c);
+
 		friend class performance::natural::Algorithm;
 		friend class performance::natural::root::Guess;
 		friend class performance::natural::logarithm::Guess;
@@ -87,7 +89,6 @@ namespace number {
 		static uint16_t ToBuilt(char a, char b, uint8_t radix);
 		static void DivN(uint8_t from, uint8_t to, std::list<char> &singles, char &remainder);
 		static char GetChar(uint8_t value);
-		static uint8_t GetValue(char c);
 		static std::list<char> GetRadixSingles(uint8_t from, uint8_t to, const std::list<char> &singles);
 
 		std::list<char> m_singles;

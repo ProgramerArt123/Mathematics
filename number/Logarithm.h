@@ -1,6 +1,8 @@
 #ifndef __NUMBER_LOGARITHM_H__
 #define __NUMBER_LOGARITHM_H__
 
+#include <optional>
+
 #include "Number.h"
 #include "Integer.h"
 #include "Fraction.h"
@@ -35,10 +37,10 @@ namespace number {
 		const Fraction &ReductionCoefficient()const;
 
 		bool IsFraction() const;
-		Fraction GetFraction(const Integer &power, uint8_t radix, size_t decimalLength)const;
 
 		void Opposite();
 
+		static std::optional<Logarithm> CheckReduce(const Fraction &power, const Fraction &base);
 	private:
 
 		Fraction m_power;
@@ -51,8 +53,6 @@ namespace number {
 		void Reduce();
 		void ReduceExponent();
 		void ReducePower();
-		Fraction GetFraction(const Integer &power, const Integer &base, bool point, int approximation)const;
-		Fraction GetFraction(const Integer &power, const Integer &base)const;
 	};
 }
 #endif

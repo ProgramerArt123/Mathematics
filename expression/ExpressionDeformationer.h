@@ -21,7 +21,7 @@ namespace expression {
 				if (reduction.ReduceFraction()) {
 					m_fraction = std::make_unique<ExpressionDeformationer<OPERATOR_TYPE_0>>(reduction.GetFractionReduction());
 				}
-				else if (reduction.ReduceOpen()) {
+				else if (reduction.ReduceRoot() || reduction.ReduceLogarithm()) {
 					m_open = std::make_unique<ExpressionDeformationer<OPERATOR_TYPE_1>>(reduction.GetOpenReduction());
 				}
 			}

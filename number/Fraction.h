@@ -41,6 +41,8 @@ namespace number {
 		bool operator>(const Fraction &other) const;
 		bool operator==(const Fraction &other) const;
 		bool operator!=(const Fraction &other) const;
+		bool operator<=(const Fraction &other) const;
+		bool operator>=(const Fraction &other) const;
 
 		Fraction operator+(const Fraction &addition) const;
 		Fraction operator-(const Fraction &subtrahend) const;
@@ -53,6 +55,8 @@ namespace number {
 		Fraction &operator-=(const Fraction &subtrahend);
 		Fraction &operator*=(const Fraction &multiplier);
 		Fraction &operator/=(const Fraction &divisor);
+
+		Fraction CalcApproximation(size_t length) const;
 
 		friend bool operator==(const number::Integer &number, const Fraction &rational);
 		friend bool operator!=(const number::Integer &number, const Fraction &rational);
@@ -71,12 +75,12 @@ namespace number {
 		static bool CheckReduce(const Integer &numerator, const Integer &denominator);
 	private:
 
-		number::Integer m_numerator;
-		number::Integer m_denominator;
+		number::Integer m_numerator = 0;
+		number::Integer m_denominator = 1;
 
-		number::Integer m_reduction_numerator;
-		number::Integer m_reduction_denominator;
-		number::Integer m_reduction_integer;
+		number::Integer m_reduction_numerator = 0;
+		number::Integer m_reduction_denominator = 1;
+		number::Integer m_reduction_integer = 0;
 
 		void Reduce();
 

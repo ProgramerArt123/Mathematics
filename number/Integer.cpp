@@ -130,7 +130,7 @@ namespace number {
 		if (!IsPositive() && other.IsPositive()) {
 			return true;
 		}
-		return IsPositive() != m_value > other.Value();
+		return IsPositive() != m_value >= other.Value();
 	}
 	bool Integer::operator>=(const Integer &other) const {
 		return *this > other || *this == other;

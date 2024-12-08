@@ -1,6 +1,8 @@
 #ifndef __NUMBER_ROOT_H__
 #define __NUMBER_ROOT_H__
 
+#include <optional>
+
 #include "Number.h"
 #include "Integer.h"
 #include "Fraction.h"
@@ -37,7 +39,6 @@ namespace number {
 
 		bool IsFraction() const;
 		bool IsImaginary() const;
-		Fraction GetFraction(const Integer &base, size_t decimalLength)const;
 
 		bool EqualPower0(const Root &right) const;
 		bool EqualPower1(const Root &right) const;
@@ -45,7 +46,7 @@ namespace number {
 		Root MulEqual(const number::Root &right, bool isLeftMul, bool isRightMul) const;
 
 		friend Root Power(const Fraction &base, const Fraction &exponent);
-		static bool CheckReduce(const Fraction &power, const Fraction &exponent);
+		static std::optional<Root> CheckReduce(const Fraction &power, const Fraction &exponent);
 	private:
 
 		bool m_unsigned = true;

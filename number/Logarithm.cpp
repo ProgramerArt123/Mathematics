@@ -5,37 +5,39 @@
 #include "Imaginary.h"
 #include "Logarithm.h"
 
-#include "number/performance/natural/Algorithm.h"
-
-#define APPROXIMATION_DEPTH 3
-#define APPROXIMATION_LENGTH 5
+#include "performance/fraction/logarithm/Dissection.h"
 
 namespace number {
-	Logarithm::Logarithm():m_power(1), m_base(0) {
+	Logarithm::Logarithm():m_power(1), m_base(0),
+		m_reduction_power(m_power), m_reduction_base(m_base) {
 		assert(Fraction(0) < m_base && 1 != m_base &&
 			Integer(0) < m_power.Numerator() && Integer(0) < m_power.Denominator());
 		Reduce();
 	}
 	Logarithm::Logarithm(const Integer &power, const Integer &base) :
-		m_power(power), m_base(base){
+		m_power(power), m_base(base),
+		m_reduction_power(m_power), m_reduction_base(m_base) {
 		assert(Fraction(0) < m_base && 1 != m_base &&
 			Integer(0) < m_power.Numerator() && Integer(0) < m_power.Denominator());
 		Reduce();
 	}
 	Logarithm::Logarithm(const Integer &power, const Fraction &base) :
-		m_power(power), m_base(base) {
+		m_power(power), m_base(base),
+		m_reduction_power(m_power), m_reduction_base(m_base) {
 		assert(Fraction(0) < m_base && 1 != m_base &&
 			Integer(0) < m_power.Numerator() && Integer(0) < m_power.Denominator());
 		Reduce();
 	}
 	Logarithm::Logarithm(const Fraction &power, const Integer &base) :
-		m_power(power), m_base(base) {
+		m_power(power), m_base(base),
+		m_reduction_power(m_power), m_reduction_base(m_base) {
 		assert(Fraction(0) < m_base && 1 != m_base &&
 			Integer(0) < m_power.Numerator() && Integer(0) < m_power.Denominator());
 		Reduce();
 	}
 	Logarithm::Logarithm(const Fraction &power, const Fraction &base) :
-		m_power(power), m_base(base) {
+		m_power(power), m_base(base),
+		m_reduction_power(m_power), m_reduction_base(m_base) {
 		assert(Fraction(0) < m_base && 1 != m_base &&
 			Integer(0) < m_power.Numerator() && Integer(0) < m_power.Denominator());
 		Reduce();
@@ -67,12 +69,8 @@ namespace number {
 	}
 	const std::string Logarithm::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
-		const Fraction &numerator = GetFraction(m_power.Numerator(), radix, decimalLength);
-		Fraction denominator(0);
-		if (!m_power.IsInteger()) {
-			denominator = GetFraction(m_power.Denominator(), radix, decimalLength);
-		}
-		const Fraction &fraction = numerator - denominator;
+		const number::Fraction &fraction =
+			performance::fraction::logarithm::Dissection(m_power, m_base, decimalLength).GetResult();
 		return fraction.GetDecimal(radix, decimalLength, round);
 	}
 	Logarithm Logarithm::operator-() const {
@@ -165,47 +163,18 @@ namespace number {
 		return EqualZero() || m_reduction_base.EqualPositiveOne() || m_reduction_power.EqualPositiveOne();
 	}
 
-	Fraction Logarithm::GetFraction(const Integer &power, uint8_t radix, size_t decimalLength)const {
-		const Fraction &numerator = GetFraction(m_base.Numerator(), power);
-		Fraction denominator(0);
-		if (!m_base.IsInteger()) {
-			denominator = GetFraction(m_base.Denominator(), power);
-		}
-		return Fraction(numerator - denominator).GetReciprocal();
-	}
-
 	void Logarithm::Opposite() {
 		m_power.Opposite();
 	}
-
-	Fraction Logarithm::GetFraction(const Integer &power, const Integer &base, bool point, int approximation) const {
-		assert(Integer(0) < base && Integer(1) != base);
-		performance::natural::Algorithm::CorrectExponent correct(1, power.Value(), point ? APPROXIMATION_LENGTH : 0);
-		while (correct.Power() < base.Value()) {
-			correct.Increase();
-		}
-		const Natural &correctPower = correct.Power();
-		const std::pair<Natural, Natural> &logarithm = correctPower.Logarithm(base.Value());
-		if (approximation < APPROXIMATION_DEPTH) {
-			Fraction remainder;
-			if (!point) {
-				remainder = Fraction(correctPower.CalcPower(APPROXIMATION_LENGTH), correctPower - logarithm.second);
-			}
-			else {
-				remainder = Fraction(correct.PointPower(), correctPower - logarithm.second);
-			}
-			return Fraction(logarithm.first + GetFraction(remainder.ReductionInteger(), base, true, approximation + 1), correct.Exponent());
+	
+	std::optional<Logarithm> Logarithm::CheckReduce(const Fraction &power, const Fraction &base) {
+		const number::Logarithm reduce(power, base);
+		if (reduce.ReductionPower() == power &&
+			reduce.ReductionCoefficient().EqualPositiveOne()) {
+			return std::nullopt;
 		}
 		else {
-			return Fraction(logarithm.first, correct.Exponent());
-		}
-	}
-	Fraction Logarithm::GetFraction(const Integer &power, const Integer &base)const {
-		if (power >= base) {
-			return GetFraction(power, base, false, 0);
-		}
-		else {
-			return GetFraction(base, power, false, 0).GetReciprocal();
+			return reduce;
 		}
 	}
 }
