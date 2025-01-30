@@ -4,9 +4,11 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <cassert>
 
 #include "Output.h"
 #include "number/Number.h"
+#include "Operator.h"
 
 namespace expression {
 	template<typename MonomialValue, typename SeriesValue = MonomialValue>
@@ -32,14 +34,14 @@ namespace expression {
 			}
 			return approximation;
 		}
-		SeriesValue GetMonomial() const {
+		SeriesValue GetMonomial(OPERATOR_TYPE_FLAG op = OPERATOR_TYPE_FLAG_ADD) const {
 			SeriesValue monomial;
 			for (size_t index = 0; index < m_polynomial.size(); index++) {
 				if (m_updates.find(index) == m_updates.end()) {
-					monomial = GetMonomial(monomial, m_polynomial[index]);
+					monomial = GetMonomial(monomial, m_polynomial[index], op);
 				}
 				else {
-					monomial = GetMonomial(monomial, m_updates.at(index));
+					monomial = GetMonomial(monomial, m_updates.at(index), op);
 				}
 			}
 			return monomial;
@@ -74,8 +76,20 @@ namespace expression {
 		std::function<MonomialValue(const uint64_t index)> m_monomial;
 		size_t m_max_length = SIZE_MAX;
 
-		static const SeriesValue GetMonomial(const SeriesValue &monomial, const SeriesValue &append) {
-			return monomial + append;
+		static const SeriesValue GetMonomial(const SeriesValue &monomial, const SeriesValue &append, OPERATOR_TYPE_FLAG op = OPERATOR_TYPE_FLAG_ADD) {
+			switch (op)
+			{
+			case OPERATOR_TYPE_FLAG_ADD:
+				return monomial + append;
+				break;
+			case OPERATOR_TYPE_FLAG_MUL:
+				return monomial * append;
+				break;
+			default:
+				assert(0);
+				return monomial;
+				break;
+			}
 		}
 	};
 }

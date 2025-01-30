@@ -174,9 +174,6 @@ namespace expression {
 			if (collect.CollectFlat()) {
 				return collect;
 			}
-			if (collect.CollectSpecial()) {
-				return collect;
-			}
 			if (collect.CollectClosure()) {
 				return collect;
 			}
@@ -184,6 +181,9 @@ namespace expression {
 				return collect;
 			}
 			if (collect.CollectCommon()) {
+				return collect;
+			}
+			if (collect.CollectSpecial()) {
 				return collect;
 			}
 			return std::nullopt;
@@ -204,6 +204,31 @@ namespace expression {
 					}
 					else if (current.value().ReduceRoot() || current.value().ReduceLogarithm()) {
 						std::cout << " --> "; current.value().GetOpenReduction().CollectForward(out);
+					}
+					else if(current.value().IsSingle()){
+						{
+							auto child = current.value().GetFirst<expression::Expression<OPERATOR_TYPE_0>>();
+							if (child.has_value()) {
+								std::cout << " --> "; std::get<expression::Expression<OPERATOR_TYPE_0>>(*child.value()).SetChild(false).CollectForward(out);
+								break;
+							}
+						}
+
+						{
+							auto child = current.value().GetFirst<expression::Expression<OPERATOR_TYPE_1>>();
+							if (child.has_value()) {
+								std::cout << " --> "; std::get<expression::Expression<OPERATOR_TYPE_1>>(*child.value()).SetChild(false).CollectForward(out);
+								break;
+							}
+						}
+
+						{
+							auto child = current.value().GetFirst<expression::Expression<OPERATOR_TYPE_2>>();
+							if (child.has_value()) {
+								std::cout << " --> "; std::get<expression::Expression<OPERATOR_TYPE_2>>(*child.value()).SetChild(false).CollectForward(out);
+								break;
+							}
+						}
 					}
 					break;
 				}
@@ -520,7 +545,17 @@ namespace expression {
 			return false;
 		}
 
+		static bool compareNode(const ExpressionNode &previous, const ExpressionNode &next)
+		{
+			return Visit(previous)->Flag() < Visit(next)->Flag();
+		}
+
+		void SortNodes() {
+			m_nodes.sort(compareNode);
+		}
+
 		bool CollectSpecial() {
+			SortNodes();
 			return m_polymorphism->CollectSpecial();
 		}
 
@@ -882,8 +917,8 @@ namespace expression {
 		}
 
 
-		Expression<OperatorType> SetChild() {
-			m_is_child = true;
+		Expression<OperatorType> SetChild(bool isChild = true) {
+			m_is_child = isChild;
 			return *this;
 		}
 

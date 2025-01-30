@@ -100,11 +100,12 @@ namespace number {
 	}
 	void Logarithm::Reduce() {
 		if (!m_power.EqualPositiveOne()) {
-			ReduceExponent();
+			ReduceBase();
 			ReducePower();
+			ReduceCoefficient();
 		}
 	}
-	void Logarithm::ReduceExponent() {
+	void Logarithm::ReduceBase() {
 		Natural exponent(2);
 		while (true) {
 			const Natural &power = Natural(2).Power(exponent);
@@ -155,6 +156,22 @@ namespace number {
 				m_reduction_coefficient = Integer(exponent);
 				m_reduction_power = Fraction(powerNumerator.first, powerDenominator.first);
 				break;
+			}
+		}
+	}
+
+	void Logarithm::ReduceCoefficient()
+	{
+		const std::pair<Natural, Natural>& numerator = m_power.Numerator().Value().Logarithm(m_base.Numerator().Value());
+		const std::pair<Natural, Natural>& denominator = m_power.Denominator().Value().Logarithm(m_base.Denominator().Value());
+		if (numerator.second.EqualZero() && denominator.second.EqualZero())
+		{
+			if (numerator.first == denominator.first ||
+				(m_power.Denominator().Value().EqualPositiveOne() && m_base.Denominator().EqualPositiveOne()))
+			{
+				m_reduction_coefficient = Integer(numerator.first);
+				m_reduction_power = Integer(1);
+				m_reduction_base = Integer(2);
 			}
 		}
 	}

@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "Output.h"
 
 const Output &Output::updatePosition(size_t pos) const {

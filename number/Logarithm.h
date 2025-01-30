@@ -51,8 +51,9 @@ namespace number {
 		Fraction m_reduction_coefficient = Integer(1);
 
 		void Reduce();
-		void ReduceExponent();
+		void ReduceBase();
 		void ReducePower();
+		void ReduceCoefficient();
 	};
 }
 #endif

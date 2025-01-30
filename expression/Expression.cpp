@@ -364,10 +364,17 @@ namespace expression {
 		}
 		std::vector<ExpressionNodes::const_iterator> nodes;
 		m_exp.GetAll(nodes);
-		for (auto &node : nodes) {
+		for (size_t index = 0; index < nodes.size(); ++ index) {
+			const auto &node = nodes.at(index);
 			if (Visit(*node)->EqualZero()) {
 				m_exp.Clear();
 				m_exp.AddClosure(ClosureNumber(0));
+				return true;
+			}
+			else if (Visit(*node)->EqualPositiveOne() &&
+				(index == nodes.size() - 1 ||
+					(index < nodes.size() - 1 && OPERATOR_TYPE_FLAG_DIV != Visit(*nodes.at(index + 1))->Flag()))) {
+				m_exp.RemoveNode(node);
 				return true;
 			}
 		}
