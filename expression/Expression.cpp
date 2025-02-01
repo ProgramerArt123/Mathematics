@@ -201,6 +201,10 @@ namespace expression {
 		return false;
 	}
 	template<typename OperatorType>
+	bool Expression<OperatorType>::Polymorphism0::CollectCancel() {
+		return false;
+	}
+	template<typename OperatorType>
 	void Expression<OperatorType>::Polymorphism0::GetChildren(std::vector<ExpressionNodes::iterator> &exps) {
 		m_exp.GetAll<expression::Expression<OPERATOR_TYPE_1>>(exps);
 		m_exp.GetAll<expression::Expression<OPERATOR_TYPE_2>>(exps);
@@ -378,6 +382,10 @@ namespace expression {
 				return true;
 			}
 		}
+		return false;
+	}
+	template<typename OperatorType>
+	bool Expression<OperatorType>::Polymorphism1::CollectCancel() {
 		return false;
 	}
 	template<typename OperatorType>
@@ -591,6 +599,104 @@ namespace expression {
 				return true;
 			}
 		}
+		return false;
+	}
+	template<typename OperatorType>
+	bool Expression<OperatorType>::Polymorphism2::CancelRoot(const ExpressionNode &one, const ExpressionNode& other) {
+		return (OPERATOR_TYPE_FLAG_POWER == Expression<OperatorType>::Visit(one)->Flag() &&
+			OPERATOR_TYPE_FLAG_ROOT == Expression<OperatorType>::Visit(other)->Flag()) ||
+			(OPERATOR_TYPE_FLAG_ROOT == Expression<OperatorType>::Visit(one)->Flag() &&
+				OPERATOR_TYPE_FLAG_POWER == Expression<OperatorType>::Visit(other)->Flag());
+	}
+	template<typename OperatorType>
+	std::optional<Expression<OPERATOR_TYPE_1>> Expression<OperatorType>::Polymorphism2::CancelLogarithm(const ExpressionNode &base, const ExpressionNode &mixture, bool mixtureFront) {
+		if (const expression::Expression<OPERATOR_TYPE_2>* exp2 =
+			std::get_if<expression::Expression<OPERATOR_TYPE_2>>(&mixture)) {
+			std::vector<ExpressionNodes::const_iterator> nodes;
+			exp2->GetAll(nodes);
+
+			bool foundLogarithm = false;
+
+			Expression<OPERATOR_TYPE_1> newExponent;
+			for (size_t index = 0; index < nodes.size(); ++index) {
+				ExpressionNode node(*nodes.at(index));
+				switch (Expression<OperatorType>::Visit(*nodes.at(index))->Flag())
+				{
+				case OPERATOR_TYPE_FLAG_ADD:
+				{
+					if (mixtureFront) {
+						Expression<OperatorType>::Visit(node)->SetOperator(OPERATOR_TYPE_FLAG_ADD);
+						newExponent.AppendNode(node);
+					}
+				}
+					break;
+				case OPERATOR_TYPE_FLAG_POWER:
+					Expression<OperatorType>::Visit(node)->SetOperator(OPERATOR_TYPE_FLAG_MUL);
+					newExponent.AppendNode(node);
+					break;
+				case OPERATOR_TYPE_FLAG_ROOT:
+					Expression<OperatorType>::Visit(node)->SetOperator(OPERATOR_TYPE_FLAG_DIV);
+					newExponent.AppendNode(node);
+					break;
+				case OPERATOR_TYPE_FLAG_LOGARITHM:
+				{
+					if (foundLogarithm) {
+						return std::nullopt;
+					}
+					if (!Expression<OperatorType>::Visit(*nodes.at(index))->IsEqual(
+						*Expression<OperatorType>::Visit(base), true)) {
+						return std::nullopt;
+					}
+					foundLogarithm = true;
+				}
+					break;
+				default:
+					return std::nullopt;
+					break;
+				}
+			}
+			return newExponent;
+
+		}
+		return std::nullopt;
+	}
+	template<typename OperatorType>
+	bool Expression<OperatorType>::Polymorphism2::CollectCancel() {
+		std::vector<ExpressionNodes::iterator> nodes;
+		m_exp.GetAll(nodes);
+		for (size_t i = 1; i < nodes.size(); ++i) {
+
+			for (size_t j = i + i; j < nodes.size(); ++j) {
+				if (i != j &&
+					Expression<OperatorType>::Visit(*nodes.at(i))->IsEqual(
+						*Expression<OperatorType>::Visit(*nodes.at(j)), true)) {
+					if (CancelRoot(*nodes.at(i), *nodes.at(j))) {
+						m_exp.RemoveNode(nodes.at(i));
+						m_exp.RemoveNode(nodes.at(j));
+						return true;
+					}
+				}
+			}
+
+			if (OPERATOR_TYPE_FLAG_POWER == Expression<OperatorType>::Visit(*nodes.at(i))->Flag()) {
+				const std::optional<Expression<OPERATOR_TYPE_1>>& cancel = CancelLogarithm(*nodes.front(), *nodes.at(i), true);
+				if (cancel.has_value()) {
+					m_exp.ReplaceSingle(nodes.at(i), cancel.value());
+					m_exp.RemoveNode(nodes.front());
+					return true;
+				}
+			}
+
+			if (OPERATOR_TYPE_FLAG_LOGARITHM == Expression<OperatorType>::Visit(*nodes.at(i))->Flag()) {
+				const std::optional<Expression<OPERATOR_TYPE_1>>& cancel = CancelLogarithm(*nodes.at(i), *nodes.front(), false);
+				if (cancel.has_value()) {
+					m_exp.ReplaceSingle(nodes.front(), cancel.value());
+					m_exp.RemoveNode(nodes.at(i));
+					return true;
+				}
+			}
+		}
+
 		return false;
 	}
 	template<typename OperatorType>

@@ -27,7 +27,7 @@ namespace expression {
 			return false;
 		}
 		const ClosureNumber &otherClosure = dynamic_cast<const ClosureNumber&>(other);
-		return *this == otherClosure;
+		return Value() == otherClosure.Value();
 	}
 	bool ClosureNumber::EqualZero() const {
 		return Value().EqualZero();
@@ -50,7 +50,7 @@ namespace expression {
 		return *this;
 	}
 	bool ClosureNumber::operator==(const ClosureNumber &other) const {
-		return Node::operator==(other) && Value() == other.Value();
+		return IsEqual(other, false);
 	}
 	ClosureNumber ClosureNumber::operator+(const ClosureNumber &addition) const {
 		return m_value + addition.m_value;

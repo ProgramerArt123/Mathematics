@@ -186,6 +186,9 @@ namespace expression {
 			if (collect.CollectSpecial()) {
 				return collect;
 			}
+			if (collect.CollectCancel()) {
+				return collect;
+			}
 			return std::nullopt;
 		}
 
@@ -539,9 +542,6 @@ namespace expression {
 			if (CollectFlat<OPERATOR_TYPE_1>()) {
 				return true;
 			}
-			if (CollectFlat<OPERATOR_TYPE_2>()) {
-				return true;
-			}
 			return false;
 		}
 
@@ -557,6 +557,10 @@ namespace expression {
 		bool CollectSpecial() {
 			SortNodes();
 			return m_polymorphism->CollectSpecial();
+		}
+
+		bool CollectCancel() {
+			return m_polymorphism->CollectCancel();
 		}
 
 		bool CollectClosure() {
@@ -1124,6 +1128,7 @@ namespace expression {
 			class Polymorphism {
 			public:
 				virtual bool CollectSpecial() = 0;
+				virtual bool CollectCancel() = 0;
 				virtual void GetChildren(std::vector<ExpressionNodes::iterator> &exps) = 0;
 				virtual bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) = 0;
 				virtual std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
@@ -1149,6 +1154,7 @@ namespace expression {
 			public:
 				Polymorphism0(Expression<OPERATOR_TYPE_0> &exp);
 				bool CollectSpecial() override;
+				bool CollectCancel() override;
 				void GetChildren(std::vector<ExpressionNodes::iterator> &exps) override;
 				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
 				std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
@@ -1176,6 +1182,7 @@ namespace expression {
 			public:
 				Polymorphism1(Expression<OPERATOR_TYPE_1> &exp);
 				bool CollectSpecial() override;
+				bool CollectCancel() override;
 				void GetChildren(std::vector<ExpressionNodes::iterator> &exps) override;
 				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
 				std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
@@ -1204,6 +1211,7 @@ namespace expression {
 			public:
 				Polymorphism2(Expression<OPERATOR_TYPE_2> &exp);
 				bool CollectSpecial() override;
+				bool CollectCancel() override;
 				void GetChildren(std::vector<ExpressionNodes::iterator> &exps) override;
 				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
 				std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
@@ -1227,6 +1235,9 @@ namespace expression {
 				
 				static bool IsOriginEqualOne(const ExpressionNode &node);
 				static bool IsDriverEqualZero(const ExpressionNode &node);
+			private:
+				static bool CancelRoot(const ExpressionNode &one, const ExpressionNode &other);
+				static std::optional<Expression<OPERATOR_TYPE_1>> CancelLogarithm(const ExpressionNode &base, const ExpressionNode &mixture, bool mixtureFront);
 			private:
 				Expression<OPERATOR_TYPE_2> &m_exp;
 				std::unique_ptr<Expression<OPERATOR_TYPE_1>> m_reduction;

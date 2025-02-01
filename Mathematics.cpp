@@ -369,6 +369,30 @@ int main() {
 		expression::Expression<OPERATOR_TYPE_2> e(number::Integer(9), LOGARITHM, number::Integer(3));
 		e.CollectForward(std::cout) << std::endl;
 	}
+	{
+		expression::Expression<OPERATOR_TYPE_2> e(number::Integer(3), LOGARITHM, number::Integer(9));
+		e.CollectForward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_2> e(number::Integer(2), POWER, expression::Symbol("x"), ROOT, expression::Symbol("x"));
+		e.CollectForward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(3), ROOT, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_2> e(number::Integer(2), POWER, e0, ROOT, e0);
+		e.CollectForward(std::cout) << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(3), LOGARITHM, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_2> e(number::Integer(2), POWER, e0);
+		e.CollectForward(std::cout) << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(3), POWER, expression::Symbol("x"));
+		expression::Expression<OPERATOR_TYPE_2> e(e0, LOGARITHM, number::Integer(3));
+		e.CollectForward(std::cout) << std::endl;
+	}
 #endif
 	getchar();
 	return 0;

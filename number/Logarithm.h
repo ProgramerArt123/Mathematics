@@ -54,6 +54,8 @@ namespace number {
 		void ReduceBase();
 		void ReducePower();
 		void ReduceCoefficient();
+
+		std::optional<Fraction> ReduceCoefficient(const Fraction &power, const Fraction &base) const;
 	};
 }
 #endif
