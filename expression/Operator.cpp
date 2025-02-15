@@ -44,6 +44,10 @@ namespace expression {
 	const OPERATOR_TYPE_LEVEL OPERATOR_TYPE_2::GetLevel() const {
 		return OPERATOR_TYPE_LEVEL_2;
 	}
+
+	const OPERATOR_TYPE_LEVEL OPERATOR_TYPE_3::GetLevel() const {
+		return OPERATOR_TYPE_LEVEL_3;
+	}
 	
 	const std::string OPERATOR_TYPE_ADD::OutPutString() const {
 		return m_position ? "+" : "";

@@ -14,7 +14,8 @@ namespace expression {
 	enum OPERATOR_TYPE_LEVEL {
 		OPERATOR_TYPE_LEVEL_0,
 		OPERATOR_TYPE_LEVEL_1,
-		OPERATOR_TYPE_LEVEL_2
+		OPERATOR_TYPE_LEVEL_2,
+		OPERATOR_TYPE_LEVEL_3
 	};
 
 	enum OPERATOR_TYPE_FLAG {
@@ -56,6 +57,13 @@ namespace expression {
 	public:
 		const static OPERATOR_TYPE_LEVEL LEVEL = OPERATOR_TYPE_LEVEL_2;
 		const static OPERATOR_TYPE_FLAG FLAG = OPERATOR_TYPE_FLAG_POWER;
+		const OPERATOR_TYPE_LEVEL GetLevel() const override;
+	};
+
+	class OPERATOR_TYPE_3 : public OPERATOR_TYPE {
+	public:
+		const static OPERATOR_TYPE_LEVEL LEVEL = OPERATOR_TYPE_LEVEL_3;
+		const static OPERATOR_TYPE_FLAG FLAG = OPERATOR_TYPE_FLAG_LOGARITHM;
 		const OPERATOR_TYPE_LEVEL GetLevel() const override;
 	};
 
@@ -101,7 +109,7 @@ namespace expression {
 		std::unique_ptr<OPERATOR_TYPE> Superposition(const OPERATOR_TYPE &other) const override;
 	};
 
-	class OPERATOR_TYPE_LOGARITHM : public OPERATOR_TYPE_2 {
+	class OPERATOR_TYPE_LOGARITHM : public OPERATOR_TYPE_3 {
 	public:
 		const std::string OutPutString() const override;
 		OPERATOR_TYPE_FLAG GetFlag() const override;

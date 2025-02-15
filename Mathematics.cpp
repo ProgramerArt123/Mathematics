@@ -343,7 +343,7 @@ int main() {
 		expression::Expression<OPERATOR_TYPE_0> e(number::Integer(1), SUB, e0, ADD, e2, ADD, e4, SUB, e5, ADD, s);
 		e.CollectForward(std::cout) << std::endl;
 	}
-	
+
 	{
 		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(2), ROOT, number::Integer(5, false));
 		expression::Expression<OPERATOR_TYPE_2> e1(number::Integer(3), ROOT, number::Integer(2));
@@ -366,11 +366,11 @@ int main() {
 		e.CollectForward(std::cout) << std::endl;
 	}
 	{
-		expression::Expression<OPERATOR_TYPE_2> e(number::Integer(9), LOGARITHM, number::Integer(3));
+		expression::Expression<OPERATOR_TYPE_3> e(number::Integer(9), LOGARITHM, number::Integer(3));
 		e.CollectForward(std::cout) << std::endl;
 	}
 	{
-		expression::Expression<OPERATOR_TYPE_2> e(number::Integer(3), LOGARITHM, number::Integer(9));
+		expression::Expression<OPERATOR_TYPE_3> e(number::Integer(3), LOGARITHM, number::Integer(9));
 		e.CollectForward(std::cout) << std::endl;
 	}
 	{
@@ -382,15 +382,30 @@ int main() {
 		expression::Expression<OPERATOR_TYPE_2> e(number::Integer(2), POWER, e0, ROOT, e0);
 		e.CollectForward(std::cout) << std::endl;
 	}
+
 	{
-		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(3), LOGARITHM, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_3> e0(number::Integer(3), LOGARITHM, number::Integer(2));
 		expression::Expression<OPERATOR_TYPE_2> e(number::Integer(2), POWER, e0);
 		e.CollectForward(std::cout) << std::endl;
 	}
 
 	{
 		expression::Expression<OPERATOR_TYPE_2> e0(number::Integer(3), POWER, expression::Symbol("x"));
-		expression::Expression<OPERATOR_TYPE_2> e(e0, LOGARITHM, number::Integer(3));
+		expression::Expression<OPERATOR_TYPE_3> e(e0, LOGARITHM, number::Integer(3));
+		e.CollectForward(std::cout) << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_3> e0(number::Integer(5), LOGARITHM, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_3> e1(number::Integer(3), LOGARITHM, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_0> e(e0, ADD, e1);
+		e.CollectForward(std::cout) << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_3> e0(number::Integer(5), LOGARITHM, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_3> e1(number::Integer(3), LOGARITHM, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_0> e(e0, SUB, e1);
 		e.CollectForward(std::cout) << std::endl;
 	}
 #endif
