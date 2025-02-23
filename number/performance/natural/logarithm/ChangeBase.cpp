@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "number/performance/natural/Algorithm.h"
 
 #include "ChangeBase.h"
@@ -9,9 +11,10 @@ namespace performance {
 		namespace logarithm {
 			ChangeBase::ChangeBase(const number::Natural &power, const number::Natural &base)
 				: Interface(power, base) {
-				const std::string &powerChange = power.GetString(CHANGE_TO_RADIX);
+				assert(!base.EqualPositiveOne());
+				const std::string& powerChange = power.GetString(CHANGE_TO_RADIX);
 				size_t powerExponent = powerChange.size() - 1;
-				const std::string &baseChange = base.GetString(CHANGE_TO_RADIX);
+				const std::string& baseChange = base.GetString(CHANGE_TO_RADIX);
 				size_t baseExponent = baseChange.size() > 1 ? baseChange.size() - 1 : 1;
 				size_t exponent = powerExponent / baseExponent;
 				Algorithm::CorrectExponent correct(exponent, base);

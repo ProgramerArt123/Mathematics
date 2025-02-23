@@ -455,41 +455,39 @@ namespace expression {
 			return m_nodes.front();
 		}
 
-		std::optional<ClosureNumber> GetIntegerBase() {
-			if (ClosureNumber *base = std::get_if<ClosureNumber>(&m_nodes.front())) {
-				return *base;
+		std::optional<ClosureNumber> GetIntegerFront() {
+			if (ClosureNumber *front = std::get_if<ClosureNumber>(&m_nodes.front())) {
+				return *front;
 			}
 			else {
 				return std::nullopt;
 			}
 		}
 		
-		bool ForeachClosure(std::function<bool(expression::ClosureNumber &, const expression::ClosureNumber &, size_t &)> factor) {
-			if (!GetIntegerBase().has_value()) {
+		bool ForeachClosure(OPERATOR_TYPE_FLAG flag, std::function<std::optional<Expression<OPERATOR_TYPE_1>>(
+			const expression::ClosureNumber &, const expression::ClosureNumber &)> factor) {
+			const std::optional<ClosureNumber> front(GetIntegerFront());
+			if (!front.has_value()) {
 				return false;
 			}
 			std::vector<ExpressionNodes::iterator> integers;
-			GetAll<expression::ClosureNumber>(integers, [](const expression::ClosureNumber &node) {return true; });
+			GetAll<expression::ClosureNumber>(integers, [&flag](const expression::ClosureNumber &node) {
+				return flag == node.Flag();
+			});
 			if (2 > integers.size()) {
 				return false;
 			}
-			expression::ClosureNumber &collect = std::get<expression::ClosureNumber>(*integers.front());
 			typename std::vector<ExpressionNodes::iterator>::iterator itor = integers.begin();
-			size_t reciprocalsCount = 0;
 			while (++itor != integers.end()) {
 				const expression::ClosureNumber &closure = std::get<expression::ClosureNumber>(**itor);
-				if (factor(collect, closure, reciprocalsCount)) {
+				const std::optional<Expression<OPERATOR_TYPE_0>> reduction(factor(front.value(), closure));
+				if (reduction.has_value()) {
+					ReplaceSingle(m_nodes.begin(), reduction.value());
 					RemoveNode(*itor);
-					if (1 == reciprocalsCount % 2) {
-						if (1 == m_nodes.size()) {
-							AppendChild(Reciprocal(collect).SetChild());
-							RemoveNode(m_nodes.begin());
-						}
-						else {
-							Visit(m_nodes.back())->Opposite();
-						}
-					}
 					return true;
+				}
+				else {
+					return false;
 				}
 			}
 			return false;
@@ -694,70 +692,36 @@ namespace expression {
 		}
 
 		bool CollectPowerClosure() {
-			return ForeachClosure([](expression::ClosureNumber &collect, const expression::ClosureNumber &closure, size_t &reciprocalsCount) {
-				if (OPERATOR_TYPE_FLAG_POWER == closure.Flag()) {
-					const number::Fraction &power = number::Fraction::Power(collect.Value(), closure.Value());
-					if (power.IsInteger()) {
-						collect = power.Numerator();
-					}
-					else {
-						collect = power.Denominator();
-						++reciprocalsCount;
-					}
-					return true;
-				}
-				else {
-					return false;
-				}
+			return ForeachClosure(OPERATOR_TYPE_FLAG_POWER, [](const expression::ClosureNumber &base, const expression::ClosureNumber &exponent) {
+				const number::Fraction &power = number::Fraction::Power(base.Value(), exponent.Value());
+				return Absorb(power);
 			});
 		}
 
 		bool CollectRootClosure() {
-			return ForeachClosure([](expression::ClosureNumber &collect, const expression::ClosureNumber &closure, size_t &reciprocalsCount) {
-				if (OPERATOR_TYPE_FLAG_ROOT == closure.Flag()) {
-					const number::Root root(collect.Value(), closure.Value());
-					if (root.IsFraction()) {
-						const number::Fraction &coefficient = root.ReductionCoefficient();
-						if (coefficient.IsInteger()) {
-							collect = coefficient.Numerator();
-						}
-						else {
-							collect = coefficient.Denominator();
-							++reciprocalsCount;
-						}
-						return true;
-					}
-					else {
-						return false;
-					}
+			return ForeachClosure(OPERATOR_TYPE_FLAG_ROOT, 
+				[](const expression::ClosureNumber &power, const expression::ClosureNumber &exponent) -> std::optional < Expression<OPERATOR_TYPE_1> > {
+				const number::Root root(power.Value(), exponent.Value());
+				if (root.IsFraction()) {
+					const number::Fraction &coefficient = root.ReductionCoefficient();
+					return Absorb(coefficient);
 				}
 				else {
-					return false;
+					return std::nullopt;
 				}
 			});
 		}
 
 		bool CollectLogarithmClosure() {
-			return ForeachClosure([](expression::ClosureNumber &collect, const expression::ClosureNumber &closure, size_t &reciprocalsCount) {
-				if (OPERATOR_TYPE_FLAG_LOGARITHM == closure.Flag()) {
-					const number::Logarithm logarithm(collect.Value(), closure.Value());
-					if (logarithm.IsFraction()) {
-						const number::Fraction &coefficient = logarithm.ReductionCoefficient();
-						if (coefficient.IsInteger()) {
-							collect = coefficient.Numerator();
-						}
-						else {
-							collect = coefficient.Denominator();
-							++reciprocalsCount;
-						}
-						return true;
-					}
-					else {
-						return false;
-					}
+			return ForeachClosure(OPERATOR_TYPE_FLAG_LOGARITHM, 
+				[](const expression::ClosureNumber &power, const expression::ClosureNumber &base) -> std::optional < Expression<OPERATOR_TYPE_1> > {
+				const number::Logarithm logarithm(power.Value(), base.Value());
+				if (logarithm.IsFraction()) {
+					const number::Fraction &coefficient = logarithm.ReductionCoefficient();
+					return Absorb(coefficient);
 				}
 				else {
-					return false;
+					return std::nullopt;
 				}
 			});
 		}
@@ -837,6 +801,9 @@ namespace expression {
 				return true;
 			}
 			if (CollectChild<OPERATOR_TYPE_2>()) {
+				return true;
+			}
+			if (CollectChild<OPERATOR_TYPE_3>()) {
 				return true;
 			}
 			return false;
@@ -1071,7 +1038,7 @@ namespace expression {
 				return std::nullopt;
 			}
 			else {
-				return std::get<expression::Expression<OperatorType>>(m_polymorphism->BuildCommon(leftChildren, rightChildren, right.Flag(), commons, isOpposite));
+				return m_polymorphism->BuildCommon(leftChildren, rightChildren, right.Flag(), commons, isOpposite);
 			}
 		}
 
@@ -1150,7 +1117,7 @@ namespace expression {
 				virtual bool CollectCombine() = 0;
 				virtual void GetChildren(std::vector<ExpressionNodes::iterator> &exps) = 0;
 				virtual bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) = 0;
-				virtual std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+				virtual Expression<OPERATOR_TYPE_1> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
 					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons, bool isOpposite) = 0;
 				virtual bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) = 0;
 				virtual bool CollectClosureExp1() = 0;
@@ -1178,7 +1145,7 @@ namespace expression {
 				bool CollectCombine() override;
 				void GetChildren(std::vector<ExpressionNodes::iterator> &exps) override;
 				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+				Expression<OPERATOR_TYPE_1> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
 					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons, bool isOpposite) override;
 
 				bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
@@ -1210,7 +1177,7 @@ namespace expression {
 				bool CollectCombine() override;
 				void GetChildren(std::vector<ExpressionNodes::iterator> &exps) override;
 				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+				Expression<OPERATOR_TYPE_1> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
 					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons, bool isOpposite) override;
 				bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
 				
@@ -1241,7 +1208,7 @@ namespace expression {
 				bool CollectCombine() override;
 				void GetChildren(std::vector<ExpressionNodes::iterator> &exps) override;
 				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+				Expression<OPERATOR_TYPE_1> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
 					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons, bool isOpposite) override;
 				bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
 				bool CollectClosureExp1() override;
@@ -1280,7 +1247,7 @@ namespace expression {
 				bool CollectCombine() override;
 				void GetChildren(std::vector<ExpressionNodes::iterator>& exps) override;
 				bool CollectCommonChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				std::variant<Expression<OPERATOR_TYPE_1>, Expression<OPERATOR_TYPE_2>> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
+				Expression<OPERATOR_TYPE_1> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
 					const std::vector<ExpressionNodes::const_iterator>& rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode>& commons, bool isOpposite) override;
 				bool CollectFractionChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
 				bool CollectClosureExp1() override;

@@ -320,8 +320,8 @@ namespace number {
 			return *this;
 		}
 	}
-	Fraction Fraction::Power(const number::Integer &number, const number::Integer &exponent) {
-		number::Integer product = number.Value().Power(exponent.Value());
+	Fraction Fraction::Power(const number::Integer & base, const number::Integer &exponent) {
+		number::Integer product = base.Value().Power(exponent.Value());
 		product.SetUnSigned(product.IsPositive() || !exponent.Value().IsOdd());
 		if (exponent.IsPositive()) {
 			return Fraction(product, 1);

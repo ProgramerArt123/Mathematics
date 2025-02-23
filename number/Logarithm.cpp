@@ -163,26 +163,32 @@ namespace number {
 	void Logarithm::ReduceCoefficient()
 	{
 		{
-			const auto &coefficient = ReduceCoefficient(m_power, m_base);
+			const auto &coefficient = ReduceCoefficient(m_reduction_power, m_reduction_base);
 			if (coefficient.has_value()) {
-				m_reduction_coefficient = coefficient.value();
-				m_reduction_power = Integer(1);
+				m_reduction_coefficient *= coefficient.value();
+				m_reduction_power = Integer(2);
 				m_reduction_base = Integer(2);
 			}
 		}
 		{
-			const auto& coefficient = ReduceCoefficient(m_base, m_power);
+			const auto& coefficient = ReduceCoefficient(m_reduction_base, m_reduction_power);
 			if (coefficient.has_value()) {
-				m_reduction_coefficient = coefficient.value().GetReciprocal();
-				m_reduction_power = Integer(1);
+				m_reduction_coefficient *= coefficient.value().GetReciprocal();
+				m_reduction_power = Integer(2);
 				m_reduction_base = Integer(2);
 			}
 		}
 	}
 
 	std::optional<Fraction> Logarithm::ReduceCoefficient(const Fraction& power, const Fraction& base) const {
-		const std::pair<Natural, Natural> &numerator = power.Numerator().Value().Logarithm(base.Numerator().Value());
-		const std::pair<Natural, Natural> &denominator = power.Denominator().Value().Logarithm(base.Denominator().Value());
+		std::pair<Natural, Natural> numerator(0, 0);
+		if (!base.Numerator().Value().EqualPositiveOne()) {
+			numerator = power.Numerator().Value().Logarithm(base.Numerator().Value());
+		}
+		std::pair<Natural, Natural> denominator(0, 0);
+		if (!base.Denominator().Value().EqualPositiveOne()) {
+			denominator = power.Denominator().Value().Logarithm(base.Denominator().Value());
+		}
 		if (numerator.second.EqualZero() && denominator.second.EqualZero())
 		{
 			if (numerator.first == denominator.first ||

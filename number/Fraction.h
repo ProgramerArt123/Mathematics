@@ -71,7 +71,7 @@ namespace number {
 		friend Fraction operator*(const number::Integer &number, const Fraction &multiplier);
 		friend Fraction operator/(const number::Integer &number, const Fraction &divisor);
 
-		static Fraction Power(const number::Integer &number, const number::Integer &exponent);
+		static Fraction Power(const number::Integer &base, const number::Integer &exponent);
 		static bool CheckReduce(const Integer &numerator, const Integer &denominator);
 	private:
 
