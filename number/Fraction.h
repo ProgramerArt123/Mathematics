@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <optional>
 #include "Real.h"
 #include "Integer.h"
 namespace number {
@@ -72,7 +73,7 @@ namespace number {
 		friend Fraction operator/(const number::Integer &number, const Fraction &divisor);
 
 		static Fraction Power(const number::Integer &base, const number::Integer &exponent);
-		static bool CheckReduce(const Integer &numerator, const Integer &denominator);
+		static std::optional<Fraction> CheckReduce(const Integer &numerator, const Integer &denominator);
 	private:
 
 		number::Integer m_numerator = 0;

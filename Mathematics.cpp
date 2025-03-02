@@ -191,12 +191,12 @@ int main() {
 			number::Integer(456), SUB, number::Integer(789));
 		e.CollectForward(std::cout) << std::endl;
 	}
-	{
-		expression::Expression<OPERATOR_TYPE_0> e(number::Integer(123, false), ADD,
-			number::Integer(456), SUB, number::Integer(789, false));
+	//{
+	//	expression::Expression<OPERATOR_TYPE_0> e(number::Integer(123, false), ADD,
+	//		number::Integer(456), SUB, number::Integer(789, false));
 
-		std::cout << ExpressionDeformationer<OPERATOR_TYPE_0>(e.OutPutString()).Deformation(e) << std::endl;
-	}
+	//	std::cout << ExpressionDeformationer<OPERATOR_TYPE_0>(e.OutPutString()).Deformation(e) << std::endl;
+	//}
 	{
 		expression::Expression<OPERATOR_TYPE_0> e0(number::Integer(456), ADD, number::Integer(789));
 		expression::Expression<OPERATOR_TYPE_1> e1(number::Integer(123), MUL, e0);

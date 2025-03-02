@@ -314,7 +314,7 @@ namespace expression {
 		return false;
 	}
 	template<typename OperatorType>
-	void Expression<OperatorType>::Polymorphism0::SetOpenReduction(const number::Fraction& coefficient, const number::Fraction& power, const number::Fraction& factor) {
+	void Expression<OperatorType>::Polymorphism0::SetOpenReduction(const Expression<OPERATOR_TYPE_1>& reduction) {
 
 	}
 	template<typename OperatorType>
@@ -322,7 +322,7 @@ namespace expression {
 		return std::nullopt;
 	}
 	template<typename OperatorType>
-	void Expression<OperatorType>::Polymorphism0::SetFractionReduction(const number::Fraction &fraction) {
+	void Expression<OperatorType>::Polymorphism0::SetFractionReduction(const Expression<OPERATOR_TYPE_0> &reduction) {
 
 	}
 	template<typename OperatorType>
@@ -601,7 +601,7 @@ namespace expression {
 		return false;
 	}
 	template<typename OperatorType>
-	void Expression<OperatorType>::Polymorphism1::SetOpenReduction(const number::Fraction& coefficient, const number::Fraction& power, const number::Fraction& factor) {
+	void Expression<OperatorType>::Polymorphism1::SetOpenReduction(const Expression<OPERATOR_TYPE_1>& reduction) {
 
 	}
 	template<typename OperatorType>
@@ -609,8 +609,8 @@ namespace expression {
 		return std::nullopt;
 	}
 	template<typename OperatorType>
-	void Expression<OperatorType>::Polymorphism1::SetFractionReduction(const number::Fraction &fraction) {
-		m_reduction = std::make_unique<Expression<OPERATOR_TYPE_0>>(Absorb(fraction));
+	void Expression<OperatorType>::Polymorphism1::SetFractionReduction(const Expression<OPERATOR_TYPE_0> &reduction) {
+		m_reduction = std::make_unique<Expression<OPERATOR_TYPE_0>>(reduction);
 	}
 	template<typename OperatorType>
 	std::optional<const Expression<OPERATOR_TYPE_0>> Expression<OperatorType>::Polymorphism1::GetFractionReduction() const {
@@ -876,17 +876,8 @@ namespace expression {
 		return false;
 	}
 	template<typename OperatorType>
-	void Expression<OperatorType>::Polymorphism2::SetOpenReduction(const number::Fraction& coefficient, const number::Fraction& power, const number::Fraction& factor) {
-		const Expression<OPERATOR_TYPE_1>& reductionCoefficient = Absorb(coefficient);
-		const Expression<OPERATOR_TYPE_0> &reductionPower = Absorb(power);
-		const Expression<OPERATOR_TYPE_0> &reductionExponent = Absorb(factor);
-		if (!power.EqualZero()) {
-			const Expression<OPERATOR_TYPE_2> reduction(reductionPower, ROOT, reductionExponent);
-			m_reduction = std::make_unique<Expression<OPERATOR_TYPE_1>>(reductionCoefficient, MUL, reduction);
-		}
-		else {
-			m_reduction = std::make_unique<Expression<OPERATOR_TYPE_1>>(reductionCoefficient, MUL, expression::ClosureNumber(1));
-		}
+	void Expression<OperatorType>::Polymorphism2::SetOpenReduction(const Expression<OPERATOR_TYPE_1>& reduction) {
+		m_reduction = std::make_unique<Expression<OPERATOR_TYPE_1>>(reduction);
 	}
 	template<typename OperatorType>
 	std::optional<const Expression<OPERATOR_TYPE_1>> Expression<OperatorType>::Polymorphism2::GetOpenReduction() const {
@@ -898,7 +889,7 @@ namespace expression {
 		}
 	}
 	template<typename OperatorType>
-	void Expression<OperatorType>::Polymorphism2::SetFractionReduction(const number::Fraction &fraction) {
+	void Expression<OperatorType>::Polymorphism2::SetFractionReduction(const Expression<OPERATOR_TYPE_0> &reduction) {
 
 	}
 	template<typename OperatorType>
@@ -1012,17 +1003,8 @@ namespace expression {
 		return false;
 	}
 	template<typename OperatorType>
-	void Expression<OperatorType>::Polymorphism3::SetOpenReduction(const number::Fraction& coefficient, const number::Fraction& power, const number::Fraction& factor) {
-		const Expression<OPERATOR_TYPE_1>& reductionCoefficient = Absorb(coefficient);
-		const Expression<OPERATOR_TYPE_1> &reductionPower = Absorb(power);
-		const Expression<OPERATOR_TYPE_1> &reductionBase = Absorb(factor);
-		if (power != factor) {
-			const Expression<OPERATOR_TYPE_3> reduction(reductionPower, LOGARITHM, reductionBase);
-			m_reduction = std::make_unique<Expression<OPERATOR_TYPE_1>>(reductionCoefficient, MUL, reduction);
-		}
-		else {
-			m_reduction = std::make_unique<Expression<OPERATOR_TYPE_1>>(reductionCoefficient, MUL, expression::ClosureNumber(1));
-		}
+	void Expression<OperatorType>::Polymorphism3::SetOpenReduction(const Expression<OPERATOR_TYPE_1>& reduction) {
+		m_reduction = std::make_unique<Expression<OPERATOR_TYPE_1>>(reduction);
 	}
 	template<typename OperatorType>
 	std::optional<const Expression<OPERATOR_TYPE_1>> Expression<OperatorType>::Polymorphism3::GetOpenReduction() const {
@@ -1034,7 +1016,7 @@ namespace expression {
 		}
 	}
 	template<typename OperatorType>
-	void Expression<OperatorType>::Polymorphism3::SetFractionReduction(const number::Fraction& fraction) {
+	void Expression<OperatorType>::Polymorphism3::SetFractionReduction(const Expression<OPERATOR_TYPE_0> &reduction) {
 
 	}
 	template<typename OperatorType>

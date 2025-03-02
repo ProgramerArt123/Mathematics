@@ -330,9 +330,14 @@ namespace number {
 			return Fraction(1, product);
 		}
 	}
-	bool Fraction::CheckReduce(const Integer &numerator, const Integer &denominator) {
+	std::optional<Fraction> Fraction::CheckReduce(const Integer &numerator, const Integer &denominator) {
 		const number::Fraction reduce(numerator.Value(), denominator.Value());
-		return reduce.ReductionInteger().EqualZero() &&
-			reduce.ReductionNumerator() == numerator.Value();
+		if (reduce.ReductionInteger().EqualZero() &&
+			reduce.ReductionNumerator() == numerator.Value()) {
+			return std::nullopt;
+		}
+		else {
+			return reduce;
+		}
 	}
 }

@@ -168,6 +168,9 @@ namespace expression {
 		}
 		std::optional<Expression<OperatorType>> Collect() const{
 			Expression<OperatorType> collect(*this);
+			if (collect.CollectSort()) {
+				return collect;
+			}
 			if (collect.CollectChild()) {
 				return collect;
 			}
@@ -195,45 +198,47 @@ namespace expression {
 			return std::nullopt;
 		}
 
+		template<typename ChildOperatorType>
+		bool ForwardChild(Expression<OperatorType> &current, std::ostream &out) const {
+			auto child = current.GetFirst<expression::Expression<ChildOperatorType>>();
+			if (child.has_value()) {
+				out << " --> "; std::get<expression::Expression<ChildOperatorType>>(*child.value()).SetChild(false).CollectForward(out);
+				return true;
+			}
+			return false;
+		}
+
 		std::ostream& CollectForward(std::ostream& out) const{
 			out << *this;
 			auto current = std::make_optional<Expression<OperatorType>>(*this);
 			while (true) {
 				auto forward = current.value().Collect();
 				if (forward.has_value()) {
-					std::cout << " --> " << forward.value();
+					out << " --> " << forward.value();
 					current = forward;
 				}
 				else {
 					if (current.value().ReduceFraction()) {
-						std::cout << " --> "; current.value().GetFractionReduction().CollectForward(out);
+						out << " --> "; current.value().GetFractionReduction().CollectForward(out);
 					}
 					else if (current.value().ReduceRoot() || current.value().ReduceLogarithm()) {
-						std::cout << " --> "; current.value().GetOpenReduction().CollectForward(out);
+						out << " --> "; current.value().GetOpenReduction().CollectForward(out);
 					}
 					else if(current.value().IsSingle()){
-						{
-							auto child = current.value().GetFirst<expression::Expression<OPERATOR_TYPE_0>>();
-							if (child.has_value()) {
-								std::cout << " --> "; std::get<expression::Expression<OPERATOR_TYPE_0>>(*child.value()).SetChild(false).CollectForward(out);
-								break;
-							}
+						if (ForwardChild<OPERATOR_TYPE_0>(current.value(), out)){
+							break;
 						}
 
-						{
-							auto child = current.value().GetFirst<expression::Expression<OPERATOR_TYPE_1>>();
-							if (child.has_value()) {
-								std::cout << " --> "; std::get<expression::Expression<OPERATOR_TYPE_1>>(*child.value()).SetChild(false).CollectForward(out);
-								break;
-							}
+						if (ForwardChild<OPERATOR_TYPE_1>(current.value(), out)) {
+							break;
 						}
 
-						{
-							auto child = current.value().GetFirst<expression::Expression<OPERATOR_TYPE_2>>();
-							if (child.has_value()) {
-								std::cout << " --> "; std::get<expression::Expression<OPERATOR_TYPE_2>>(*child.value()).SetChild(false).CollectForward(out);
-								break;
-							}
+						if (ForwardChild<OPERATOR_TYPE_2>(current.value(), out)) {
+							break;
+						}
+
+						if (ForwardChild<OPERATOR_TYPE_3>(current.value(), out)) {
+							break;
 						}
 					}
 					break;
@@ -255,7 +260,7 @@ namespace expression {
 				size_t completed = 0;
 				expand = expand.Expand(1, completed);
 				if (completed) {
-					std::cout << " --< " << expand;
+					out << " --< " << expand;
 				}
 				else {
 					break;
@@ -557,17 +562,16 @@ namespace expression {
 			return false;
 		}
 
-		static bool compareNode(const ExpressionNode &previous, const ExpressionNode &next)
-		{
-			return Visit(previous)->Flag() < Visit(next)->Flag();
-		}
-
-		void SortNodes() {
-			m_nodes.sort(compareNode);
+		bool CollectSort() {
+			const ExpressionNodes original(m_nodes.cbegin(), m_nodes.cend());
+			m_nodes.sort([](const ExpressionNode& previous, const ExpressionNode& next)
+				{
+					return Visit(previous)->Flag() < Visit(next)->Flag();
+				});
+			return !std::equal(original.cbegin(), original.cend(), m_nodes.cbegin());
 		}
 
 		bool CollectSpecial() {
-			SortNodes();
 			return m_polymorphism->CollectSpecial();
 		}
 
@@ -637,10 +641,11 @@ namespace expression {
 					if (OPERATOR_TYPE_FLAG_DIV != denominator.Flag()) {
 						return false;
 					}
-					if (number::Fraction::CheckReduce(numerator.Value(), denominator.Value())) {
+					const std::optional<number::Fraction> &fraction = number::Fraction::CheckReduce(numerator.Value(), denominator.Value());
+					if (!fraction.has_value()) {
 						return false;
 					}
-					m_polymorphism->SetFractionReduction(number::Fraction(numerator.Value(), denominator.Value()));
+					m_polymorphism->SetFractionReduction(Absorb(fraction.value()));
 					return true;
 				});
 			}
@@ -663,8 +668,17 @@ namespace expression {
 					if (!root.has_value()) {
 						return false;
 					}
-					m_polymorphism->SetOpenReduction(root.value().ReductionCoefficient(),
-						root.value().ReductionPower(), root.value().ReductionExponent());
+					const Expression<OPERATOR_TYPE_1>& reductionCoefficient = Absorb(root.value().ReductionCoefficient());
+					if (!root.value().IsFraction()) {
+						const Expression<OPERATOR_TYPE_0>& reductionPower = Absorb(root.value().ReductionPower());
+						const Expression<OPERATOR_TYPE_0>& reductionExponent = Absorb(root.value().ReductionExponent());
+						m_polymorphism->SetOpenReduction(Expression<OPERATOR_TYPE_1>(reductionCoefficient, MUL,
+							Expression<OPERATOR_TYPE_2>(reductionPower, ROOT, reductionExponent)));
+					}
+					else {
+						m_polymorphism->SetOpenReduction(Expression<OPERATOR_TYPE_1>(reductionCoefficient, MUL,
+							expression::ClosureNumber(1)));
+					}
 					return true;
 				});
 			}
@@ -683,8 +697,17 @@ namespace expression {
 					if (!logarithm.has_value()) {
 						return false;
 					}
-					m_polymorphism->SetOpenReduction(logarithm.value().ReductionCoefficient(),
-						logarithm.value().ReductionPower(), logarithm.value().ReductionBase());
+					const Expression<OPERATOR_TYPE_1>& reductionCoefficient = Absorb(logarithm.value().ReductionCoefficient());
+					if (!logarithm.value().IsFraction()) {
+						const Expression<OPERATOR_TYPE_1>& reductionPower = Absorb(logarithm.value().ReductionPower());
+						const Expression<OPERATOR_TYPE_1>& reductionBase = Absorb(logarithm.value().ReductionBase());
+						m_polymorphism->SetOpenReduction(Expression<OPERATOR_TYPE_1>(reductionCoefficient, MUL,
+							Expression<OPERATOR_TYPE_3>(reductionPower, LOGARITHM, reductionBase)));
+					}
+					else {
+						m_polymorphism->SetOpenReduction(Expression<OPERATOR_TYPE_1>(reductionCoefficient, MUL,
+							expression::ClosureNumber(1)));
+					}
 					return true;
 				});
 			}
@@ -1123,9 +1146,9 @@ namespace expression {
 				virtual bool CollectClosureExp1() = 0;
 				virtual bool CollectClosureExp2() = 0;
 				virtual bool CollectClosure(ClosureNumber &closure) = 0;
-				virtual void SetOpenReduction(const number::Fraction &coefficient, const number::Fraction &power, const number::Fraction &factor) = 0;
+				virtual void SetOpenReduction(const Expression<OPERATOR_TYPE_1> &reduction) = 0;
 				virtual std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const = 0;
-				virtual void SetFractionReduction(const number::Fraction &fraction) = 0;
+				virtual void SetFractionReduction(const Expression<OPERATOR_TYPE_0> &reduction) = 0;
 				virtual std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const = 0;
 				virtual bool IsUnSigned() const = 0;
 				virtual void SetUnSigned(bool isUnSigned) = 0;
@@ -1152,9 +1175,9 @@ namespace expression {
 				bool CollectClosureExp1() override;
 				bool CollectClosureExp2() override;
 				bool CollectClosure(ClosureNumber &closure) override;
-				void SetOpenReduction(const number::Fraction& coefficient, const number::Fraction& power, const number::Fraction& factor) override;
+				void SetOpenReduction(const Expression<OPERATOR_TYPE_1>& reduction) override;
 				std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const override;
-				void SetFractionReduction(const number::Fraction &fraction) override;
+				void SetFractionReduction(const Expression<OPERATOR_TYPE_0> &reduction) override;
 				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
 				bool IsUnSigned() const override;
 				void SetUnSigned(bool isUnSigned) override;
@@ -1184,9 +1207,9 @@ namespace expression {
 				bool CollectClosureExp1() override;
 				bool CollectClosureExp2() override;
 				bool CollectClosure(ClosureNumber &closure) override;
-				void SetOpenReduction(const number::Fraction& coefficient, const number::Fraction& power, const number::Fraction& factor) override;
+				void SetOpenReduction(const Expression<OPERATOR_TYPE_1>& reduction) override;
 				std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const override;
-				void SetFractionReduction(const number::Fraction &fraction) override;
+				void SetFractionReduction(const Expression<OPERATOR_TYPE_0> &reduction) override;
 				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
 				bool IsUnSigned() const override;
 				void SetUnSigned(bool isUnSigned) override;
@@ -1214,9 +1237,9 @@ namespace expression {
 				bool CollectClosureExp1() override;
 				bool CollectClosureExp2() override;
 				bool CollectClosure(ClosureNumber &closure) override;
-				void SetOpenReduction(const number::Fraction& coefficient, const number::Fraction& power, const number::Fraction& factor) override;
+				void SetOpenReduction(const Expression<OPERATOR_TYPE_1>& reduction) override;
 				std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const override;
-				void SetFractionReduction(const number::Fraction &fraction) override;
+				void SetFractionReduction(const Expression<OPERATOR_TYPE_0> &reduction) override;
 				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
 				bool IsUnSigned() const override;
 				void SetUnSigned(bool isUnSigned) override;
@@ -1253,9 +1276,9 @@ namespace expression {
 				bool CollectClosureExp1() override;
 				bool CollectClosureExp2() override;
 				bool CollectClosure(ClosureNumber& closure) override;
-				void SetOpenReduction(const number::Fraction& coefficient, const number::Fraction& power, const number::Fraction& factor) override;
+				void SetOpenReduction(const Expression<OPERATOR_TYPE_1>& reduction) override;
 				std::optional<const Expression<OPERATOR_TYPE_1>> GetOpenReduction() const override;
-				void SetFractionReduction(const number::Fraction& fraction) override;
+				void SetFractionReduction(const Expression<OPERATOR_TYPE_0> &reduction) override;
 				std::optional<const Expression<OPERATOR_TYPE_0>> GetFractionReduction() const override;
 				bool IsUnSigned() const override;
 				void SetUnSigned(bool isUnSigned) override;

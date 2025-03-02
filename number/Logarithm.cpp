@@ -201,7 +201,8 @@ namespace number {
 	}
 
 	bool Logarithm::IsFraction() const {
-		return EqualZero() || m_reduction_base.EqualPositiveOne() || m_reduction_power.EqualPositiveOne();
+		return EqualZero() || m_reduction_base.EqualPositiveOne() ||
+			m_reduction_power.EqualPositiveOne() || m_reduction_base == m_reduction_power;
 	}
 
 	void Logarithm::Opposite() {
