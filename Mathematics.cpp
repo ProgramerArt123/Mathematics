@@ -408,6 +408,18 @@ int main() {
 		expression::Expression<OPERATOR_TYPE_0> e(e0, SUB, e1);
 		e.CollectForward(std::cout) << std::endl;
 	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_3> e0(number::Integer(5), LOGARITHM, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_0> e(e0, ADD, e0);
+		e.CollectForward(std::cout) << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_3> e0(number::Integer(5), LOGARITHM, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_0> e(e0, SUB, e0);
+		e.CollectForward(std::cout) << std::endl;
+	}
 #endif
 	getchar();
 	return 0;
