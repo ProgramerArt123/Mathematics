@@ -33,7 +33,7 @@ namespace number {
 		bool EqualZero() const override;
 		bool EqualPositiveOne() const override;
 		bool EqualNegativeOne() const override;
-		void SetUnSigned(bool isUnSigned) override;
+		void SetPositive(bool isPositive) override;
 		bool IsPositive() const override;
 		void Opposite() override;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,

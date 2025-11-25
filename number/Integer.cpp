@@ -10,9 +10,10 @@ namespace number {
 	}
 
 	Integer::Integer(const Natural &value, bool isUnSigned) :
-		m_value(value), m_unsigned(isUnSigned) {
+		m_value(value) {
+		SetPositive(isUnSigned);
 		if (m_value.EqualZero()) {
-			m_unsigned = true;
+			SetPositive(true);
 		}
 	}
 	Integer::Integer(const std::string &value, bool isUnSigned) :
@@ -20,7 +21,7 @@ namespace number {
 
 	}
 	const std::string Integer::GetString(uint8_t radix)const {
-		return m_unsigned ? m_value.GetString(radix) : "-" + m_value.GetString(radix);
+		return IsPositive() ? m_value.GetString(radix) : "-" + m_value.GetString(radix);
 	}
 	bool Integer::EqualZero() const {
 		return m_value.EqualZero();
@@ -30,17 +31,6 @@ namespace number {
 	}
 	bool Integer::EqualNegativeOne() const {
 		return !IsPositive() && m_value.EqualPositiveOne();
-	}
-	void Integer::SetUnSigned(bool isUnSigned) {
-		m_unsigned = isUnSigned;
-	}
-	bool Integer::IsPositive() const {
-		return m_unsigned;
-	}
-	void Integer::Opposite() {
-		if (!EqualZero()) {
-			m_unsigned = !m_unsigned;
-		}
 	}
 	const std::string Integer::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
@@ -53,11 +43,11 @@ namespace number {
 		return IsPositive() ? *this : -*this;
 	}
 	Integer Integer::operator-() const {
-		return Integer(m_value, !m_unsigned);
+		return Integer(m_value, !IsPositive());
 	}
 	Integer Integer::operator+(const Integer &addition) const {
-		if (m_unsigned) {
-			if (addition.m_unsigned) {
+		if (IsPositive()) {
+			if (addition.IsPositive()) {
 				return PositiveAdd(addition);
 			}
 			else {
@@ -65,7 +55,7 @@ namespace number {
 			}
 		}
 		else {
-			if (addition.m_unsigned) {
+			if (addition.IsPositive()) {
 				return addition.PositiveSub(*this);
 			}
 			else {
@@ -78,17 +68,17 @@ namespace number {
 	}
 	Integer Integer::operator*(const Integer &multiplier) const {
 		Integer product = m_value * multiplier.m_value;
-		product.m_unsigned = m_unsigned == multiplier.m_unsigned;
+		product.SetPositive(IsPositive() == multiplier.IsPositive());
 		return product;
 	}
 	Integer Integer::operator/(const Integer &divisor) const {
 		Integer quotient = m_value / divisor.m_value;
-		quotient.m_unsigned = m_unsigned == divisor.m_unsigned;
+		quotient.SetPositive(IsPositive() == divisor.IsPositive());
 		return quotient;
 	}
 	Integer Integer::operator%(const Integer &divisor) const {
 		Integer remainder = m_value % divisor.m_value;
-		remainder.m_unsigned = m_unsigned == divisor.m_unsigned;
+		remainder.SetPositive(IsPositive() == divisor.IsPositive());
 		return remainder;
 	}
 
@@ -109,7 +99,7 @@ namespace number {
 		return *this;
 	}
 	bool Integer::operator==(const Integer &other)const {
-		return m_unsigned == other.m_unsigned && m_value == other.m_value;
+		return IsPositive() == other.IsPositive() && m_value == other.m_value;
 	}
 	bool Integer::operator!=(const Integer &other) const {
 		return !(*this == other);

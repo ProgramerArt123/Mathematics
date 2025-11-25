@@ -1,8 +1,8 @@
-#include <cassert>
+﻿#include <cassert>
 #include "Dissection.h"
 
 #define APPROXIMATION_DEPTH 3
-#define APPROXIMATION_LENGTH 5
+#define APPROXIMATION_LENGTH 10
 
 #include "number/performance/natural/Algorithm.h"
 
@@ -18,42 +18,39 @@ namespace performance {
 				}
 				m_result = numerator - denominator;
 			}
-			number::Fraction Dissection::GetApproximation(const number::Integer &power, size_t decimalLength)const {
-				const number::Fraction &numerator = GetApproximation(m_base.Numerator(), power);
-				number::Fraction denominator(0);
-				if (!m_base.IsInteger()) {
-					denominator = GetApproximation(m_base.Denominator(), power);
+			number::Fraction Dissection::GetApproximation(const number::Natural &power, size_t decimalLength)const {
+				if (power.EqualPositiveOne()) {
+					return number::Fraction(0);
 				}
-				return number::Fraction(numerator - denominator).GetReciprocal();
+				if (m_base.IsInteger()) {
+					return GetApproximationInverse‌(power, m_base.ReductionInteger(), 0);
+				}
+				number::Fraction changeBaseNumerator = Dissection(number::Fraction(power), number::Fraction(2), decimalLength).GetResult();
+				number::Fraction changeBaseDenominator = Dissection(m_base, number::Fraction(2), decimalLength).GetResult();
+				return changeBaseNumerator / changeBaseDenominator;
 			}
-			number::Fraction Dissection::GetApproximation(const number::Integer &power, const number::Integer &base, bool point, int approximation) const {
-				assert(number::Integer(0) < base && number::Integer(1) != base);
-				performance::natural::Algorithm::CorrectExponent correct(1, power.Value(), point ? APPROXIMATION_LENGTH : 0);
-				while (correct.Power() < base.Value()) {
-					correct.Increase();
-				}
-				const number::Natural &correctPower = correct.Power();
-				const std::pair<number::Natural, number::Natural> &logarithm = correctPower.Logarithm(base.Value());
+			number::Fraction Dissection::GetApproximationValue(const number::Natural &power, const number::Natural &base, int approximation) const {
+				assert(number::Natural(0) < base && number::Natural(1) != base);
+				assert(power >= base);
+				const std::pair<number::Natural, number::Natural> &logarithm = power.Logarithm(base);
+				number::Fraction logarithmApproximation = number::Fraction(logarithm.first);
 				if (approximation < APPROXIMATION_DEPTH) {
-					number::Fraction remainder;
-					if (!point) {
-						remainder = number::Fraction(correctPower.CalcPower(APPROXIMATION_LENGTH), correctPower - logarithm.second);
+					number::Fraction remainder = number::Fraction(power, power - logarithm.second);
+					number::Fraction exponentRemainder = remainder.Power(APPROXIMATION_LENGTH);
+					if (!exponentRemainder.ReductionInteger().EqualPositiveOne()) {
+						number::Fraction remainderLogarithm = GetApproximationInverse‌(exponentRemainder.ReductionInteger(), base, approximation + 1);
+						logarithmApproximation += (remainderLogarithm / APPROXIMATION_LENGTH);
 					}
-					else {
-						remainder = number::Fraction(correct.PointPower(), correctPower - logarithm.second);
-					}
-					return number::Fraction(logarithm.first + GetApproximation(remainder.ReductionInteger(), base, true, approximation + 1), correct.Exponent());
 				}
-				else {
-					return number::Fraction(logarithm.first, correct.Exponent());
-				}
+				return logarithmApproximation;
 			}
-			number::Fraction Dissection::GetApproximation(const number::Integer &power, const number::Integer &base)const {
+
+			number::Fraction Dissection::GetApproximationInverse‌(const number::Natural &power, const number::Natural &base, int approximation)const {
 				if (power >= base) {
-					return GetApproximation(power, base, false, 0);
+					return GetApproximationValue(power, base, approximation);
 				}
 				else {
-					return GetApproximation(base, power, false, 0).GetReciprocal();
+					return GetApproximationValue(base, power, approximation).GetReciprocal();
 				}
 			}
 		}

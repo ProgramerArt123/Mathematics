@@ -72,18 +72,18 @@ namespace performance {
 
 
 
-		Algorithm::CorrectExponent::CorrectExponent(size_t exponent, const number::Natural &base, size_t point) :
-			m_begin_exponent(exponent), m_exponent(exponent), m_base(base), m_point(point) {
-			m_point_power = m_base.Power(exponent) / number::Natural(1).CalcPower(m_point*(exponent - 1));
+		Algorithm::CorrectExponent::CorrectExponent(size_t exponent, const number::Natural &base) :
+			m_begin_exponent(exponent), m_exponent(exponent), m_base(base) {
+			m_power = m_base.Power(exponent);
 		}
 		Algorithm::CorrectExponent &Algorithm::CorrectExponent::Increase() {
-			m_point_power = (m_point_power * m_base) / number::Natural(1).CalcPower(m_point);
+			m_power *= m_base;
 			m_exponent++;
 			m_increase = true;
 			return *this;
 		}
 		Algorithm::CorrectExponent &Algorithm::CorrectExponent::Decrease() {
-			m_point_power = (m_point_power / m_base) * number::Natural(1).CalcPower(m_point);
+			m_power /= m_base;
 			m_exponent--;
 			m_increase = false;
 			return *this;
@@ -95,10 +95,7 @@ namespace performance {
 			return m_increase;
 		}
 		const number::Natural Algorithm::CorrectExponent::Power() const {
-			return PointPower() / number::Natural(1).CalcPower(m_point);
-		}
-		const number::Natural &Algorithm::CorrectExponent::PointPower() const {
-			return m_point_power;
+			return m_power;
 		}
 	}
 }

@@ -11,7 +11,8 @@ namespace performance {
 		namespace logarithm {
 			ChangeBase::ChangeBase(const number::Natural &power, const number::Natural &base)
 				: Interface(power, base) {
-				assert(!base.EqualPositiveOne());
+				assert(!base.EqualZero() && !base.EqualPositiveOne());
+				assert(!power.EqualZero());
 				const std::string& powerChange = power.GetString(CHANGE_TO_RADIX);
 				size_t powerExponent = powerChange.size() - 1;
 				const std::string& baseChange = base.GetString(CHANGE_TO_RADIX);

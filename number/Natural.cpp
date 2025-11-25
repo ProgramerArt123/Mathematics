@@ -51,7 +51,7 @@ namespace number {
 	bool Natural::EqualNegativeOne() const {
 		return false;
 	}
-	void Natural::SetUnSigned(bool isUnSigned) {
+	void Natural::SetPositive(bool isPositive) {
 		throw "undefined";
 	}
 	bool Natural::IsPositive() const {

@@ -3,14 +3,14 @@
 
 #include <optional>
 
-#include "Number.h"
+#include "Real.h"
 #include "Integer.h"
 #include "Fraction.h"
 
 namespace number {
 	class Complex;
 
-	class Root : public Number {
+	class Root : public Real{
 	public:
 		Root();
 		Root(const Integer &power, const Integer &exponent, bool isUnSigned = true);
@@ -22,9 +22,7 @@ namespace number {
 		bool EqualZero() const override;
 		bool EqualPositiveOne() const override;
 		bool EqualNegativeOne() const override;
-		void SetUnSigned(bool isUnSigned) override;
-		bool IsPositive() const override;
-		void Opposite() override;
+
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
 
@@ -40,16 +38,14 @@ namespace number {
 		bool IsFraction() const;
 		bool IsImaginary() const;
 
-		bool EqualPower0(const Root &right) const;
-		bool EqualPower1(const Root &right) const;
 		Root AddEqual(const number::Root &right) const;
 		Root MulEqual(const number::Root &right, bool isLeftMul, bool isRightMul) const;
 
 		friend Root Power(const Fraction &base, const Fraction &exponent);
 		static std::optional<Root> CheckReduce(const Fraction &power, const Fraction &exponent);
-	private:
 
-		bool m_unsigned = true;
+		static void ExponentDomainVerification(const Fraction& exponent);
+	private:
 
 		Fraction m_power;
 		Fraction m_exponent;
@@ -64,6 +60,8 @@ namespace number {
 
 		bool ValueEqualPositiveOne() const;
 		bool ValueEqualNegativeOne() const;
+
+		void DomainVerification() const;
 
 		std::pair<Natural, Natural> CalcuCoefficient(const Natural &maxRoot, const Natural &power) const;
 	};

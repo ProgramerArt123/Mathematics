@@ -13,10 +13,6 @@ namespace number {
 		Imaginary(const Fraction &value);
 		const std::string GetString(uint8_t radix = 10) const override;
 		bool EqualZero() const override;
-		bool EqualPositiveOne() const override;
-		bool EqualNegativeOne() const override;
-		void SetUnSigned(bool isUnSigned) override;
-		bool IsPositive() const override;
 		void Opposite() override;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;

@@ -13,11 +13,11 @@ namespace performance {
 			}
 
 			std::pair<number::Fraction, number::Fraction> Dissection::GetApproximation(const number::Integer &base, size_t decimalLength)const {
-				number::Natural power = base.Value().Power(m_exponent.Denominator().Value());
-				for (number::Natural index(1); index <= m_exponent.Numerator().Value(); ++index) {
+				number::Natural power = base.Value().Power(m_exponent.Denominator());
+				for (number::Natural index(1); index <= m_exponent.Numerator(); ++index) {
 					power = power.CalcPower(decimalLength + 1);
 				}
-				const std::pair<number::Natural, number::Natural> &result = power.Root(m_exponent.Numerator().Value());
+				const std::pair<number::Natural, number::Natural> &result = power.Root(m_exponent.Numerator());
 				number::Fraction root = number::Fraction(result.first) / number::Fraction(number::Natural(1).CalcPower(decimalLength + 1));
 				const number::Fraction remainder(result.second, result.first);
 				if (m_exponent.IsPositive()) {

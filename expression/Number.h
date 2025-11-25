@@ -6,7 +6,7 @@
 namespace expression {
 	class Number : public Atom {
 	public:
-		Number(OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD): Atom(flag) {
+		Number(OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_NONE): Atom(flag) {
 		}
 		Number(const Number &prototype);
 

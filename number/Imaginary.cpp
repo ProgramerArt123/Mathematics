@@ -24,18 +24,7 @@ namespace number {
 	bool Imaginary::EqualZero() const {
 		return m_value.EqualZero();
 	}
-	bool Imaginary::EqualPositiveOne() const {
-		return m_value.EqualPositiveOne();
-	}
-	bool Imaginary::EqualNegativeOne() const {
-		return m_value.EqualNegativeOne();
-	}
-	void Imaginary::SetUnSigned(bool isUnSigned) {
-		m_value.SetUnSigned(isUnSigned);
-	}
-	bool Imaginary::IsPositive() const {
-		return m_value.IsPositive();
-	}
+	
 	void Imaginary::Opposite() {
 		m_value.Opposite();
 	}

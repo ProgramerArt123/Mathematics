@@ -1,4 +1,4 @@
-#ifndef __PERFORMANCE_FRACTION_LOGARITHM_DISSECTION_H__
+﻿#ifndef __PERFORMANCE_FRACTION_LOGARITHM_DISSECTION_H__
 #define __PERFORMANCE_FRACTION_LOGARITHM_DISSECTION_H__
 
 #include "Interface.h"
@@ -10,9 +10,9 @@ namespace performance {
 			public:
 				Dissection(const number::Fraction &power, const number::Fraction &base, size_t decimalLength);
 			private:
-				number::Fraction GetApproximation(const number::Integer &power, size_t decimalLength)const;
-				number::Fraction GetApproximation(const number::Integer &power, const number::Integer &base, bool point, int approximation)const;
-				number::Fraction GetApproximation(const number::Integer &power, const number::Integer &base)const;
+				number::Fraction GetApproximation(const number::Natural &power, size_t decimalLength)const;
+				number::Fraction GetApproximationValue(const number::Natural &power, const number::Natural &base, int approximation)const;
+				number::Fraction GetApproximationInverse‌(const number::Natural &power, const number::Natural &base, int approximation)const;
 			};
 		}
 	}

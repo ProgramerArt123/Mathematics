@@ -11,18 +11,24 @@ namespace expression {
 	public:
 		ClosureNumber(const expression::ClosureNumber &prototype);
 		ClosureNumber(const expression::ClosureNumber &prototype, OPERATOR_TYPE_FLAG flag);
-		ClosureNumber(const number::Integer &value, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_ADD);
+		ClosureNumber(const number::Integer &value, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_NONE);
 		
-		bool IsUnSigned() const override;
+		const std::string GetString(uint8_t radix = LITERAL_DEFAULT_RADIX) const override;
 
-		const std::string GetString(size_t pos = 0, uint8_t radix = LITERAL_DEFAULT_RADIX) const override;
-
-		bool IsEqual(const Node &other, bool ignoreOperator = false) const override;
+		bool IsEqual(const Node &other, bool ignoreSigned = false, bool ignoreOperator = false) const override;
 		bool EqualZero() const override;
 		bool EqualPositiveOne() const override;
 		bool EqualNegativeOne() const override;
+		bool IsDisplaySigned() const override;
+
+		bool CollectAddSubSigned() override;
+		bool CollectMulDivSigned() override;
 
 		void Opposite() override;
+
+		void SetOperator(OPERATOR_TYPE_FLAG flag) override;
+
+		std::optional<bool> Compare(const ClosureNumber &other) const;
 
 		const number::Integer &Value() const;
 		
@@ -37,7 +43,8 @@ namespace expression {
 		ClosureNumber &operator-=(const ClosureNumber &subtrahend);
 		ClosureNumber &operator*=(const ClosureNumber &multiplier);
 		ClosureNumber &operator/=(const ClosureNumber &divisor);
-						
+		
+
 	private:
 		number::Integer m_value;
 

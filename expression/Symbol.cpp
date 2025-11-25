@@ -1,3 +1,4 @@
+#include <sstream>
 #include "Symbol.h"
 namespace expression {
 	Symbol::Symbol(const expression::Symbol &prototype) {
@@ -8,14 +9,37 @@ namespace expression {
 		SetOperator(flag);
 	}
 	Symbol::Symbol(const std::string &name, bool isUnSigned, OPERATOR_TYPE_FLAG flag):
-		Atom(flag), m_name(name), m_unsigned(isUnSigned){
-
+		Atom(flag), m_name(name){
+		SetUnSigned(isUnSigned);
 	}
-	bool Symbol::IsUnSigned() const {
-		return m_unsigned;
+	const std::string Symbol::GetString(uint8_t radix) const {
+		std::stringstream ss;
+		if (IsDisplaySigned()) {
+			ss << "-";
+		}
+		ss << Name();
+		if (m_substitution) {
+			ss << "{" << *m_substitution << "}";
+		}
+		return ss.str();
 	}
-	const std::string Symbol::GetString(size_t pos, uint8_t radix) const {
-		return m_unsigned ? Name() : "-" + Name();
+	bool Symbol::IsEqual(const Node& other, bool ignoreSigned, bool ignoreOperator) const {
+		if (!Node::IsEqual(other, ignoreSigned, ignoreOperator)) {
+			return false;
+		}
+		const Symbol& otherSymbol = dynamic_cast<const Symbol&>(other);
+		return Name() == otherSymbol.Name();
+	}
+	Symbol Symbol::operator-() const {
+		Symbol negative(*this);
+		negative.Opposite();
+		return negative;
+	}
+	std::optional<bool> Symbol::Compare(const Symbol &other) const {
+		if (Name() == other.Name()) {
+			return std::nullopt;
+		}
+		return Name() < other.Name();
 	}
 	const std::string &Symbol::Name() const {
 		return m_name;
@@ -24,6 +48,7 @@ namespace expression {
 		Atom::operator=(right);
 		m_name = right.m_name;
 		m_unsigned = right.m_unsigned;
+		m_substitution = right.m_substitution;
 		return *this;
 	}
 	bool Symbol::operator==(const Symbol &other) const {
@@ -40,7 +65,24 @@ namespace expression {
 	bool Symbol::EqualNegativeOne() const {
 		return false;
 	}
-	void Symbol::Opposite() {
-		m_unsigned = !m_unsigned;
+	bool Symbol::ExtendAddSub(Expression<OPERATOR_TYPE_ADD_SUB> &exp) {
+		return false;
 	}
+	bool Symbol::ExtendMulDiv(Expression<OPERATOR_TYPE_MUL_DIV> &exp) {
+		return false;
+	}
+	bool Symbol::ExtendPowerRoot(Expression<OPERATOR_TYPE_POWER_ROOT> &exp) {
+		return false;
+	}
+	bool Symbol::ExtendLogarithm(Expression<OPERATOR_TYPE_LOGARITHM>& exp) {
+		return false;
+	}
+	std::shared_ptr<Node> Symbol::GetSubstitution() const {
+		return m_substitution;
+	}
+	SymbolManager &SymbolManager::GetInstance() {
+		static SymbolManager instance;
+		return instance;
+	}
+
 }

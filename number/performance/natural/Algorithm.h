@@ -14,7 +14,7 @@ namespace performance {
 
 			class CorrectExponent {
 			public:
-				CorrectExponent(size_t exponent, const number::Natural &base, size_t point = 0);
+				CorrectExponent(size_t exponent, const number::Natural &base);
 				CorrectExponent &Increase();
 				CorrectExponent &Decrease();
 				size_t Exponent() const;
@@ -24,9 +24,8 @@ namespace performance {
 			private:
 				const size_t m_begin_exponent = 0;
 				size_t m_exponent = 0;
-				number::Natural m_point_power;
+				number::Natural m_power;
 				const number::Natural &m_base;
-				const size_t m_point = 0;
 				bool m_increase = false;
 			};
 

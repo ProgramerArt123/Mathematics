@@ -15,9 +15,7 @@ namespace number {
 		bool EqualZero() const override;
 		bool EqualPositiveOne() const override;
 		bool EqualNegativeOne() const override;
-		void SetUnSigned(bool isUnSigned)override;
-		bool IsPositive() const override;
-		void Opposite() override;
+
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
 
@@ -45,8 +43,6 @@ namespace number {
 	private:
 		Integer PositiveAdd(const Integer &addition) const;
 		Integer PositiveSub(const Integer &subtrahend) const;
-
-		bool m_unsigned = true;
 
 		Natural m_value;
 	};

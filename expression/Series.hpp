@@ -34,22 +34,12 @@ namespace expression {
 			}
 			return approximation;
 		}
-		SeriesValue GetMonomial(OPERATOR_TYPE_FLAG op = OPERATOR_TYPE_FLAG_ADD) const {
-			SeriesValue monomial;
-			for (size_t index = 0; index < m_polynomial.size(); index++) {
-				if (m_updates.find(index) == m_updates.end()) {
-					monomial = GetMonomial(monomial, m_polynomial[index], op);
-				}
-				else {
-					monomial = GetMonomial(monomial, m_updates.at(index), op);
-				}
-			}
-			return monomial;
-		}
-		const std::string OutPutString() const override {
+		const std::string OutPutString(size_t pos) const override {
 			return GetMonomial().OutPutString();
 		}
-
+		SeriesValue GetMonomialAdd() const {
+			return GetMonomial(OPERATOR_TYPE_FLAG_ADD);
+		}
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const {
 			return GetMonomial().GetDecimal(radix, decimalLength, round);
@@ -75,6 +65,19 @@ namespace expression {
 		std::map<size_t, MonomialValue> m_updates;
 		std::function<MonomialValue(const uint64_t index)> m_monomial;
 		size_t m_max_length = SIZE_MAX;
+
+		SeriesValue GetMonomial(OPERATOR_TYPE_FLAG op = OPERATOR_TYPE_FLAG_ADD) const {
+			SeriesValue monomial;
+			for (size_t index = 0; index < m_polynomial.size(); index++) {
+				if (m_updates.find(index) == m_updates.end()) {
+					monomial = GetMonomial(monomial, m_polynomial[index], op);
+				}
+				else {
+					monomial = GetMonomial(monomial, m_updates.at(index), op);
+				}
+			}
+			return monomial;
+		}
 
 		static const SeriesValue GetMonomial(const SeriesValue &monomial, const SeriesValue &append, OPERATOR_TYPE_FLAG op = OPERATOR_TYPE_FLAG_ADD) {
 			switch (op)

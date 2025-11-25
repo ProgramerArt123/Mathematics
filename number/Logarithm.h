@@ -2,28 +2,28 @@
 #define __NUMBER_LOGARITHM_H__
 
 #include <optional>
+#include <exception>
 
-#include "Number.h"
+#include "Real.h"
 #include "Integer.h"
 #include "Fraction.h"
 
 namespace number {
 	class Complex;
 
-	class Logarithm : public Number {
+	class Logarithm : public Real {
 	public:
 		Logarithm();
-		Logarithm(const Integer &power, const Integer &base);
-		Logarithm(const Integer &power, const Fraction &base);
-		Logarithm(const Fraction &power, const Integer &base);
-		Logarithm(const Fraction &power, const Fraction &base);
+		Logarithm(const Integer &power, const Integer &base, bool isUnSigned = true);
+		Logarithm(const Integer &power, const Fraction &base, bool isUnSigned = true);
+		Logarithm(const Fraction &power, const Integer &base, bool isUnSigned = true);
+		Logarithm(const Fraction &power, const Fraction &base, bool isUnSigned = true);
 
 		const std::string GetString(uint8_t radix = 10) const override;
 		bool EqualZero() const override;
 		bool EqualPositiveOne() const override;
 		bool EqualNegativeOne() const override;
-		void SetUnSigned(bool isUnSigned) override;
-		bool IsPositive() const override;
+
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
 
@@ -41,6 +41,11 @@ namespace number {
 		void Opposite();
 
 		static std::optional<Logarithm> CheckReduce(const Fraction &power, const Fraction &base);
+
+		static void PowerDomainVerification(const Fraction& power);
+
+		static void BaseDomainVerification(const Fraction& base);
+
 	private:
 
 		Fraction m_power;
@@ -54,6 +59,8 @@ namespace number {
 		void ReduceBase();
 		void ReducePower();
 		void ReduceCoefficient();
+
+		void DomainVerification() const;
 
 		std::optional<Fraction> ReduceCoefficient(const Fraction &power, const Fraction &base) const;
 	};

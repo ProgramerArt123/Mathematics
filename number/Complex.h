@@ -27,10 +27,6 @@ namespace number {
 
 		const std::string GetString(uint8_t radix = 10) const override;
 		bool EqualZero() const override;
-		bool EqualPositiveOne() const override;
-		bool EqualNegativeOne() const override;
-		void SetUnSigned(bool isUnSigned)override;
-		bool IsPositive() const override;
 		void Opposite() override;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
@@ -53,7 +49,7 @@ namespace number {
 		Complex &operator*=(const Complex &multiplier);
 		Complex &operator/=(const Complex &divisor);
 
-		Complex Power(const Integer &exponent);
+		Complex Power(const Natural &exponent);
 
 		friend Complex operator+(const Integer &number, const Complex &addition);
 		friend Complex operator-(const Integer &number, const Complex &subtrahend);
@@ -85,7 +81,7 @@ namespace number {
 		friend Complex operator*(const Complex &number, const Imaginary &multiplier);
 		friend Complex operator/(const Complex &number, const Imaginary &divisor);
 
-		static Complex Power(const Imaginary &number, const Integer &exponent);
+		static Complex Power(const Imaginary &number, const Natural &exponent);
 
 		friend Complex operator+(const Integer &number, const Imaginary &addition);
 		friend Complex operator-(const Integer &number, const Imaginary &subtrahend);

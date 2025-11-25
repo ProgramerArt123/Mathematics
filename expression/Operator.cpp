@@ -1,11 +1,20 @@
 #include <cassert>
 
+#include "number/Fraction.h"
+#include "number/Logarithm.h"
+#include "number/Root.h"
+
 #include "Operator.h"
+
+
 namespace expression {
 
 	std::unique_ptr<OPERATOR_TYPE> OPERATOR_TYPE::OperatorFactory(OPERATOR_TYPE_FLAG flag) {
 		switch (flag)
 		{
+		case expression::OPERATOR_TYPE_FLAG_NONE:
+			return std::make_unique<OPERATOR_TYPE_NONE>();
+			break;
 		case expression::OPERATOR_TYPE_FLAG_ADD:
 			return std::make_unique<OPERATOR_TYPE_ADD>();
 			break;
@@ -33,24 +42,53 @@ namespace expression {
 		}
 	}
 
-	const OPERATOR_TYPE_LEVEL OPERATOR_TYPE_0::GetLevel() const {
-		return OPERATOR_TYPE_LEVEL_0;
+	const OPERATOR_TYPE_LEVEL OPERATOR_TYPE_NONE::GetLevel() const {
+		return OPERATOR_TYPE_LEVEL_NONE;
 	}
 
-	const OPERATOR_TYPE_LEVEL OPERATOR_TYPE_1::GetLevel() const{
-		return OPERATOR_TYPE_LEVEL_1;
+	const std::string OPERATOR_TYPE_NONE::OutPutString(size_t pos) const {
+		assert(0 == pos);
+		return "";
 	}
 
-	const OPERATOR_TYPE_LEVEL OPERATOR_TYPE_2::GetLevel() const {
-		return OPERATOR_TYPE_LEVEL_2;
-	}
-
-	const OPERATOR_TYPE_LEVEL OPERATOR_TYPE_3::GetLevel() const {
-		return OPERATOR_TYPE_LEVEL_3;
+	OPERATOR_TYPE_FLAG OPERATOR_TYPE_NONE::GetFlag() const {
+		return OPERATOR_TYPE_FLAG_NONE;
 	}
 	
-	const std::string OPERATOR_TYPE_ADD::OutPutString() const {
-		return m_position ? "+" : "";
+	std::unique_ptr<OPERATOR_TYPE> OPERATOR_TYPE_NONE::Superposition(const OPERATOR_TYPE& other) const {
+		return OperatorFactory(other.GetFlag());
+	}
+
+	const OPERATOR_TYPE_LEVEL OPERATOR_TYPE_ADD_SUB::GetLevel() const {
+		return OPERATOR_TYPE_LEVEL_ADD_SUB;
+	}
+
+	const OPERATOR_TYPE_LEVEL OPERATOR_TYPE_MUL_DIV::GetLevel() const{
+		return OPERATOR_TYPE_LEVEL_MUL_DIV;
+	}
+
+	void OPERATOR_TYPE_MUL_DIV::DomainVerification(OPERATOR_TYPE_FLAG flag, const number::Integer& domain) const {
+		if (OPERATOR_TYPE_FLAG_DIV == flag) {
+			number::Fraction::DenominatorDomainVerification(domain.Value());
+		}
+	}
+
+	const OPERATOR_TYPE_LEVEL OPERATOR_TYPE_POWER_ROOT::GetLevel() const {
+		return OPERATOR_TYPE_LEVEL_POWER_ROOT;
+	}
+
+	void OPERATOR_TYPE_POWER_ROOT::DomainVerification(OPERATOR_TYPE_FLAG flag, const number::Integer& domain) const {
+		if (OPERATOR_TYPE_FLAG_ROOT == flag) {
+			number::Root::ExponentDomainVerification(domain);
+		}
+	}
+
+	const OPERATOR_TYPE_LEVEL OPERATOR_TYPE_LOGARITHM::GetLevel() const {
+		return OPERATOR_TYPE_LEVEL_LOGARITHM;
+	}
+	
+	const std::string OPERATOR_TYPE_ADD::OutPutString(size_t pos) const {
+		return 0 < pos ? "+" : "";
 	}
 
 	OPERATOR_TYPE_FLAG OPERATOR_TYPE_ADD::GetFlag() const {
@@ -61,8 +99,7 @@ namespace expression {
 		return OperatorFactory(other.GetFlag());
 	}
 
-	const std::string OPERATOR_TYPE_SUB::OutPutString() const {
-		//assert(m_position);
+	const std::string OPERATOR_TYPE_SUB::OutPutString(size_t pos) const {
 		return "-";
 	}
 
@@ -79,9 +116,8 @@ namespace expression {
 		}
 	}
 	
-	const std::string OPERATOR_TYPE_MUL::OutPutString() const {
-		//assert(m_position);
-		return "*";
+	const std::string OPERATOR_TYPE_MUL::OutPutString(size_t pos) const {
+		return 0 < pos ? "*" : "";
 	}
 
 	OPERATOR_TYPE_FLAG OPERATOR_TYPE_MUL::GetFlag() const {
@@ -97,8 +133,7 @@ namespace expression {
 		}
 	}
 
-	const std::string OPERATOR_TYPE_DIV::OutPutString() const {
-		//assert(m_position);
+	const std::string OPERATOR_TYPE_DIV::OutPutString(size_t pos) const {
 		return "/";
 	}
 
@@ -114,9 +149,8 @@ namespace expression {
 		}
 	}
 
-
-	const std::string OPERATOR_TYPE_POWER::OutPutString() const {
-		//assert(m_position);
+	const std::string OPERATOR_TYPE_POWER::OutPutString(size_t pos) const {
+		//assert(pos);
 		return "^";
 	}
 
@@ -132,8 +166,8 @@ namespace expression {
 		}
 	}
 
-	const std::string OPERATOR_TYPE_ROOT::OutPutString() const {
-		//assert(m_position);
+	const std::string OPERATOR_TYPE_ROOT::OutPutString(size_t pos) const {
+		assert(pos);
 		return "@";
 	}
 
@@ -149,8 +183,8 @@ namespace expression {
 		}
 	}
 
-	const std::string OPERATOR_TYPE_LOGARITHM::OutPutString() const {
-		//assert(m_position);
+	const std::string OPERATOR_TYPE_LOGARITHM::OutPutString(size_t pos) const {
+		assert(pos);
 		return "#";
 	}
 
@@ -163,6 +197,17 @@ namespace expression {
 		}
 		else {
 			return OperatorFactory(expression::OPERATOR_TYPE_FLAG_POWER);
+		}
+	}
+	void OPERATOR_TYPE_LOGARITHM::DomainVerification(OPERATOR_TYPE_FLAG flag, const number::Integer& domain) const {
+		if (OPERATOR_TYPE_FLAG_NONE == flag) {
+			number::Logarithm::PowerDomainVerification(domain);
+		}
+		else if (OPERATOR_TYPE_FLAG_LOGARITHM == flag) {
+			number::Logarithm::PowerDomainVerification(domain);
+		}
+		else {
+			assert(0);
 		}
 	}
 }

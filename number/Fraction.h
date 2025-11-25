@@ -10,28 +10,24 @@ namespace number {
 	class Fraction : public Real {
 	public:
 		Fraction();
-		Fraction(const Integer &significant);
-		Fraction(const Integer &numerator, const Integer &denominator);
-		Fraction(const Integer &numerator, const Fraction &denominator);
-		Fraction(const Fraction &numerator, const Integer &denominator);
-		Fraction(const Fraction &numerator, const Fraction &denominator);
+		Fraction(const Integer &numerator, const Integer &denominator = 1, bool isUnSigned = true);
+		Fraction(const Integer &numerator, const Fraction &denominator, bool isUnSigned = true);
+		Fraction(const Fraction &numerator, const Integer &denominator, bool isUnSigned = true);
+		Fraction(const Fraction &numerator, const Fraction &denominator, bool isUnSigned = true);
 
 		Fraction Point(size_t point) const;
 		const std::string GetString(uint8_t radix = 10) const override;
 		bool EqualZero() const override;
 		bool EqualPositiveOne() const override;
 		bool EqualNegativeOne() const override;
-		void SetUnSigned(bool isUnSigned) override;
-		bool IsPositive() const override;
-		void Opposite() override;
 		const std::string GetDecimal(uint8_t radix, size_t decimalLength,
 			std::function<bool(char)> round = [](char last) {return false; }) const override;
 
-		const Integer &Numerator() const;
-		const Integer &ReductionNumerator() const;
-		const Integer &Denominator() const;
-		const Integer &ReductionDenominator() const;
-		const Integer &ReductionInteger() const;
+		const Natural &Numerator() const;
+		const Natural &ReductionNumerator() const;
+		const Natural &Denominator() const;
+		const Natural &ReductionDenominator() const;
+		const Natural &ReductionInteger() const;
 
 		Fraction GetAbs() const;
 		Fraction GetReciprocal() const;
@@ -74,17 +70,22 @@ namespace number {
 
 		static Fraction Power(const number::Integer &base, const number::Integer &exponent);
 		static std::optional<Fraction> CheckReduce(const Integer &numerator, const Integer &denominator);
+
+		static void DenominatorDomainVerification(const Natural &denominator);
 	private:
 
-		number::Integer m_numerator = 0;
-		number::Integer m_denominator = 1;
+		void SetPositiveUnSigned(bool isUnSigned, bool isNumeratorPositive, bool isDenominatorPositive);
 
-		number::Integer m_reduction_numerator = 0;
-		number::Integer m_reduction_denominator = 1;
-		number::Integer m_reduction_integer = 0;
+		number::Natural m_numerator = 0;
+		number::Natural m_denominator = 1;
+
+		number::Natural m_reduction_numerator = 0;
+		number::Natural m_reduction_denominator = 1;
+		number::Natural m_reduction_integer = 0;
 
 		void Reduce();
 
+		void DomainVerification() const;
 	};
 }
 

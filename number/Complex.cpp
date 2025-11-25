@@ -56,7 +56,7 @@ namespace number {
 		else if (m_image.EqualZero()) {
 			return m_real.GetString(radix);
 		}
-		else if (m_image.IsPositive()) {
+		else if (m_image.Value().IsPositive()) {
 			return m_real.GetString(radix) + "+" + m_image.GetString(radix);
 		}
 		else {
@@ -67,23 +67,12 @@ namespace number {
 	bool Complex::EqualZero() const {
 		return m_real.EqualZero() && m_image.EqualZero();
 	}
-	bool Complex::EqualPositiveOne() const {
-		return m_real.EqualPositiveOne() && m_image.EqualZero();
-	}
-	bool Complex::EqualNegativeOne() const {
-		return m_real.EqualNegativeOne() && m_image.EqualZero();
-	}
-	void Complex::SetUnSigned(bool isUnSigned) {
-		m_real.SetUnSigned(isUnSigned);
-		m_image.SetUnSigned(isUnSigned);
-	}
-	bool Complex::IsPositive() const {
-		return m_real.IsPositive() && m_image.IsPositive();
-	}
+	
 	void Complex::Opposite() {
 		m_real.Opposite();
 		m_image.Opposite();
 	}
+
 	const std::string Complex::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
 		if (m_real.EqualZero() && m_image.EqualZero()) {
@@ -95,7 +84,7 @@ namespace number {
 		else if (m_image.EqualZero()) {
 			return m_real.GetDecimal(radix, decimalLength, round);
 		}
-		else if (m_image.IsPositive()) {
+		else if (m_image.Value().IsPositive()) {
 			return m_real.GetDecimal(radix, decimalLength, round) +
 				"+" + m_image.GetDecimal(radix, decimalLength, round);
 		}
@@ -236,18 +225,18 @@ namespace number {
 		return number / Complex(Integer(0), divisor);
 	}
 
-	Complex Complex::Power(const Integer &exponent) {
+	Complex Complex::Power(const Natural &exponent) {
 		Complex power(0, 0);
-		for (Natural index(0); index <= exponent.Value(); ++index) {
-			power += Integer(exponent.Value().Composition(index)) *
+		for (Natural index(0); index <= exponent; ++index) {
+			power += Integer(exponent.Composition(index)) *
 				m_real.Power(exponent - index) * Complex::Power(m_image, index);
 		}
 		return power;
 	}
 
-	Complex Complex::Power(const Imaginary &number, const Integer &exponent) {
+	Complex Complex::Power(const Imaginary &number, const Natural &exponent) {
 		const Fraction &fraction = number.Value().Power(exponent);
-		const Natural &mod = exponent.Value() % Natural(4);
+		const Natural &mod = exponent % Natural(4);
 		if (mod.EqualZero()) {
 			return Complex(fraction, 0);
 		}

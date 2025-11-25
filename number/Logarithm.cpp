@@ -10,36 +10,36 @@
 namespace number {
 	Logarithm::Logarithm():m_power(1), m_base(0),
 		m_reduction_power(m_power), m_reduction_base(m_base) {
-		assert(Fraction(0) < m_base && 1 != m_base &&
-			Integer(0) < m_power.Numerator() && Integer(0) < m_power.Denominator());
+		DomainVerification();
+		SetPositive(true);
 		Reduce();
 	}
-	Logarithm::Logarithm(const Integer &power, const Integer &base) :
+	Logarithm::Logarithm(const Integer &power, const Integer &base, bool isUnSigned) :
 		m_power(power), m_base(base),
 		m_reduction_power(m_power), m_reduction_base(m_base) {
-		assert(Fraction(0) < m_base && 1 != m_base &&
-			Integer(0) < m_power.Numerator() && Integer(0) < m_power.Denominator());
+		DomainVerification();
+		SetPositive(isUnSigned);
 		Reduce();
 	}
-	Logarithm::Logarithm(const Integer &power, const Fraction &base) :
+	Logarithm::Logarithm(const Integer &power, const Fraction &base, bool isUnSigned) :
 		m_power(power), m_base(base),
 		m_reduction_power(m_power), m_reduction_base(m_base) {
-		assert(Fraction(0) < m_base && 1 != m_base &&
-			Integer(0) < m_power.Numerator() && Integer(0) < m_power.Denominator());
+		DomainVerification();
+		SetPositive(isUnSigned);
 		Reduce();
 	}
-	Logarithm::Logarithm(const Fraction &power, const Integer &base) :
+	Logarithm::Logarithm(const Fraction &power, const Integer &base, bool isUnSigned) :
 		m_power(power), m_base(base),
 		m_reduction_power(m_power), m_reduction_base(m_base) {
-		assert(Fraction(0) < m_base && 1 != m_base &&
-			Integer(0) < m_power.Numerator() && Integer(0) < m_power.Denominator());
+		assert(m_base.IsPositive() && !m_base.EqualPositiveOne() && m_power.IsPositive());
+		SetPositive(isUnSigned);
 		Reduce();
 	}
-	Logarithm::Logarithm(const Fraction &power, const Fraction &base) :
+	Logarithm::Logarithm(const Fraction &power, const Fraction &base, bool isUnSigned) :
 		m_power(power), m_base(base),
 		m_reduction_power(m_power), m_reduction_base(m_base) {
-		assert(Fraction(0) < m_base && 1 != m_base &&
-			Integer(0) < m_power.Numerator() && Integer(0) < m_power.Denominator());
+		DomainVerification();
+		SetPositive(isUnSigned);
 		Reduce();
 	}
 	const std::string Logarithm::GetString(uint8_t radix) const {
@@ -59,14 +59,7 @@ namespace number {
 	bool Logarithm::EqualNegativeOne() const {
 		return IsPositive() && m_reduction_coefficient.EqualPositiveOne() && m_reduction_power == m_base;
 	}
-	void Logarithm::SetUnSigned(bool isUnSigned) {
-		m_power.SetUnSigned(isUnSigned);
-		m_base.SetUnSigned(true);
-		Reduce();
-	}
-	bool Logarithm::IsPositive() const {
-		return m_power.IsPositive() == m_base.IsPositive();
-	}
+	
 	const std::string Logarithm::GetDecimal(uint8_t radix, size_t decimalLength,
 		std::function<bool(char)> round) const {
 		const number::Fraction &fraction =
@@ -109,25 +102,25 @@ namespace number {
 		Natural exponent(2);
 		while (true) {
 			const Natural &power = Natural(2).Power(exponent);
-			if (power >= m_base.Numerator().Value()) {
+			if (power >= m_base.Numerator()) {
 				break;
 			}
-			if (power >= m_base.Denominator().Value()) {
+			if (power >= m_base.Denominator()) {
 				break;
 			}
-			if (power >= m_power.Numerator().Value()) {
+			if (power >= m_power.Numerator()) {
 				break;
 			}
-			if (power >= m_power.Denominator().Value()) {
+			if (power >= m_power.Denominator()) {
 				break;
 			}
 			++exponent;
 		}
 		for (; exponent >= 2; --exponent) {
-			const std::pair<Natural, Natural> &baseNumerator = m_base.Numerator().Value().Root(exponent);
-			const std::pair<Natural, Natural> &baseDenominator = m_base.Denominator().Value().Root(exponent);
-			const std::pair<Natural, Natural> &powerNumerator = m_power.Numerator().Value().Root(exponent);
-			const std::pair<Natural, Natural> &powerDenominator = m_power.Denominator().Value().Root(exponent);
+			const std::pair<Natural, Natural> &baseNumerator = m_base.Numerator().Root(exponent);
+			const std::pair<Natural, Natural> &baseDenominator = m_base.Denominator().Root(exponent);
+			const std::pair<Natural, Natural> &powerNumerator = m_power.Numerator().Root(exponent);
+			const std::pair<Natural, Natural> &powerDenominator = m_power.Denominator().Root(exponent);
 			if (baseNumerator.second.EqualZero() && baseDenominator.second.EqualZero() &&
 				powerNumerator.second.EqualZero() && powerDenominator.second.EqualZero()) {
 				m_reduction_base = Fraction(baseNumerator.first, baseDenominator.first);
@@ -140,18 +133,18 @@ namespace number {
 		Natural exponent(2);
 		while (true) {
 			const Natural &power = Natural(2).Power(exponent);
-			if (power >= m_reduction_power.Numerator().Value()) {
+			if (power >= m_reduction_power.Numerator()) {
 				break;
 			}
-			if (power >= m_reduction_power.Denominator().Value()) {
+			if (power >= m_reduction_power.Denominator()) {
 				break;
 			}
 			++exponent;
 		}
 
 		for (; exponent >= 2; --exponent) {
-			const std::pair<Natural, Natural> &powerNumerator = m_reduction_power.Numerator().Value().Root(exponent);
-			const std::pair<Natural, Natural> &powerDenominator = m_reduction_power.Denominator().Value().Root(exponent);
+			const std::pair<Natural, Natural> &powerNumerator = m_reduction_power.Numerator().Root(exponent);
+			const std::pair<Natural, Natural> &powerDenominator = m_reduction_power.Denominator().Root(exponent);
 			if (powerNumerator.second.EqualZero() && powerDenominator.second.EqualZero()) {
 				m_reduction_coefficient = Integer(exponent);
 				m_reduction_power = Fraction(powerNumerator.first, powerDenominator.first);
@@ -182,17 +175,17 @@ namespace number {
 
 	std::optional<Fraction> Logarithm::ReduceCoefficient(const Fraction& power, const Fraction& base) const {
 		std::pair<Natural, Natural> numerator(0, 0);
-		if (!base.Numerator().Value().EqualPositiveOne()) {
-			numerator = power.Numerator().Value().Logarithm(base.Numerator().Value());
+		if (!base.Numerator().EqualPositiveOne()) {
+			numerator = power.Numerator().Logarithm(base.Numerator());
 		}
 		std::pair<Natural, Natural> denominator(0, 0);
-		if (!base.Denominator().Value().EqualPositiveOne()) {
-			denominator = power.Denominator().Value().Logarithm(base.Denominator().Value());
+		if (!base.Denominator().EqualPositiveOne()) {
+			denominator = power.Denominator().Logarithm(base.Denominator());
 		}
 		if (numerator.second.EqualZero() && denominator.second.EqualZero())
 		{
 			if (numerator.first == denominator.first ||
-				(power.Denominator().Value().EqualPositiveOne() && base.Denominator().EqualPositiveOne()))
+				(power.Denominator().EqualPositiveOne() && base.Denominator().EqualPositiveOne()))
 			{
 				return Integer(numerator.first);
 			}
@@ -218,5 +211,22 @@ namespace number {
 		else {
 			return reduce;
 		}
+	}
+
+	void Logarithm::PowerDomainVerification(const Fraction& power) {
+		if (!(power.IsPositive())) {
+			throw std::exception("Domain Undefined : Logarithm Power Must Positive");
+		}
+	}
+
+	void Logarithm::BaseDomainVerification(const Fraction& base) {
+		if (!(base.IsPositive() && !base.EqualPositiveOne())) {
+			throw std::exception("Domain Undefined : Logarithm Base Must Positive, Can not 1");
+		}
+	}
+
+	void Logarithm::DomainVerification() const {
+		PowerDomainVerification(m_power);
+		BaseDomainVerification(m_base);
 	}
 }

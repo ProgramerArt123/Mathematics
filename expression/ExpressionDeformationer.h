@@ -19,15 +19,15 @@ namespace expression {
 			else {
 				Expression<OperatorType> reduction(expression);
 				if (reduction.ReduceFraction()) {
-					m_fraction = std::make_unique<ExpressionDeformationer<OPERATOR_TYPE_0>>(reduction.GetFractionReduction());
+					m_fraction = std::make_unique<ExpressionDeformationer<OPERATOR_TYPE_ADD_SUB>>(reduction.GetFractionReduction());
 				}
 				else if (reduction.ReduceRoot() || reduction.ReduceLogarithm()) {
-					m_open = std::make_unique<ExpressionDeformationer<OPERATOR_TYPE_1>>(reduction.GetOpenReduction());
+					m_open = std::make_unique<ExpressionDeformationer<OPERATOR_TYPE_MUL_DIV>>(reduction.GetOpenReduction());
 				}
 			}
 		}
 
-		const std::string OutPutString() const override {
+		const std::string OutPutString(size_t pos = 0) const override {
 			if (m_fraction) {
 				return m_fraction->OutPutString();
 			}
@@ -41,10 +41,7 @@ namespace expression {
 			else {
 				std::stringstream ss;
 				for (const auto &collect : m_collects) {
-					for (size_t i = 0; i < m_position; i++) {
-						ss << "\t";
-					}
-					ss << m_expression + "\t==>\t" + collect.updatePosition(m_position + 1).OutPutString() << std::endl;
+					ss << m_expression + "\t==>\t" + collect.OutPutString() << std::endl;
 				}
 				return ss.str();
 			}
@@ -78,7 +75,7 @@ namespace expression {
 			else
 			{
 				Expression<OperatorType> collect;
-				collect.m_nodes.push_back(child.m_nodes.front());
+				collect.m_nodes.push_back(child.Front());
 				m_collects.push_back(ExpressionDeformationer<OperatorType>(collect));
 			}
 			return *this;
@@ -89,9 +86,9 @@ namespace expression {
 
 		std::list<ExpressionDeformationer<OperatorType>> m_collects;
 
-		std::unique_ptr<ExpressionDeformationer<OPERATOR_TYPE_0>> m_fraction;
+		std::unique_ptr<ExpressionDeformationer<OPERATOR_TYPE_ADD_SUB>> m_fraction;
 
-		std::unique_ptr<ExpressionDeformationer<OPERATOR_TYPE_1>> m_open;
+		std::unique_ptr<ExpressionDeformationer<OPERATOR_TYPE_MUL_DIV>> m_open;
 	};
 
 }
