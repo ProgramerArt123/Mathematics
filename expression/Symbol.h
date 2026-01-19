@@ -48,6 +48,8 @@ namespace expression {
 			m_substitution = std::make_shared<SubstitutionType>(substitution);
 		}
 
+		void SetSubstitution();
+
 		std::shared_ptr<Node> GetSubstitution() const;
 
 	protected:
@@ -81,6 +83,7 @@ namespace expression {
 
 #define SYMBOL_A SYMBOL("a")
 #define SYMBOL_B SYMBOL("b")
+#define SYMBOL_C SYMBOL("c")
 
 #define SYMBOL_X SYMBOL("x")
 #define SYMBOL_Y SYMBOL("y")

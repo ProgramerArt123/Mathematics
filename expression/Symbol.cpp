@@ -77,6 +77,9 @@ namespace expression {
 	bool Symbol::ExtendLogarithm(Expression<OPERATOR_TYPE_LOGARITHM>& exp) {
 		return false;
 	}
+	void Symbol::SetSubstitution() {
+		m_substitution.reset();
+	}
 	std::shared_ptr<Node> Symbol::GetSubstitution() const {
 		return m_substitution;
 	}

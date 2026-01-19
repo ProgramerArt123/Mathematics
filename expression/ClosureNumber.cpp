@@ -46,7 +46,7 @@ namespace expression {
 		int signedCount = (IsUnSigned() ? 0 : 1) + (Value().IsPositive() ? 0 : 1);
 		return 1 == signedCount % 2;
 	}
-	bool ClosureNumber::CollectAddSubSigned() {
+	bool ClosureNumber::AddSubSigned() {
 		int signedCount = (IsUnSigned() ? 0 : 1) + (Value().IsPositive() ? 0 : 1);
 		if (signedCount) {
 			if (!Value().IsPositive()) {
@@ -62,7 +62,7 @@ namespace expression {
 		}
 		return false;
 	}
-	bool ClosureNumber::CollectMulDivSigned() {
+	bool ClosureNumber::MulDivSigned() {
 		int signedCount = (IsUnSigned() ? 0 : 1) + (Value().IsPositive() ? 0 : 1);
 		if (signedCount) {
 			if (!Value().IsPositive()) {

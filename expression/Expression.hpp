@@ -28,7 +28,13 @@
 
 namespace expression {
 
-	template<typename OperatorType>
+	class Polymorphism;
+	class PolymorphismAddSub;
+	class PolymorphismMulDiv;
+	class PolymorphismPowerRoot;
+	class PolymorphismLogarithm;
+
+	template<typename OperatorType = OPERATOR_TYPE_ADD_SUB>
 	class Expression : public Node {
 	public:
 		typedef std::variant<ClosureNumber, Symbol, Expression<OPERATOR_TYPE_ADD_SUB>, Expression<OPERATOR_TYPE_MUL_DIV>, Expression<OPERATOR_TYPE_POWER_ROOT>, Expression<OPERATOR_TYPE_LOGARITHM>> ExpressionNode;
@@ -157,12 +163,12 @@ namespace expression {
 			}
 			return Visit(Front())->EqualNegativeOne();
 		}
-		bool CollectSigned() override {
-			if (m_polymorphism->CollectSigned()) {
+		bool Signed() override {
+			if (m_polymorphism->Signed()) {
 				return true;
 			}
 			for (auto &node : m_nodes) {
-				if (Visit(node)->CollectSigned()) {
+				if (Visit(node)->Signed()) {
 					return true;
 				}
 			}
@@ -177,31 +183,28 @@ namespace expression {
 			if (collect.CollectChild()) {
 				return collect;
 			}
-			if (collect.CollectSigned()) {
+			if (collect.Signed()) {
 				return collect;
 			}
-			if (collect.CollectSort()) {
+			if (collect.Sort()) {
 				return collect;
 			}
-			if (collect.CollectFlat()) {
+			if (collect.Flat()) {
 				return collect;
 			}
-			if (collect.CollectClosure()) {
-				return collect;
-			}
-			if (collect.CollectFraction()) {
+			if (collect.Closure()) {
 				return collect;
 			}
 			if (collect.CollectCommon()) {
 				return collect;
 			}
-			if (collect.CollectSpecial()) {
+			if (collect.Special()) {
 				return collect;
 			}
-			if (collect.CollectCancel()) {
+			if (collect.Cancel()) {
 				return collect;
 			}
-			if (collect.CollectSymbol()) {
+			if (collect.Symbol()) {
 				return collect;
 			}
 			return std::nullopt;
@@ -232,7 +235,28 @@ namespace expression {
 			return false;
 		}
 
-		void CollectForward(std::list<ExpressionSome> &forwards) const {
+		std::shared_ptr<ExpressionSome> ForwardSingleChild(Expression<OperatorType>& current) const {
+			if (auto child = ForwardChild<OPERATOR_TYPE_ADD_SUB>(current)) {
+				return std::make_shared<ExpressionSome>(child.value());
+			}
+
+			if (auto child = ForwardChild<OPERATOR_TYPE_MUL_DIV>(current)) {
+				return std::make_shared<ExpressionSome>(child.value());
+			}
+
+			if (auto child = ForwardChild<OPERATOR_TYPE_POWER_ROOT>(current)) {
+				return std::make_shared<ExpressionSome>(child.value());
+			}
+
+			if (auto child = ForwardChild<OPERATOR_TYPE_LOGARITHM>(current)) {
+				return std::make_shared<ExpressionSome>(child.value());
+			}
+
+			return nullptr;
+		}
+
+		std::list<ExpressionSome> CollectForward() const {
+			std::list<ExpressionSome> forwards;
 			auto current = std::make_optional<Expression<OperatorType>>(*this);
 			while (true) {
 				auto forward = current.value().Collect();
@@ -241,43 +265,43 @@ namespace expression {
 					current = forward;
 				}
 				else {
-					if (current.value().ReduceFraction()) {
-						current.value().GetFractionReduction().CollectForward(forwards);
-					}
-					else if (current.value().ReduceRoot() || current.value().ReduceLogarithm()) {
-						current.value().GetOpenReduction().CollectForward(forwards);
+					auto reduction = current.value().Reduce();
+					if (reduction) {
+						const auto &reductionForwards = reduction->CollectForward();
+						forwards.insert(forwards.end(), reductionForwards.begin(), reductionForwards.end());
 					}
 					else if (current.value().IsSingle()) {
-						if (auto child = ForwardChild<OPERATOR_TYPE_ADD_SUB>(current.value())) {
-							forwards.push_back(child.value());
-						}
-
-						if (auto child = ForwardChild<OPERATOR_TYPE_MUL_DIV>(current.value())) {
-							forwards.push_back(child.value());
-						}
-
-						if (auto child = ForwardChild<OPERATOR_TYPE_POWER_ROOT>(current.value())) {
-							forwards.push_back(child.value());
-						}
-
-						if (auto child = ForwardChild<OPERATOR_TYPE_LOGARITHM>(current.value())) {
-							forwards.push_back(child.value());
+						auto child = ForwardSingleChild(current.value());
+						if (child) {
+							forwards.push_back(*child);
 						}
 					}
 					break;
 				}
 			}
+			return forwards;
 		}
 
 		std::list<ExpressionSome> CollectForwardOutput(std::ostream& out) const{
 			out << *this;
-			std::list<ExpressionSome> forwards;
-			CollectForward(forwards);
-			for (auto &forward : forwards) {
+			const auto &forwards = CollectForward();
+			for (const auto &forward : forwards) {
 				out << " --> ";
 				std::visit([&out](const auto &value) {
 					out << value;
 				}, forward);
+			}
+			return forwards;
+		}
+
+		std::list<ExpressionSome> ExpandForwardOutput(std::ostream& out) const {
+			out << *this;
+			const auto& forwards = ExpandForward();
+			for (const auto& forward : forwards) {
+				out << " --< ";
+				std::visit([&out](const auto& value) {
+					out << value;
+					}, forward);
 			}
 			return forwards;
 		}
@@ -295,26 +319,114 @@ namespace expression {
 			return magnitude;
 		}
 
+		template<typename ChildOperatorType>
+		bool ExpandChild() {
+			std::vector<ExpressionNodes::iterator> exps = GetAll<expression::Expression<ChildOperatorType>>();
 
-		Expression<OperatorType> Expand(size_t count, size_t &completed) const {
-			Expression<OperatorType> expand(*this);
-			return expand;
+			for (size_t index = 0; index < exps.size(); ++index) {
+				Expression<ChildOperatorType>& exp = std::get<Expression<ChildOperatorType>>(*exps.at(index));
+				OPERATOR_TYPE_FLAG flag = exp.Flag();
+				auto expand = exp.Expand();
+				if (expand.has_value()) {
+					*exps.at(index) = expand.value();
+					return true;
+				}
+			}
+
+			return false;
 		}
 
-		std::ostream& ExpandForward(std::ostream& out) const {
-			out << *this;
-			expression::Expression<OperatorType> expand = *this;
+		bool ExpandChild() {
+			if (ExpandChild<OPERATOR_TYPE_ADD_SUB>()) {
+				return true;
+			}
+			if (ExpandChild<OPERATOR_TYPE_MUL_DIV>()) {
+				return true;
+			}
+			if (ExpandChild<OPERATOR_TYPE_POWER_ROOT>()) {
+				return true;
+			}
+			if (ExpandChild<OPERATOR_TYPE_LOGARITHM>()) {
+				return true;
+			}
+			return false;
+		}
+
+		template<typename ChildOperatorType>
+		bool ExpandExpression() {
+			std::vector<ExpressionNodes::iterator> exps = GetAll<expression::Expression<ChildOperatorType>>();
+
+			for (size_t i = 0; i < exps.size(); ++i) {
+				Expression<ChildOperatorType>& exp = std::get<Expression<ChildOperatorType>>(*exps.at(i));
+				auto expand = m_polymorphism->ExpandExpression(*exp.m_polymorphism, exps.at(i));
+				if (expand.has_value()) {
+					Clear();
+					AppendChild(expand.value());
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		bool ExpandExpression() {
+			return m_polymorphism->ExpandExpression();
+		}
+
+		std::optional<Expression<OperatorType>> Expand() const {
+			Expression<OperatorType> expand(*this);
+			if (expand.ExpandChild()) {
+				return expand;
+			}
+			if (expand.Signed()) {
+				return expand;
+			}
+			if (expand.Sort()) {
+				return expand;
+			}
+			if (expand.Flat()) {
+				return expand;
+			}
+			if (expand.ExpandExpression()) {
+				return expand;
+			}
+			if (expand.Special()) {
+				return expand;
+			}
+			if (expand.Cancel()) {
+				return expand;
+			}
+			if (expand.Symbol()) {
+				return expand;
+			}
+			return std::nullopt;
+		}
+
+		std::list<ExpressionSome> ExpandForward() const {
+			std::list<ExpressionSome> forwards;
+			auto current = std::make_optional<Expression<OperatorType>>(*this);
 			while (true) {
-				size_t completed = 0;
-				expand = expand.Expand(1, completed);
-				if (completed) {
-					out << " --< " << expand;
+				auto forward = current.value().Expand();
+				if (forward.has_value()) {
+					forwards.push_back(forward.value());
+					current = forward;
 				}
 				else {
+					auto reduction = current.value().Reduce();
+					if (reduction) {
+						const auto& reductionForwards = reduction->ExpandForward();
+						forwards.insert(forwards.end(), reductionForwards.begin(), reductionForwards.end());
+					}
+					else if (current.value().IsSingle()) {
+						auto child = ForwardSingleChild(current.value());
+						if (child) {
+							forwards.push_back(*child);
+						}
+					}
 					break;
 				}
 			}
-			return out;
+			return forwards;
 		}
 
 
@@ -362,57 +474,57 @@ namespace expression {
 			return Expression<OPERATOR_TYPE_MUL_DIV>(expression::ClosureNumber(1), DIV, exp);
 		}
 
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &addition);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &addition);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &addition);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &addition);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &addition);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &addition);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &addition);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &addition);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &addition);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &addition);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &addition);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &addition);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &addition);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &addition);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &addition);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &addition);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &addition);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &addition);
 
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &subtrahend);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &subtrahend);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &subtrahend);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &subtrahend);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &subtrahend);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &subtrahend);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &subtrahend);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &subtrahend);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &subtrahend);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &subtrahend);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &subtrahend);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &subtrahend);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &subtrahend);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &subtrahend);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &subtrahend);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &subtrahend);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &subtrahend);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &subtrahend);
 
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &multiplier);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &multiplier);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &multiplier);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &multiplier);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &multiplier);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &multiplier);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &multiplier);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &multiplier);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &multiplier);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &multiplier);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &multiplier);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &multiplier);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &multiplier);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &multiplier);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &multiplier);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &multiplier);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &multiplier);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &multiplier);
 
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &divisor);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &divisor);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &divisor);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &divisor);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &divisor);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &divisor);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &divisor);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &divisor);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &divisor);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &divisor);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &divisor);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &divisor);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &divisor);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &divisor);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &divisor);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &divisor);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &divisor);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &divisor);
 
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::ClosureNumber &addition);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::ClosureNumber &addition);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::ClosureNumber &addition);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::ClosureNumber &addition);
 
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::ClosureNumber &subtrahend);
-		friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::ClosureNumber &subtrahend);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::ClosureNumber &subtrahend);
+		//friend Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::ClosureNumber &subtrahend);
 
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::ClosureNumber &multiplier);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::ClosureNumber &multiplier);
-		
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::ClosureNumber &divisor);
-		friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::ClosureNumber &divisor);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::ClosureNumber &multiplier);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::ClosureNumber &multiplier);
+		//
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::ClosureNumber &divisor);
+		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::ClosureNumber &divisor);
 
 	private:
 		
@@ -429,6 +541,12 @@ namespace expression {
 		template<typename OPERATOR_TYPE_MUL_DIV> friend class ExpressionDeformationer;
 
 		friend class expression::Imaginary;
+
+		friend class Polymorphism;
+		friend class PolymorphismAddSub;
+		friend class PolymorphismMulDiv;
+		friend class PolymorphismPowerRoot;
+		friend class PolymorphismLogarithm;
 		
 		expression::ClosureNumber &AddClosure(const expression::ClosureNumber &n) {
 			m_nodes.push_front(expression::ClosureNumber(n));
@@ -534,34 +652,34 @@ namespace expression {
 		}
 
 		template<typename ChildOperatorType>
-		bool CollectFlat() {
+		bool Flat() {
 			std::vector<ExpressionNodes::iterator> exps = GetAll<expression::Expression<ChildOperatorType>>();
 			
 			for (auto exp : exps) {
-				if (CollectFlat<ChildOperatorType>(exp)) {
+				if (Flat<ChildOperatorType>(exp)) {
 					return true;
 				}
 			}
 			return false;
 		}
 
-		bool CollectFlat() {
-			if (CollectFlat<OPERATOR_TYPE_ADD_SUB>()) {
+		bool Flat() {
+			if (Flat<OPERATOR_TYPE_ADD_SUB>()) {
 				return true;
 			}
-			if (CollectFlat<OPERATOR_TYPE_MUL_DIV>()) {
+			if (Flat<OPERATOR_TYPE_MUL_DIV>()) {
 				return true;
 			}
-			if (CollectFlat<OPERATOR_TYPE_POWER_ROOT>()) {
+			if (Flat<OPERATOR_TYPE_POWER_ROOT>()) {
 				return true;
 			}
-			if (CollectFlat<OPERATOR_TYPE_LOGARITHM>()) {
+			if (Flat<OPERATOR_TYPE_LOGARITHM>()) {
 				return true;
 			}
 			return false;
 		}
 
-		bool CollectSort() {
+		bool Sort() {
 			const ExpressionNodes original(m_nodes.cbegin(), m_nodes.cend());
 			m_nodes.sort([](const ExpressionNode& previous, const ExpressionNode& next)
 				{
@@ -581,45 +699,40 @@ namespace expression {
 			return !std::equal(original.cbegin(), original.cend(), m_nodes.cbegin());
 		}
 
-		bool CollectSpecial() {
-			return m_polymorphism->CollectSpecial();
+		bool Special() {
+			return m_polymorphism->Special();
 		}
 
-		bool CollectCancel() {
-			return m_polymorphism->CollectCancel();
+		bool Cancel() {
+			return m_polymorphism->Cancel();
 		}
 
-		bool CollectClosure() {
-			return m_polymorphism->CollectClosure();
+		bool Closure() {
+			return m_polymorphism->Closure();
 		}
 
-		bool CollectSymbol() {
+		bool Symbol() {
 			if (SubstitutionSymbols()) {
 				return true;
 			}
-			return m_polymorphism->CollectSymbol();
+			return m_polymorphism->SymbolExtend();
 		}
 
-		bool Reduce(std::function<bool()> factor) {
+		std::shared_ptr<Expression<OPERATOR_TYPE_ADD_SUB>> Reduce() {
 			if (2 != Size()) {
-				return false;
+				return nullptr;
 			}
 			if (!std::get_if<expression::ClosureNumber>(&Front())) {
-				return false;
+				return nullptr;
 			}
 			if (!std::get_if<expression::ClosureNumber>(&Back())) {
-				return false;
+				return nullptr;
 			}
-			if (factor()) {
-				return true;
+			auto reduction = m_polymorphism->Reduce();
+			if (reduction.has_value()) {
+				return std::make_shared<Expression<OPERATOR_TYPE_ADD_SUB>>(reduction.value());
 			}
-			else {
-				return false;
-			}
-		}
-
-		const Expression<OPERATOR_TYPE_ADD_SUB> GetFractionReduction() const {
-			return m_polymorphism->GetFractionReduction().value();
+			return nullptr;
 		}
 
 		std::optional<bool> Compare(const Expression<OperatorType> &other) const {
@@ -631,92 +744,6 @@ namespace expression {
 				}
 			}
 			return std::nullopt;
-		}
-
-		bool ReduceFraction() {
-			if constexpr (std::is_same<OPERATOR_TYPE_MUL_DIV, OperatorType>::value) {
-				return Reduce([&]() {
-					auto &numerator = std::get<expression::ClosureNumber>(Front());
-					auto &denominator = std::get<expression::ClosureNumber>(Back());
-					if (OPERATOR_TYPE_FLAG_DIV != denominator.Flag()) {
-						return false;
-					}
-					const std::optional<number::Fraction> &fraction = number::Fraction::CheckReduce(numerator.Value(), denominator.Value());
-					if (!fraction.has_value()) {
-						return false;
-					}
-					Expression<OPERATOR_TYPE_ADD_SUB> reduction(Absorb(fraction.value()), Flag());
-					m_polymorphism->SetFractionReduction(reduction);
-					return true;
-				});
-			}
-			return false;
-		}
-
-		const Expression<OPERATOR_TYPE_MUL_DIV> GetOpenReduction() const {
-			return m_polymorphism->GetOpenReduction().value();
-		}
-
-		bool ReduceRoot() {
-			if constexpr (std::is_same<OPERATOR_TYPE_POWER_ROOT, OperatorType>::value) {
-				return Reduce([&]() {
-					auto &power = std::get<expression::ClosureNumber>(Front());
-					auto &exponent = std::get<expression::ClosureNumber>(Back());
-					if (OPERATOR_TYPE_FLAG_ROOT != exponent.Flag()) {
-						return false;
-					}
-					const std::optional<number::Root> &root = number::Root::CheckReduce(power.Value(), exponent.Value());
-					if (!root.has_value()) {
-						return false;
-					}
-					const Expression<OPERATOR_TYPE_MUL_DIV>& reductionCoefficient = Absorb(root.value().ReductionCoefficient());
-					if (!root.value().IsFraction()) {
-						const Expression<OPERATOR_TYPE_ADD_SUB>& reductionPower = Absorb(root.value().ReductionPower());
-						const Expression<OPERATOR_TYPE_ADD_SUB>& reductionExponent = Absorb(root.value().ReductionExponent());
-						Expression<OPERATOR_TYPE_MUL_DIV> reduction(Expression<OPERATOR_TYPE_MUL_DIV>(reductionCoefficient, MUL,
-							Expression<OPERATOR_TYPE_POWER_ROOT>(reductionPower, ROOT, reductionExponent)), OPERATOR_TYPE_FLAG_MUL);
-						m_polymorphism->SetOpenReduction(reduction);
-					}
-					else {
-						Expression<OPERATOR_TYPE_MUL_DIV> reduction(Expression<OPERATOR_TYPE_MUL_DIV>(reductionCoefficient, MUL,
-							expression::ClosureNumber(1)), OPERATOR_TYPE_FLAG_MUL);
-						m_polymorphism->SetOpenReduction(reduction);
-					}
-					return true;
-				});
-			}
-			return false;
-		}
-
-		bool ReduceLogarithm() {
-			if constexpr (std::is_same<OPERATOR_TYPE_LOGARITHM, OperatorType>::value) {
-				return Reduce([&]() {
-					auto &power = std::get<expression::ClosureNumber>(Front());
-					auto &base = std::get<expression::ClosureNumber>(Back());
-					if (OPERATOR_TYPE_FLAG_LOGARITHM != base.Flag()) {
-						return false;
-					}
-					const std::optional<number::Logarithm> &logarithm = number::Logarithm::CheckReduce(power.Value(), base.Value());
-					if (!logarithm.has_value()) {
-						return false;
-					}
-					const Expression<OPERATOR_TYPE_MUL_DIV>& reductionCoefficient = Absorb(logarithm.value().ReductionCoefficient());
-					if (!logarithm.value().IsFraction()) {
-						const Expression<OPERATOR_TYPE_MUL_DIV>& reductionPower = Absorb(logarithm.value().ReductionPower());
-						const Expression<OPERATOR_TYPE_MUL_DIV>& reductionBase = Absorb(logarithm.value().ReductionBase());
-						Expression<OPERATOR_TYPE_MUL_DIV> reduction(Expression<OPERATOR_TYPE_MUL_DIV>(reductionCoefficient, MUL,
-							Expression<OPERATOR_TYPE_LOGARITHM>(reductionPower, LOGARITHM, reductionBase)), Flag());
-						m_polymorphism->SetOpenReduction(reduction);
-					}
-					else {
-						Expression<OPERATOR_TYPE_MUL_DIV> reduction(Expression<OPERATOR_TYPE_MUL_DIV>(reductionCoefficient, MUL,
-							expression::ClosureNumber(1)), Flag());
-						m_polymorphism->SetOpenReduction(reduction);
-					}
-					return true;
-				});
-			}
-			return false;
 		}
 
 		bool CollectChild() {
@@ -731,21 +758,6 @@ namespace expression {
 			}
 			if (CollectChild<OPERATOR_TYPE_LOGARITHM>()) {
 				return true;
-			}
-			return false;
-		}
-
-		bool CollectFraction() {
-			std::vector<ExpressionNodes::iterator> exps = GetAll<expression::Expression<OPERATOR_TYPE_MUL_DIV>>();
-			if (2 > exps.size()) {
-				return false;
-			}
-			for (auto itor = exps.begin(); itor != exps.end(); ++itor) {
-				if (m_polymorphism->CollectFractionChild(exps, itor)) {
-					RemoveNode(*itor);
-					exps.erase(itor);
-					return true;
-				}
 			}
 			return false;
 		}
@@ -854,7 +866,7 @@ namespace expression {
 		}
 
 		template<typename ChildOperatorType>
-		bool CollectFlat(const ExpressionNodes::iterator child) {
+		bool Flat(const ExpressionNodes::iterator child) {
 			if (std::get<Expression<ChildOperatorType>>(*child).IsSingle()) {
 				FlatSingle<ChildOperatorType>(child);
 				return true;
@@ -1009,14 +1021,10 @@ namespace expression {
 					return true;
 				}
 				else {
-					if (exp.ReduceFraction()) {
-						Expression<OPERATOR_TYPE_ADD_SUB> fraction(exp.GetFractionReduction(), flag);
-						*exps.at(index) = fraction.SetChild(true);
-						return true;
-					}
-					else if (exp.ReduceRoot() || exp.ReduceLogarithm()) {
-						Expression<OPERATOR_TYPE_MUL_DIV> open(exp.GetOpenReduction(), flag);
-						*exps.at(index) = open.SetChild(true);
+					auto reduction = exp.Reduce();
+					if (reduction) {
+						reduction->SetOperator(flag);
+						*exps.at(index) = reduction->SetChild(true);
 						return true;
 					}
 				}
@@ -1041,22 +1049,7 @@ namespace expression {
 		}
 
 		static std::unique_ptr<Node> GetClone(const ExpressionNode &original) {
-			if (std::get_if<expression::ClosureNumber>(&original)) {
-				return std::make_unique<expression::ClosureNumber>(std::get<expression::ClosureNumber>(original));
-			}
-			if (std::get_if<expression::Symbol>(&original)) {
-				return std::make_unique<expression::Symbol>(std::get<expression::Symbol>(original));
-			}
-			if (std::get_if<expression::Expression<OPERATOR_TYPE_ADD_SUB>>(&original)) {
-				return std::make_unique<expression::Expression<OPERATOR_TYPE_ADD_SUB>>(std::get<expression::Expression<OPERATOR_TYPE_ADD_SUB>>(original));
-			}
-			if (std::get_if<expression::Expression<OPERATOR_TYPE_MUL_DIV>>(&original)) {
-				return std::make_unique<expression::Expression<OPERATOR_TYPE_MUL_DIV>>(std::get<expression::Expression<OPERATOR_TYPE_MUL_DIV>>(original));
-			}
-			if (std::get_if<expression::Expression<OPERATOR_TYPE_POWER_ROOT>>(&original)) {
-				return std::make_unique<expression::Expression<OPERATOR_TYPE_POWER_ROOT>>(std::get<expression::Expression<OPERATOR_TYPE_POWER_ROOT>>(original));
-			}
-			return nullptr;
+			return std::make_unique<Node>(original);
 		}
 
 		template<typename NodeType>
@@ -1074,7 +1067,7 @@ namespace expression {
 			if (oneType != otherType) {
 				return oneType < otherType;
 			}
-
+			
 			size_t previousSize = Visit(one)->Size();
 			size_t nextSize = Visit(other)->Size();
 			if (previousSize != nextSize) {
@@ -1132,11 +1125,11 @@ namespace expression {
 					const std::shared_ptr<Node> substitution = symbol->GetSubstitution();
 					if (substitution) {
 						OPERATOR_TYPE_FLAG flag = Visit(*itor)->Flag();
-						if (typeid(*substitution) == typeid(ClosureNumber)) {
-							*itor = *std::dynamic_pointer_cast<ClosureNumber>(substitution);
+						if (typeid(*substitution) == typeid(expression::ClosureNumber)) {
+							*itor = *std::dynamic_pointer_cast<expression::ClosureNumber>(substitution);
 						}
-						else if (typeid(*substitution) == typeid(Symbol)) {
-							*itor = *std::dynamic_pointer_cast<Symbol>(substitution);
+						else if (typeid(*substitution) == typeid(expression::Symbol)) {
+							*itor = *std::dynamic_pointer_cast<expression::Symbol>(substitution);
 						}
 						else if (typeid(*substitution) == typeid(expression::Expression<OPERATOR_TYPE_ADD_SUB>)) {
 							*itor = *std::dynamic_pointer_cast<expression::Expression<OPERATOR_TYPE_ADD_SUB>>(substitution);
@@ -1163,245 +1156,6 @@ namespace expression {
 
 		protected:
 
-			class Polymorphism {
-			public:
-				virtual bool CollectSpecial() = 0;
-				virtual bool CollectCancel() = 0;
-				virtual std::vector<ExpressionNodes::iterator> GetChildren() = 0;
-				virtual bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) = 0;
-				virtual Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
-					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons) = 0;
-				virtual bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) = 0;
-				virtual bool CollectClosure(ClosureNumber &closure) = 0;
-				virtual bool CollectClosure() = 0;
-				virtual void SetOpenReduction(const Expression<OPERATOR_TYPE_MUL_DIV> &reduction) = 0;
-				virtual std::optional<const Expression<OPERATOR_TYPE_MUL_DIV>> GetOpenReduction() const = 0;
-				virtual void SetFractionReduction(const Expression<OPERATOR_TYPE_ADD_SUB> &reduction) = 0;
-				virtual std::optional<const Expression<OPERATOR_TYPE_ADD_SUB>> GetFractionReduction() const = 0;
-
-				virtual bool FlatAble(const ExpressionNodes::iterator child) const = 0;
-				virtual Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpterMulDiv() const = 0;
-
-				virtual OPERATOR_TYPE_FLAG FrontDefaultFlag() const = 0;
-
-				virtual bool CollectSymbol() = 0;
-
-				virtual bool CollectSigned();
-
-				template<typename ChildOperatorType>
-				static std::optional<typename Expression<ChildOperatorType>::ExpressionNodes::iterator> CollectClosures(const std::vector<ExpressionNodes::iterator> &closures,
-					const std::vector<ExpressionNodes::iterator> &exps);
-			
-				static Expression<OPERATOR_TYPE_MUL_DIV> NodesBuild(const std::vector<ExpressionNodes::const_iterator>& nodes, OPERATOR_TYPE_FLAG reciprocal);
-
-			};
-
-			class PolymorphismAddSub : public Polymorphism {
-			public:
-				PolymorphismAddSub(Expression<OPERATOR_TYPE_ADD_SUB> &exp);
-				bool CollectSpecial() override;
-				bool CollectCancel() override;
-				std::vector<ExpressionNodes::iterator> GetChildren() override
-				{
-					std::vector<ExpressionNodes::iterator> exps;
-					std::vector<ExpressionNodes::iterator> symbols = m_exp.GetAll<expression::Symbol>();
-					exps.insert(exps.end(), symbols.begin(), symbols.end());
-					std::vector<ExpressionNodes::iterator> divs = m_exp.GetAll<expression::Expression<OPERATOR_TYPE_MUL_DIV>>();
-					exps.insert(exps.end(), divs.begin(), divs.end());
-					std::vector<ExpressionNodes::iterator> roots = m_exp.GetAll<expression::Expression<OPERATOR_TYPE_POWER_ROOT>>();
-					exps.insert(exps.end(), roots.begin(), roots.end());
-					std::vector<ExpressionNodes::iterator> logarithms = m_exp.GetAll<expression::Expression<OPERATOR_TYPE_LOGARITHM>>();
-					exps.insert(exps.end(), logarithms.begin(), logarithms.end());
-					return exps;
-				}
-				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
-					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons) override;
-
-				bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				bool CollectClosure(ClosureNumber &closure) override;
-				bool CollectClosure() override;
-				void SetOpenReduction(const Expression<OPERATOR_TYPE_MUL_DIV>& reduction) override;
-				std::optional<const Expression<OPERATOR_TYPE_MUL_DIV>> GetOpenReduction() const override;
-				void SetFractionReduction(const Expression<OPERATOR_TYPE_ADD_SUB> &reduction) override;
-				std::optional<const Expression<OPERATOR_TYPE_ADD_SUB>> GetFractionReduction() const override;
-
-				bool FlatAble(const ExpressionNodes::iterator child) const override;
-				Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpterMulDiv() const override;
-
-				OPERATOR_TYPE_FLAG FrontDefaultFlag() const override;
-
-				bool CollectSymbol() override;
-
-				bool CollectSigned() override;
-
-				static std::optional<number::Fraction> Exhale(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &exp);
-			private:
-				static Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpter(const ExpressionNode *node);
-
-				static Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpterMulDiv(const Symbol &symbol);
-			private:
-				bool CheckCombine(expression::Expression<OPERATOR_TYPE_LOGARITHM> &one, expression::Expression<OPERATOR_TYPE_LOGARITHM>& other);
-				bool CollectCommonChildFull(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start);
-				bool CollectCommonChildPartial(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start);
-
-				bool CollectNodesSigned();
-				bool CollectFrontNodeSigned();
-
-				Expression<OPERATOR_TYPE_ADD_SUB> &m_exp;
-			};
-
-			class PolymorphismMulDiv : public Polymorphism {
-			public:
-				PolymorphismMulDiv(Expression<OPERATOR_TYPE_MUL_DIV> &exp);
-				bool CollectSpecial() override;
-				bool CollectCancel() override;
-				std::vector<ExpressionNodes::iterator> GetChildren() override
-				{
-					std::vector<ExpressionNodes::iterator> exps;
-					std::vector<ExpressionNodes::iterator> symbols = m_exp.GetAll<expression::Symbol>();
-					exps.insert(exps.end(), symbols.begin(), symbols.end());
-					std::vector<ExpressionNodes::iterator> roots = m_exp.GetAll<expression::Expression<OPERATOR_TYPE_POWER_ROOT>>();
-					exps.insert(exps.end(), roots.begin(), roots.end());
-					return exps;
-				}
-				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
-					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons) override;
-				bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-
-				bool CollectClosure(ClosureNumber &closure) override;
-				bool CollectClosure() override;
-				void SetOpenReduction(const Expression<OPERATOR_TYPE_MUL_DIV>& reduction) override;
-				std::optional<const Expression<OPERATOR_TYPE_MUL_DIV>> GetOpenReduction() const override;
-				void SetFractionReduction(const Expression<OPERATOR_TYPE_ADD_SUB> &reduction) override;
-				std::optional<const Expression<OPERATOR_TYPE_ADD_SUB>> GetFractionReduction() const override;
-
-				bool FlatAble(const ExpressionNodes::iterator child) const override;
-				Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpterMulDiv() const override;
-
-				OPERATOR_TYPE_FLAG FrontDefaultFlag() const override;
-
-				bool CollectSymbol() override;
-
-				bool CollectSigned() override;
-
-				template<typename ChildOperatorType>
-				bool CollectClosureExp();
-			private:
-				Expression<OPERATOR_TYPE_MUL_DIV> &m_exp;
-				std::unique_ptr<Expression<OPERATOR_TYPE_ADD_SUB>> m_reduction;
-
-			private:
-				static Expression<OPERATOR_TYPE_POWER_ROOT> GetCommonAdpter(const ExpressionNode* node);
-
-				static Expression<OPERATOR_TYPE_POWER_ROOT> GetCommonAdpterPowerRoot(const Symbol& symbol);
-			private:
-				bool CollectMulClosure();
-				bool CollectDivClosure();
-				std::optional<bool> CollectDivisors();
-				std::optional<bool> CollectReduction();
-				bool CollectClosurePower(ClosureNumber &closure);
-				bool CollectClosureRoot(ClosureNumber &closure);
-
-				int CollectNodesSigned();
-
-
-			};
-
-			class PolymorphismPowerRoot : public Polymorphism {
-			public:
-				PolymorphismPowerRoot(Expression<OPERATOR_TYPE_POWER_ROOT> &exp);
-				bool CollectSpecial() override;
-				bool CollectCancel() override;
-				std::vector<ExpressionNodes::iterator> GetChildren() override
-				{
-					return std::vector<ExpressionNodes::iterator>();
-				}
-				bool CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
-					const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons) override;
-				bool CollectFractionChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-
-				bool CollectClosure(ClosureNumber &closure) override;
-				bool CollectClosure() override;
-				void SetOpenReduction(const Expression<OPERATOR_TYPE_MUL_DIV>& reduction) override;
-				std::optional<const Expression<OPERATOR_TYPE_MUL_DIV>> GetOpenReduction() const override;
-				void SetFractionReduction(const Expression<OPERATOR_TYPE_ADD_SUB> &reduction) override;
-				std::optional<const Expression<OPERATOR_TYPE_ADD_SUB>> GetFractionReduction() const override;
-
-				bool FlatAble(const ExpressionNodes::iterator child) const override;
-				Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpterMulDiv() const override;
-
-				OPERATOR_TYPE_FLAG FrontDefaultFlag() const override;
-
-				bool CollectSymbol() override;
-
-				bool CollectSigned() override;
-				
-				const Node *Origin() const;
-
-				template<typename ChildOperatorType>
-				bool CollectClosureExp();
-				
-				static bool IsOriginEqualPositiveOne(const ExpressionNode &node);
-				static bool IsDriverEqualZero(const ExpressionNode &node);
-				static bool IsDriverEqualPositiveOne(const ExpressionNode& node);
-			private:
-				
-				bool CollectPowerClosure();
-				bool CollectRootClosure();
-
-				int CollectDriversSigned();
-
-			private:
-				static bool CancelRoot(const ExpressionNode &one, const ExpressionNode &other);
-				static std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> CancelLogarithm(const ExpressionNode &base, const ExpressionNode &mixture);
-				static bool ContainFront(const std::list<ExpressionNode> &nodes);
-
-			private:
-				Expression<OPERATOR_TYPE_POWER_ROOT> &m_exp;
-				std::unique_ptr<Expression<OPERATOR_TYPE_MUL_DIV>> m_reduction;
-			};
-
-			class PolymorphismLogarithm : public Polymorphism {
-			public:
-				PolymorphismLogarithm(Expression<OPERATOR_TYPE_LOGARITHM>& exp);
-				bool CollectSpecial() override;
-				bool CollectCancel() override;
-				std::vector<ExpressionNodes::iterator> GetChildren() override
-				{
-					return std::vector<ExpressionNodes::iterator>();
-				}
-				bool CollectCommonChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-				Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
-					const std::vector<ExpressionNodes::const_iterator>& rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode>& commons) override;
-				bool CollectFractionChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-
-				bool CollectClosure(ClosureNumber& closure) override;
-				bool CollectClosure() override;
-				void SetOpenReduction(const Expression<OPERATOR_TYPE_MUL_DIV>& reduction) override;
-				std::optional<const Expression<OPERATOR_TYPE_MUL_DIV>> GetOpenReduction() const override;
-				void SetFractionReduction(const Expression<OPERATOR_TYPE_ADD_SUB> &reduction) override;
-				std::optional<const Expression<OPERATOR_TYPE_ADD_SUB>> GetFractionReduction() const override;
-
-				bool FlatAble(const ExpressionNodes::iterator child) const override;
-				Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpterMulDiv() const override;
-
-				OPERATOR_TYPE_FLAG FrontDefaultFlag() const override;
-
-				bool CollectSymbol() override;
-
-			private:
-
-				bool CollectLogarithmClosure();
-
-			private:
-				static std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> CancelLogarithm(const ExpressionNode& base, const ExpressionNode& mixture);
-			private:
-				Expression<OPERATOR_TYPE_LOGARITHM>& m_exp;
-				std::unique_ptr<Expression<OPERATOR_TYPE_MUL_DIV>> m_reduction;
-			};
 			
 			void InitPolymorphism() {
 				if (!m_polymorphism) {
@@ -1423,7 +1177,302 @@ namespace expression {
 			std::unique_ptr<Polymorphism> m_polymorphism;
 	};
 	
+	typedef Expression<OPERATOR_TYPE_ADD_SUB>::ExpressionNode ExpressionNode;
+	typedef Expression<OPERATOR_TYPE_ADD_SUB>::ExpressionNodes ExpressionNodes;
+
+	class Polymorphism {
+	public:
+		virtual bool Special() = 0;
+		virtual bool Cancel() = 0;
+		virtual std::vector<ExpressionNodes::iterator> GetChildren() = 0;
+		virtual bool CollectCommonChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) = 0;
+		virtual Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
+			const std::vector<ExpressionNodes::const_iterator>& rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode>& commons) = 0;
+
+		virtual bool Closure(ClosureNumber& closure) = 0;
+		virtual bool Closure() = 0;
+
+		virtual bool FlatAble(const ExpressionNodes::iterator child) const = 0;
+		virtual Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpterMulDiv() const = 0;
+
+		virtual OPERATOR_TYPE_FLAG FrontDefaultFlag() const = 0;
+
+		virtual OPERATOR_TYPE_FLAG Flag() const = 0;
+
+		virtual OPERATOR_TYPE_LEVEL Level() const = 0;
+
+		virtual bool SymbolExtend() = 0;
+
+		virtual ExpressionNodes BuildPowerRootOriginNodes() const = 0;
+
+		virtual ExpressionNodes BuildPowerRootDriverNodes() const = 0;
+
+		virtual ExpressionNodes BuildLogarithmOriginNodes() const = 0;
+
+		virtual ExpressionNodes BuildMulNodes() const = 0;
+
+		virtual std::optional<const Expression<OPERATOR_TYPE_ADD_SUB>> Reduce() const;
+
+		virtual bool ExpandExpression() const;
+
+		virtual std::optional<typename expression::Expression<OPERATOR_TYPE_ADD_SUB>> ExpandExpression(const Polymorphism& exp, ExpressionNodes::const_iterator pos) const;
+
+		virtual bool Signed();
+
+		template<typename ChildOperatorType>
+		static std::optional<typename Expression<ChildOperatorType>::ExpressionNodes::iterator> Closures(const std::vector<ExpressionNodes::iterator>& closures,
+			const std::vector<ExpressionNodes::iterator>& exps);
+
+		static Expression<OPERATOR_TYPE_MUL_DIV> NodesBuild(const std::vector<ExpressionNodes::const_iterator>& nodes, OPERATOR_TYPE_FLAG reciprocal);
+
+		static const Node* Visit(const ExpressionNode& node);
+
+		static Node* Visit(ExpressionNode& node);
+	};
+
+	class PolymorphismAddSub : public Polymorphism {
+	public:
+		PolymorphismAddSub(Expression<OPERATOR_TYPE_ADD_SUB>& exp);
+		bool Special() override;
+		bool Cancel() override;
+		std::vector<ExpressionNodes::iterator> GetChildren() override;
+		bool CollectCommonChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
+		Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
+			const std::vector<ExpressionNodes::const_iterator>& rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode>& commons) override;
+
+		bool Closure(ClosureNumber& closure) override;
+		bool Closure() override;
+
+
+		bool FlatAble(const ExpressionNodes::iterator child) const override;
+		Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpterMulDiv() const override;
+
+		OPERATOR_TYPE_FLAG FrontDefaultFlag() const override;
+
+		OPERATOR_TYPE_FLAG Flag() const override;
+
+		OPERATOR_TYPE_LEVEL Level() const override;
+
+		bool SymbolExtend() override;
+
+		ExpressionNodes BuildPowerRootOriginNodes() const override;
+
+		ExpressionNodes BuildPowerRootDriverNodes() const override;
+
+		ExpressionNodes BuildLogarithmOriginNodes() const override;
+
+		ExpressionNodes BuildMulNodes() const override;
+
+		bool Signed() override;
+
+	private:
+		static Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpter(const ExpressionNode* node);
+
+		static Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpterMulDiv(const Symbol& symbol);
+	private:
+		bool CheckCombine(expression::Expression<OPERATOR_TYPE_LOGARITHM>& one, expression::Expression<OPERATOR_TYPE_LOGARITHM>& other);
+		bool CollectCommonChildFull(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start);
+		bool CollectCommonChildPartial(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start);
+
+		bool NodesSigned();
+		bool FrontNodeSigned();
+
+		Expression<OPERATOR_TYPE_ADD_SUB>& m_exp;
+	};
+
+	class PolymorphismMulDiv : public Polymorphism {
+	public:
+		PolymorphismMulDiv(Expression<OPERATOR_TYPE_MUL_DIV>& exp);
+		bool Special() override;
+		bool Cancel() override;
+		std::vector<ExpressionNodes::iterator> GetChildren() override;
+		bool CollectCommonChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
+		Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
+			const std::vector<ExpressionNodes::const_iterator>& rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode>& commons) override;
+
+		bool Closure(ClosureNumber& closure) override;
+		bool Closure() override;
+
+		bool FlatAble(const ExpressionNodes::iterator child) const override;
+		Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpterMulDiv() const override;
+
+		OPERATOR_TYPE_FLAG FrontDefaultFlag() const override;
+
+		OPERATOR_TYPE_FLAG Flag() const override;
+
+		OPERATOR_TYPE_LEVEL Level() const override;
+
+		bool SymbolExtend() override;
+
+		ExpressionNodes BuildPowerRootOriginNodes() const override;
+
+		ExpressionNodes BuildPowerRootDriverNodes() const override;
+
+		ExpressionNodes BuildLogarithmOriginNodes() const override;
+
+		ExpressionNodes BuildMulNodes() const override;
+
+		bool ExpandExpression() const override;
+
+		std::optional<typename expression::Expression<OPERATOR_TYPE_ADD_SUB>> ExpandExpression(const Polymorphism& exp, ExpressionNodes::const_iterator pos) const override;
+
+		std::optional<const Expression<OPERATOR_TYPE_ADD_SUB>> Reduce() const override;
+
+		bool Signed() override;
+
+		template<typename ChildOperatorType>
+		bool ClosureExp();
+
+
+	private:
+		Expression<OPERATOR_TYPE_MUL_DIV>& m_exp;
+
+	private:
+		static Expression<OPERATOR_TYPE_POWER_ROOT> GetCommonAdpter(const ExpressionNode* node);
+
+		static Expression<OPERATOR_TYPE_POWER_ROOT> GetCommonAdpterPowerRoot(const Symbol& symbol);
+	private:
+		bool MulClosure();
+		bool DivClosure();
+		std::optional<bool> Divisors();
+		std::optional<bool> Reduction();
+		bool ClosurePower(ClosureNumber& closure);
+		bool ClosureRoot(ClosureNumber& closure);
+
+		int NodesSigned();
+
+		ExpressionNodes BuildCommonNodes(ExpressionNodes::const_iterator pos) const;
+
+		std::optional<typename expression::Expression<OPERATOR_TYPE_ADD_SUB>> ExpandMulExpression(const Polymorphism& exp, ExpressionNodes::const_iterator pos) const;
 	
+		std::optional<typename expression::Expression<OPERATOR_TYPE_ADD_SUB>> ExpandDivExpression(const Polymorphism& exp, ExpressionNodes::const_iterator pos) const;
+	
+		size_t GetDivisorCount() const;
+	};
+
+	class PolymorphismPowerRoot : public Polymorphism {
+	public:
+		PolymorphismPowerRoot(Expression<OPERATOR_TYPE_POWER_ROOT>& exp);
+		bool Special() override;
+		bool Cancel() override;
+		std::vector<ExpressionNodes::iterator> GetChildren() override;
+		bool CollectCommonChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
+		Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
+			const std::vector<ExpressionNodes::const_iterator>& rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode>& commons) override;
+
+		bool Closure(ClosureNumber& closure) override;
+		bool Closure() override;
+
+
+		bool FlatAble(const ExpressionNodes::iterator child) const override;
+		Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpterMulDiv() const override;
+
+		OPERATOR_TYPE_FLAG FrontDefaultFlag() const override;
+
+		OPERATOR_TYPE_FLAG Flag() const override;
+
+		OPERATOR_TYPE_LEVEL Level() const override;
+
+		bool SymbolExtend() override;
+
+		ExpressionNodes BuildPowerRootOriginNodes() const override;
+
+		ExpressionNodes BuildPowerRootDriverNodes() const override;
+
+		ExpressionNodes BuildLogarithmOriginNodes() const override;
+
+		ExpressionNodes BuildMulNodes() const override;
+
+		bool ExpandExpression() const override;
+
+		std::optional<typename expression::Expression<OPERATOR_TYPE_ADD_SUB>> ExpandExpression(const Polymorphism& exp, ExpressionNodes::const_iterator pos) const override;
+
+		std::optional<const Expression<OPERATOR_TYPE_ADD_SUB>> Reduce() const override;
+
+		bool Signed() override;
+
+		const Node* Origin() const;
+
+		template<typename ChildOperatorType>
+		bool ClosureExp();
+
+		static bool IsOriginEqualPositiveOne(const ExpressionNode& node);
+		static bool IsDriverEqualZero(const ExpressionNode& node);
+		static bool IsDriverEqualPositiveOne(const ExpressionNode& node);
+	private:
+
+		bool PowerClosure();
+		bool RootClosure();
+
+		int DriversSigned();
+
+		std::optional<typename expression::Expression<OPERATOR_TYPE_MUL_DIV>> ExpandAddSubOrigin(const Polymorphism& exp) const;
+
+		std::optional<typename expression::Expression<OPERATOR_TYPE_MUL_DIV>> ExpandMulDivOrigin(const Polymorphism& exp) const;
+
+		std::optional<typename expression::Expression<OPERATOR_TYPE_MUL_DIV>> ExpandAddSubDriver(const Polymorphism& exp) const;
+
+		std::optional<typename expression::Expression<OPERATOR_TYPE_MUL_DIV>> ExpandMulDivDriver(const Polymorphism& exp) const;
+	private:
+		static bool CancelRoot(const ExpressionNode& one, const ExpressionNode& other);
+		static std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> CancelLogarithm(const ExpressionNode& base, const ExpressionNode& mixture);
+		static bool ContainFront(const std::list<ExpressionNode>& nodes);
+
+	private:
+		Expression<OPERATOR_TYPE_POWER_ROOT>& m_exp;
+	};
+
+	class PolymorphismLogarithm : public Polymorphism {
+	public:
+		PolymorphismLogarithm(Expression<OPERATOR_TYPE_LOGARITHM>& exp);
+		bool Special() override;
+		bool Cancel() override;
+		std::vector<ExpressionNodes::iterator> GetChildren() override;
+		bool CollectCommonChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
+		Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
+			const std::vector<ExpressionNodes::const_iterator>& rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode>& commons) override;
+
+		bool Closure(ClosureNumber& closure) override;
+		bool Closure() override;
+
+		bool FlatAble(const ExpressionNodes::iterator child) const override;
+		Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpterMulDiv() const override;
+
+		OPERATOR_TYPE_FLAG FrontDefaultFlag() const override;
+
+		OPERATOR_TYPE_FLAG Flag() const override;
+
+		OPERATOR_TYPE_LEVEL Level() const override;
+
+		bool SymbolExtend() override;
+
+		ExpressionNodes BuildPowerRootOriginNodes() const override;
+
+		ExpressionNodes BuildPowerRootDriverNodes() const override;
+
+		ExpressionNodes BuildLogarithmOriginNodes() const override;
+
+		ExpressionNodes BuildMulNodes() const override;
+
+		bool ExpandExpression() const override;
+
+		std::optional<typename expression::Expression<OPERATOR_TYPE_ADD_SUB>> ExpandExpression(const Polymorphism& exp, ExpressionNodes::const_iterator pos) const override;
+
+		std::optional<const Expression<OPERATOR_TYPE_ADD_SUB>> Reduce() const override;
+
+	private:
+
+		bool LogarithmClosure();
+
+		std::optional<typename expression::Expression<OPERATOR_TYPE_ADD_SUB>> ExpandMulDivOrigin(const Polymorphism& exp) const;
+	
+		std::optional<typename expression::Expression<OPERATOR_TYPE_MUL_DIV>> ExpandPowerRootOrigin(const Polymorphism& exp) const;
+
+	private:
+		static std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> CancelLogarithm(const ExpressionNode& base, const ExpressionNode& mixture);
+	private:
+		Expression<OPERATOR_TYPE_LOGARITHM>& m_exp;
+	};
 }
 
 #endif

@@ -21,8 +21,8 @@ namespace expression {
 		bool EqualNegativeOne() const override;
 		bool IsDisplaySigned() const override;
 
-		bool CollectAddSubSigned() override;
-		bool CollectMulDivSigned() override;
+		bool AddSubSigned() override;
+		bool MulDivSigned() override;
 
 		void Opposite() override;
 

@@ -36,10 +36,11 @@ namespace expression {
 		virtual bool EqualNegativeOne() const = 0;
 		virtual const std::string GetString(uint8_t radix = LITERAL_DEFAULT_RADIX) const = 0;
 		virtual bool IsDisplaySigned() const;
-		virtual bool CollectSigned();
-		virtual bool CollectAddSubSigned();
-		virtual bool CollectMulDivSigned();
-		virtual bool CollectPowerRootSigned();
+
+		virtual bool Signed();
+		virtual bool AddSubSigned();
+		virtual bool MulDivSigned();
+		virtual bool PowerRootSigned();
 
 		virtual void Opposite();
 

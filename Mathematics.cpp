@@ -1,7 +1,8 @@
 ﻿#include <iostream>
 
 #define NUMBER_TEST
-#define EXPRESSION_TEST
+#define EXPRESSION_TEST_COLLECT
+#define EXPRESSION_TEST_EXPAND
 
 #ifdef NUMBER_TEST
 #include "number/Integer.h"
@@ -13,7 +14,15 @@
 using namespace number;
 #endif
 
-#ifdef EXPRESSION_TEST
+#ifdef EXPRESSION_TEST_COLLECT
+#include "expression/Series.hpp"
+#include "expression/Expression.hpp"
+#include "expression/ExpressionDeformationer.h"
+#include "expression/Imaginary.h"
+using namespace expression;
+#endif
+
+#ifdef EXPRESSION_TEST_EXPAND
 #include "expression/Series.hpp"
 #include "expression/Expression.hpp"
 #include "expression/ExpressionDeformationer.h"
@@ -179,7 +188,7 @@ int main() {
 		std::cout << number::Logarithm(Fraction(81), Fraction(36)).GetDecimal(10, 20) << std::endl;
 	}
 #endif
-#ifdef EXPRESSION_TEST
+#ifdef EXPRESSION_TEST_COLLECT
 	{
 		std::cout << "e = " << expression::Series<number::Fraction>(
 			[](const uint64_t index) {
@@ -660,6 +669,8 @@ int main() {
 		SYMBOL_B.SetSubstitution<ClosureNumber>(ClosureNumber(number::Integer(2)));
 		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(SYMBOL_A, ADD, SYMBOL_B);
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+		SYMBOL_B.SetSubstitution();
+		SYMBOL_A.SetSubstitution();
 	}
 
 	{
@@ -667,20 +678,351 @@ int main() {
 		SYMBOL_B.SetSubstitution<ClosureNumber>(ClosureNumber(number::Integer(2)));
 		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(SYMBOL_A, ADD, -SYMBOL_B);
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+		SYMBOL_B.SetSubstitution();
+		SYMBOL_A.SetSubstitution();
 	}
 
 	{
-		SYMBOL_A.SetSubstitution<ClosureNumber>(ClosureNumber(number::Integer(1)));
-		SYMBOL_B.SetSubstitution<ClosureNumber>(ClosureNumber(number::Integer(2)));
-		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(SYMBOL_A, SUB, SYMBOL_B);
+		Symbol a("a");
+		a.SetSubstitution<ClosureNumber>(ClosureNumber(number::Integer(1)));
+		Symbol b("b");
+		b.SetSubstitution<ClosureNumber>(ClosureNumber(number::Integer(2)));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(a, SUB, b);
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
 	}
 
 	{
-		SYMBOL_A.SetSubstitution<ClosureNumber>(ClosureNumber(number::Integer(1)));
-		SYMBOL_B.SetSubstitution<ClosureNumber>(ClosureNumber(number::Integer(2)));
-		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(-SYMBOL_A, SUB, -SYMBOL_B);
+		Symbol a("a");
+		a.SetSubstitution<ClosureNumber>(ClosureNumber(number::Integer(1)));
+		Symbol b("b");
+		b.SetSubstitution<ClosureNumber>(ClosureNumber(number::Integer(2)));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(-a, SUB, -b);
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+#endif
+#ifdef EXPRESSION_TEST_EXPAND
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(e0, ADD, e0);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e1(number::Integer(123), MUL,
+			number::Integer(456), MUL, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(e0, ADD, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e1(number::Integer(2), POWER, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(e0, ADD, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_LOGARITHM> e1(number::Integer(3), LOGARITHM, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(e0, ADD, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(e0, SUB, e0);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e1(number::Integer(123), MUL,
+			number::Integer(456), MUL, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(e1, SUB, e0);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e1(number::Integer(2), POWER, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(e1, SUB, e0);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_LOGARITHM> e1(number::Integer(3), LOGARITHM, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(e1, SUB, e0);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e1(number::Integer(2), POWER, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(e0, SUB, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_LOGARITHM> e1(number::Integer(3), LOGARITHM, number::Integer(2));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(e0, SUB, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e1(SYMBOL_A, ADD,
+			SYMBOL_B, SUB, SYMBOL_C);
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(number::Integer(123), MUL, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e1(SYMBOL_A, ADD,
+			SYMBOL_B, SUB, SYMBOL_C);
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(e0, MUL, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e1(SYMBOL_A, ADD,
+			SYMBOL_B, SUB, SYMBOL_C);
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(expression::ClosureNumber(1), DIV, e0, DIV, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e1(SYMBOL_A, ADD,
+			SYMBOL_B, SUB, SYMBOL_C);
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(e0, DIV, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e1(SYMBOL_A, ADD,
+			SYMBOL_B, SUB, SYMBOL_C);
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(expression::ClosureNumber(1), DIV, e0, MUL, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e1(SYMBOL_A, MUL,
+			SYMBOL_B, DIV, SYMBOL_C);
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(e0, MUL, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e1(SYMBOL_A, MUL,
+			SYMBOL_B, DIV, SYMBOL_C);
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(e0, DIV, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e1(SYMBOL_A, MUL,
+			SYMBOL_B, DIV, SYMBOL_C);
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(e1, DIV, e0);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e1(SYMBOL_A, POWER,
+			SYMBOL_B, POWER, SYMBOL_C);
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(e0, MUL, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e1(SYMBOL_A, POWER,
+			SYMBOL_B, POWER, SYMBOL_C);
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(e0, DIV, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e1(SYMBOL_A, ROOT,
+			SYMBOL_B, ROOT, SYMBOL_C);
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(e0, MUL, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e1(SYMBOL_A, ROOT,
+			SYMBOL_B, ROOT, SYMBOL_C);
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(e0, DIV, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_LOGARITHM> e1(SYMBOL_A, LOGARITHM,
+			SYMBOL_B, LOGARITHM, SYMBOL_C);
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(e0, MUL, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(number::Integer(123), ADD,
+			number::Integer(456), SUB, number::Integer(789));
+		expression::Expression<OPERATOR_TYPE_LOGARITHM> e1(SYMBOL_A, LOGARITHM,
+			SYMBOL_B, LOGARITHM, SYMBOL_C);
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(e0, DIV, e1);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e0(SYMBOL_A, MUL, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e(e0, POWER, SYMBOL_C);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e0(SYMBOL_A, DIV, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e(e0, POWER, SYMBOL_C);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e0(SYMBOL_A, MUL, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e(SYMBOL_C, POWER, e0);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+
+	{
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e0(SYMBOL_A, DIV, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e(SYMBOL_C, POWER, e0);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(SYMBOL_A, ADD, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e(SYMBOL_C, POWER, e0);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(SYMBOL_A, SUB, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e(SYMBOL_C, POWER, e0);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+
+	{
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e0(SYMBOL_A, MUL, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e(e0, ROOT, SYMBOL_C);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e0(SYMBOL_A, DIV, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e(e0, ROOT, SYMBOL_C);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e0(SYMBOL_A, MUL, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e(SYMBOL_C, ROOT, e0);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+
+	{
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e0(SYMBOL_A, DIV, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e(SYMBOL_C, ROOT, e0);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+
+	{
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e0(SYMBOL_A, MUL, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_LOGARITHM> e(e0, LOGARITHM, SYMBOL_C);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_MUL_DIV> e0(SYMBOL_A, DIV, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_LOGARITHM> e(e0, LOGARITHM, SYMBOL_C);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+
+	{
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e0(SYMBOL_A, POWER, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_LOGARITHM> e(e0, LOGARITHM, SYMBOL_C);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e0(SYMBOL_A, ROOT, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_LOGARITHM> e(e0, LOGARITHM, SYMBOL_C);
+		e.ExpandForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(SYMBOL_A, ADD, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e(e0, POWER, expression::ClosureNumber(2));
+		auto expands = e.ExpandForwardOutput(std::cout);
+		std::visit([](auto& expand) {
+			expand.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+		}, expands.back());
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(SYMBOL_A, ADD, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e(e0, POWER, expression::ClosureNumber(3));
+		auto expands = e.ExpandForwardOutput(std::cout);
+		std::visit([](auto& expand) {
+			expand.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+			}, expands.back());
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(SYMBOL_A, ADD, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e(e0, POWER, expression::ClosureNumber(number::Integer(3, false)));
+		auto expands = e.ExpandForwardOutput(std::cout);
+		std::visit([](auto& expand) {
+			expand.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+			}, expands.back());
+	}
+
+	{
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e0(SYMBOL_A, ADD, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_POWER_ROOT> e(e0, POWER, expression::ClosureNumber(number::Integer(3, false)), POWER, SYMBOL_C);
+		auto expands = e.ExpandForwardOutput(std::cout);
+		std::visit([](auto& expand) {
+			expand.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+			}, expands.back());
 	}
 
 #endif

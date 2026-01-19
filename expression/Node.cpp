@@ -82,11 +82,11 @@ namespace expression {
 	bool Node::IsDisplaySigned() const {
 		return !IsUnSigned();
 	}
-	bool Node::CollectSigned() {
+	bool Node::Signed() {
 		return false;
 	}
 
-	bool Node::CollectAddSubSigned() {
+	bool Node::AddSubSigned() {
 		if (IsDisplaySigned()) {
 			Opposite();
 			SetOperator(IsAdd() ? OPERATOR_TYPE_FLAG_SUB : OPERATOR_TYPE_FLAG_ADD);
@@ -95,7 +95,7 @@ namespace expression {
 		return false;
 	}
 
-	bool Node::CollectMulDivSigned() {
+	bool Node::MulDivSigned() {
 		if (IsDisplaySigned()) {
 			Opposite();
 			return true;
@@ -103,7 +103,7 @@ namespace expression {
 		return false;
 	}
 
-	bool Node::CollectPowerRootSigned() {
+	bool Node::PowerRootSigned() {
 		if (IsDisplaySigned()) {
 			Opposite();
 			return true;

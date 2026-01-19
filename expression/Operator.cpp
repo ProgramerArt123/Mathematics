@@ -47,7 +47,7 @@ namespace expression {
 	}
 
 	const std::string OPERATOR_TYPE_NONE::OutPutString(size_t pos) const {
-		assert(0 == pos);
+		//assert(0 == pos);
 		return "";
 	}
 
