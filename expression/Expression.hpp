@@ -24,6 +24,7 @@
 #include "Operator.h"
 #include "number/Root.h"
 #include "number/Logarithm.h"
+#include "inf/Infinitesimal.h"
 
 
 namespace expression {
@@ -37,7 +38,7 @@ namespace expression {
 	template<typename OperatorType = OPERATOR_TYPE_ADD_SUB>
 	class Expression : public Node {
 	public:
-		typedef std::variant<ClosureNumber, Symbol, Expression<OPERATOR_TYPE_ADD_SUB>, Expression<OPERATOR_TYPE_MUL_DIV>, Expression<OPERATOR_TYPE_POWER_ROOT>, Expression<OPERATOR_TYPE_LOGARITHM>> ExpressionNode;
+		typedef std::variant<ClosureNumber, SymbolWrapper, Expression<OPERATOR_TYPE_ADD_SUB>, Expression<OPERATOR_TYPE_MUL_DIV>, Expression<OPERATOR_TYPE_POWER_ROOT>, Expression<OPERATOR_TYPE_LOGARITHM>> ExpressionNode;
 		typedef std::list<ExpressionNode> ExpressionNodes;
 
 		typedef std::variant<Expression<OPERATOR_TYPE_ADD_SUB>, Expression<OPERATOR_TYPE_MUL_DIV>, Expression<OPERATOR_TYPE_POWER_ROOT>, Expression<OPERATOR_TYPE_LOGARITHM>> ExpressionSome;
@@ -107,12 +108,12 @@ namespace expression {
 		}
 
 		template<typename ConcreteOperatorType, typename ...Append>
-		Expression(const ConcreteOperatorType &o, const expression::Symbol &n, Append ...append) : Expression(append...) {
+		Expression(const ConcreteOperatorType &o, const expression::SymbolWrapper &n, Append ...append) : Expression(append...) {
 			static_assert(std::is_base_of<OperatorType, ConcreteOperatorType>::value, "ConcreteOperatorType invalid");
 			AddSymbol(n, o);
 		}
 		template<typename ...Append>
-		Expression(const expression::Symbol &n, Append ...append) : Expression(append...) {
+		Expression(const expression::SymbolWrapper &n, Append ...append) : Expression(append...) {
 			InitPolymorphism();
 			AddSymbol(n);
 		}
@@ -306,7 +307,7 @@ namespace expression {
 			return forwards;
 		}
 
-		Expression<OperatorType> Substitution(const Symbol &source, const ExpressionNode &destination) const {
+		Expression<OperatorType> Substitution(const SymbolWrapper &source, const ExpressionNode &destination) const {
 			Expression<OperatorType> magnitude(*this);
 			magnitude.ForeachNodes([&source, &destination](ExpressionNodes::iterator itor) {
 				if (source.IsEqual(*Visit(*itor), true)) {
@@ -458,7 +459,7 @@ namespace expression {
 		static Expression<OPERATOR_TYPE_MUL_DIV> Reciprocal(const number::Fraction &number) {
 			return Expression<OPERATOR_TYPE_MUL_DIV>(number.Numerator(), DIV, number.Denominator());
 		}
-		static Expression<OPERATOR_TYPE_MUL_DIV> Reciprocal(const expression::Symbol &symbol) {
+		static Expression<OPERATOR_TYPE_MUL_DIV> Reciprocal(const expression::SymbolWrapper &symbol) {
 			return Expression<OPERATOR_TYPE_MUL_DIV>(expression::ClosureNumber(1), DIV, symbol);
 		}
 		static Expression<OPERATOR_TYPE_MUL_DIV> Reciprocal(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &exp) {
@@ -522,7 +523,7 @@ namespace expression {
 
 		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::ClosureNumber &multiplier);
 		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::ClosureNumber &multiplier);
-		//
+		
 		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::ClosureNumber &divisor);
 		//friend Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::ClosureNumber &divisor);
 
@@ -541,6 +542,7 @@ namespace expression {
 		template<typename OPERATOR_TYPE_MUL_DIV> friend class ExpressionDeformationer;
 
 		friend class expression::Imaginary;
+		friend class inf::Infinitesimal;
 
 		friend class Polymorphism;
 		friend class PolymorphismAddSub;
@@ -571,15 +573,16 @@ namespace expression {
 			m_nodes.push_front(expression::Expression<AbstractOperatorType>(child, o.GetFlag()).SetChild());
 		}
 
-		expression::Symbol &AddSymbol(const expression::Symbol &s) {
-			m_nodes.push_front(expression::Symbol(s));
+		expression::SymbolWrapper &AddSymbol(const expression::SymbolWrapper &s) {
+			m_nodes.push_front(s);
 			Visit(Front())->SetOperator(m_polymorphism->FrontDefaultFlag());
-			return std::get<expression::Symbol>(Front());
+			return std::get<expression::SymbolWrapper>(Front());
 		}
 
 		template<typename ConcreteOperatorType>
-		void AddSymbol(const expression::Symbol &s, const ConcreteOperatorType &o) {
-			m_nodes.push_front(expression::Symbol(s, o.GetFlag()));
+		void AddSymbol(const expression::SymbolWrapper &s, const ConcreteOperatorType &o) {
+			m_nodes.push_front(s);
+			Visit(Front())->SetOperator(o.GetFlag());
 		}
 
 		void AppendNode(const ExpressionNode &node) {
@@ -712,10 +715,10 @@ namespace expression {
 		}
 
 		bool Symbol() {
-			if (SubstitutionSymbols()) {
+			if (m_polymorphism->SymbolExtend()) {
 				return true;
 			}
-			return m_polymorphism->SymbolExtend();
+			return SubstitutionSymbols();
 		}
 
 		std::shared_ptr<Expression<OPERATOR_TYPE_ADD_SUB>> Reduce() {
@@ -1082,7 +1085,7 @@ namespace expression {
 			}
 
 			{
-				auto compare = CompareTypeNode<expression::Symbol>(one, other);
+				auto compare = CompareTypeNode<expression::SymbolWrapper>(one, other);
 				if (compare.has_value()) {
 					return compare.value();
 				}
@@ -1121,15 +1124,15 @@ namespace expression {
 
 		bool SubstitutionSymbols() {
 			return !ForeachNodes([](ExpressionNodes::iterator itor) {
-				if (const expression::Symbol* symbol = std::get_if<expression::Symbol>(&*itor)) {
+				if (const expression::SymbolWrapper* symbol = std::get_if<expression::SymbolWrapper>(&*itor)) {
 					const std::shared_ptr<Node> substitution = symbol->GetSubstitution();
 					if (substitution) {
 						OPERATOR_TYPE_FLAG flag = Visit(*itor)->Flag();
 						if (typeid(*substitution) == typeid(expression::ClosureNumber)) {
 							*itor = *std::dynamic_pointer_cast<expression::ClosureNumber>(substitution);
 						}
-						else if (typeid(*substitution) == typeid(expression::Symbol)) {
-							*itor = *std::dynamic_pointer_cast<expression::Symbol>(substitution);
+						else if (typeid(*substitution) == typeid(expression::SymbolWrapper)) {
+							*itor = *std::dynamic_pointer_cast<expression::SymbolWrapper>(substitution);
 						}
 						else if (typeid(*substitution) == typeid(expression::Expression<OPERATOR_TYPE_ADD_SUB>)) {
 							*itor = *std::dynamic_pointer_cast<expression::Expression<OPERATOR_TYPE_ADD_SUB>>(substitution);
@@ -1268,7 +1271,7 @@ namespace expression {
 	private:
 		static Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpter(const ExpressionNode* node);
 
-		static Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpterMulDiv(const Symbol& symbol);
+		static Expression<OPERATOR_TYPE_MUL_DIV> GetCommonAdpterMulDiv(const SymbolWrapper& symbol);
 	private:
 		bool CheckCombine(expression::Expression<OPERATOR_TYPE_LOGARITHM>& one, expression::Expression<OPERATOR_TYPE_LOGARITHM>& other);
 		bool CollectCommonChildFull(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start);
@@ -1330,7 +1333,7 @@ namespace expression {
 	private:
 		static Expression<OPERATOR_TYPE_POWER_ROOT> GetCommonAdpter(const ExpressionNode* node);
 
-		static Expression<OPERATOR_TYPE_POWER_ROOT> GetCommonAdpterPowerRoot(const Symbol& symbol);
+		static Expression<OPERATOR_TYPE_POWER_ROOT> GetCommonAdpterPowerRoot(const SymbolWrapper& symbol);
 	private:
 		bool MulClosure();
 		bool DivClosure();

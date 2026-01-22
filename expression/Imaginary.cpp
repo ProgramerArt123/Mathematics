@@ -6,7 +6,7 @@
 
 namespace expression {
 	bool Imaginary::ExtendPowerRoot(Expression<OPERATOR_TYPE_POWER_ROOT> &exp) {
-		if (const expression::Symbol *symbol = std::get_if<expression::Symbol>(&exp.Front())) {
+		if (const expression::SymbolWrapper *symbol = std::get_if<expression::SymbolWrapper>(&exp.Front())) {
 			if (Name() != symbol->Name()) {
 				return false;
 			}
@@ -26,5 +26,9 @@ namespace expression {
 			return true;
 		}
 		return false;
+	}
+
+	std::shared_ptr<Symbol> Imaginary::GetClone() const {
+		return std::make_shared<Imaginary>(*this);
 	}
 }

@@ -230,7 +230,7 @@ namespace expression {
 	}
 	std::vector<ExpressionNodes::iterator> PolymorphismAddSub::GetChildren(){
 		std::vector<ExpressionNodes::iterator> exps;
-		std::vector<ExpressionNodes::iterator> symbols = m_exp.GetAll<expression::Symbol>();
+		std::vector<ExpressionNodes::iterator> symbols = m_exp.GetAll<expression::SymbolWrapper>();
 		exps.insert(exps.end(), symbols.begin(), symbols.end());
 		std::vector<ExpressionNodes::iterator> divs = m_exp.GetAll<expression::Expression<OPERATOR_TYPE_MUL_DIV>>();
 		exps.insert(exps.end(), divs.begin(), divs.end());
@@ -288,9 +288,9 @@ namespace expression {
 		return OPERATOR_TYPE_LEVEL_ADD_SUB;
 	}
 	bool PolymorphismAddSub::SymbolExtend() {
-		auto symbols = m_exp.GetAll<Symbol>();
+		auto symbols = m_exp.GetAll<SymbolWrapper>();
 		for (auto &symbol : symbols) {
-			if (SYMBOL(std::get<Symbol>(*symbol).Name()).ExtendAddSub(m_exp)) {
+			if (std::get<SymbolWrapper>(*symbol).ExtendAddSub(m_exp)) {
 				return true;
 			}
 		}
@@ -325,10 +325,9 @@ namespace expression {
 		}
 		return false;
 	}
-	
 	Expression<OPERATOR_TYPE_MUL_DIV> PolymorphismAddSub::GetCommonAdpter(const ExpressionNode* node)
 	{
-		if (const expression::Symbol* symbol = std::get_if<expression::Symbol>(node)) {
+		if (const expression::SymbolWrapper* symbol = std::get_if<expression::SymbolWrapper>(node)) {
 			return GetCommonAdpterMulDiv(*symbol);
 		}
 		else if (const expression::Expression<OPERATOR_TYPE_MUL_DIV>* exp1 = std::get_if<expression::Expression<OPERATOR_TYPE_MUL_DIV>>(node)) {
@@ -342,7 +341,7 @@ namespace expression {
 		}
 		return Expression<OPERATOR_TYPE_MUL_DIV>();
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> PolymorphismAddSub::GetCommonAdpterMulDiv(const Symbol& symbol) {
+	Expression<OPERATOR_TYPE_MUL_DIV> PolymorphismAddSub::GetCommonAdpterMulDiv(const SymbolWrapper& symbol) {
 		Expression<OPERATOR_TYPE_MUL_DIV> exp(number::Integer(1), MUL, symbol);
 		exp.SetOperator(symbol.Flag());
 		return exp;
@@ -460,7 +459,7 @@ namespace expression {
 	}
 	std::vector<ExpressionNodes::iterator> PolymorphismMulDiv::GetChildren(){
 		std::vector<ExpressionNodes::iterator> exps;
-		std::vector<ExpressionNodes::iterator> symbols = m_exp.GetAll<expression::Symbol>();
+		std::vector<ExpressionNodes::iterator> symbols = m_exp.GetAll<expression::SymbolWrapper>();
 		exps.insert(exps.end(), symbols.begin(), symbols.end());
 		std::vector<ExpressionNodes::iterator> roots = m_exp.GetAll<expression::Expression<OPERATOR_TYPE_POWER_ROOT>>();
 		exps.insert(exps.end(), roots.begin(), roots.end());
@@ -483,13 +482,15 @@ namespace expression {
 	Expression<OPERATOR_TYPE_MUL_DIV> PolymorphismMulDiv::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
 		const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons) {
 		
-		const Expression<OPERATOR_TYPE_MUL_DIV> &childLeft = Polymorphism::NodesBuild(leftChildren, OPERATOR_TYPE_FLAG_DIV);
-		
-		const Expression<OPERATOR_TYPE_MUL_DIV> &childRight = Polymorphism::NodesBuild(rightChildren, OPERATOR_TYPE_FLAG_DIV);
-		
-		Expression<OPERATOR_TYPE_ADD_SUB> child = OPERATOR_TYPE_FLAG_SUB == right ?
-			Expression<OPERATOR_TYPE_ADD_SUB>(childLeft, SUB, childRight) :
-			Expression<OPERATOR_TYPE_ADD_SUB>(childLeft, ADD, childRight);
+		Expression<OPERATOR_TYPE_MUL_DIV> childLeft = Polymorphism::NodesBuild(leftChildren, OPERATOR_TYPE_FLAG_DIV);
+
+		Expression<OPERATOR_TYPE_MUL_DIV> childRight = Polymorphism::NodesBuild(rightChildren, OPERATOR_TYPE_FLAG_DIV);
+
+		OPERATOR_TYPE_FLAG left = m_exp.Flag();
+		Expression<OPERATOR_TYPE_ADD_SUB> child =
+			(OPERATOR_TYPE_FLAG_SUB == left && OPERATOR_TYPE_FLAG_SUB != right) || 
+			(OPERATOR_TYPE_FLAG_SUB != left && OPERATOR_TYPE_FLAG_SUB == right) ?
+			Expression<OPERATOR_TYPE_ADD_SUB>(childLeft, SUB, childRight) : Expression<OPERATOR_TYPE_ADD_SUB>(childLeft, ADD, childRight);
 		child.SetOperator(OPERATOR_TYPE_FLAG_MUL);
 
 		Expression<OPERATOR_TYPE_MUL_DIV> collect;
@@ -497,7 +498,7 @@ namespace expression {
 			collect.AppendNode(common);
 		}
 		collect.AppendChild(child.SetChild());
-		
+
 		return collect;
 	}
 	bool PolymorphismMulDiv::Closure(ClosureNumber &closure) {
@@ -558,9 +559,9 @@ namespace expression {
 		return OPERATOR_TYPE_LEVEL_MUL_DIV;
 	}
 	bool PolymorphismMulDiv::SymbolExtend() {
-		auto symbols = m_exp.GetAll<Symbol>();
+		auto symbols = m_exp.GetAll<SymbolWrapper>();
 		for (auto& symbol : symbols) {
-			if (SYMBOL(std::get<Symbol>(*symbol).Name()).ExtendMulDiv(m_exp)) {
+			if (std::get<SymbolWrapper>(*symbol).ExtendMulDiv(m_exp)) {
 				return true;
 			}
 		}
@@ -650,7 +651,7 @@ namespace expression {
 		return exp.has_value();
 	}
 	Expression<OPERATOR_TYPE_POWER_ROOT> PolymorphismMulDiv::GetCommonAdpter(const ExpressionNode* node) {
-		if (const expression::Symbol* symbol = std::get_if<expression::Symbol>(node)) {
+		if (const expression::SymbolWrapper* symbol = std::get_if<expression::SymbolWrapper>(node)) {
 			return GetCommonAdpterPowerRoot(*symbol);
 		}
 		else if (const expression::Expression<OPERATOR_TYPE_POWER_ROOT>* exp = std::get_if<expression::Expression<OPERATOR_TYPE_POWER_ROOT>>(node)) {
@@ -658,7 +659,7 @@ namespace expression {
 		}
 		return expression::Expression<OPERATOR_TYPE_POWER_ROOT>();
 	}
-	Expression<OPERATOR_TYPE_POWER_ROOT> PolymorphismMulDiv::GetCommonAdpterPowerRoot(const Symbol& symbol) {
+	Expression<OPERATOR_TYPE_POWER_ROOT> PolymorphismMulDiv::GetCommonAdpterPowerRoot(const SymbolWrapper& symbol) {
 		Expression<OPERATOR_TYPE_POWER_ROOT> exp(symbol, POWER, number::Integer(1));
 		exp.SetOperator(symbol.Flag());
 		return exp;
@@ -964,7 +965,7 @@ namespace expression {
 		std::vector<ExpressionNodes::iterator> nodes = m_exp.GetAll();
 		for (size_t i = 1; i < nodes.size(); ++i) {
 
-			for (size_t j = i + i; j < nodes.size(); ++j) {
+			for (size_t j = i + 1; j < nodes.size(); ++j) {
 				if (i != j &&
 					Polymorphism::Visit(*nodes.at(i))->IsEqual(
 						*Polymorphism::Visit(*nodes.at(j)), false, true)) {
@@ -998,14 +999,19 @@ namespace expression {
 	Expression<OPERATOR_TYPE_MUL_DIV> PolymorphismPowerRoot::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
 		const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons) {
 		
-		const Expression<OPERATOR_TYPE_MUL_DIV> &childLeft = Polymorphism::NodesBuild(leftChildren, OPERATOR_TYPE_FLAG_ROOT);
+		Expression<OPERATOR_TYPE_MUL_DIV> childLeft = Polymorphism::NodesBuild(leftChildren, OPERATOR_TYPE_FLAG_ROOT);
 
-		const Expression<OPERATOR_TYPE_MUL_DIV> &childRight = Polymorphism::NodesBuild(rightChildren, OPERATOR_TYPE_FLAG_ROOT);
+		Expression<OPERATOR_TYPE_MUL_DIV> childRight = Polymorphism::NodesBuild(rightChildren, OPERATOR_TYPE_FLAG_ROOT);
+
+		OPERATOR_TYPE_FLAG left = m_exp.Flag();
 
 		if (ContainFront(commons)) {
-			Expression<OPERATOR_TYPE_ADD_SUB> child = OPERATOR_TYPE_FLAG_DIV == right ?
-				Expression<OPERATOR_TYPE_ADD_SUB>(childLeft, SUB, childRight) :
+			Expression<OPERATOR_TYPE_ADD_SUB> child = 
+				(OPERATOR_TYPE_FLAG_DIV == left && OPERATOR_TYPE_FLAG_DIV != right) ||
+				(OPERATOR_TYPE_FLAG_DIV != left && OPERATOR_TYPE_FLAG_DIV == right) ? 
+				Expression<OPERATOR_TYPE_ADD_SUB>(childLeft, SUB, childRight):
 				Expression<OPERATOR_TYPE_ADD_SUB>(childLeft, ADD, childRight);
+			
 			child.SetOperator(OPERATOR_TYPE_FLAG_POWER);
 
 			Expression<OPERATOR_TYPE_POWER_ROOT> collect;
@@ -1016,10 +1022,13 @@ namespace expression {
 			return collect;
 		}
 		else {
-			Expression<OPERATOR_TYPE_MUL_DIV> child = OPERATOR_TYPE_FLAG_DIV == right ?
-				Expression<OPERATOR_TYPE_MUL_DIV>(childLeft, DIV, childRight) :
+			Expression<OPERATOR_TYPE_ADD_SUB> child =
+				(OPERATOR_TYPE_FLAG_DIV == left && OPERATOR_TYPE_FLAG_DIV != right) ||
+				(OPERATOR_TYPE_FLAG_DIV != left && OPERATOR_TYPE_FLAG_DIV == right) ?
+				Expression<OPERATOR_TYPE_MUL_DIV>(childLeft, DIV, childRight) : 
 				Expression<OPERATOR_TYPE_MUL_DIV>(childLeft, MUL, childRight);
-			child.SetOperator(OPERATOR_TYPE_FLAG_POWER);
+			
+			child.SetOperator(OPERATOR_TYPE_FLAG_MUL);
 
 			Expression<OPERATOR_TYPE_POWER_ROOT> collect;
 			collect.AppendChild(child.SetChild());
@@ -1068,9 +1077,9 @@ namespace expression {
 		return OPERATOR_TYPE_LEVEL_POWER_ROOT;
 	}
 	bool PolymorphismPowerRoot::SymbolExtend() {
-		auto symbols = m_exp.GetAll<Symbol>();
+		auto symbols = m_exp.GetAll<SymbolWrapper>();
 		for (auto& symbol : symbols) {
-			if (SYMBOL(std::get<Symbol>(*symbol).Name()).ExtendPowerRoot(m_exp)) {
+			if (std::get<SymbolWrapper>(*symbol).ExtendPowerRoot(m_exp)) {
 				return true;
 			}
 		}
@@ -1384,9 +1393,9 @@ namespace expression {
 		return OPERATOR_TYPE_LEVEL_LOGARITHM;
 	}
 	bool PolymorphismLogarithm::SymbolExtend() {
-		auto symbols = m_exp.GetAll<Symbol>();
+		auto symbols = m_exp.GetAll<SymbolWrapper>();
 		for (auto& symbol : symbols) {
-			if (SYMBOL(std::get<Symbol>(*symbol).Name()).ExtendLogarithm(m_exp)) {
+			if (std::get<SymbolWrapper>(*symbol).ExtendLogarithm(m_exp)) {
 				return true;
 			}
 		}

@@ -13,38 +13,29 @@ namespace expression {
 
 	template<typename OperatorType> class Expression;
 
-	class Symbol : public Atom {
+	class Symbol {
 	public:
-		Symbol(const expression::Symbol &prototype);
-		Symbol(const expression::Symbol &prototype, OPERATOR_TYPE_FLAG flag);
-		Symbol(const std::string &name, bool isUnSigned = true, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_NONE);
+		Symbol(const expression::Symbol& prototype);
+		Symbol(const std::string& name);
 
-		const std::string GetString(uint8_t radix = LITERAL_DEFAULT_RADIX) const override;
+		virtual const std::string GetString(uint8_t radix = LITERAL_DEFAULT_RADIX) const;
 
-		bool IsEqual(const Node& other, bool ignoreSigned = false, bool ignoreOperator = false) const override;
+		std::optional<bool> Compare(const Symbol& other) const;
 
-		Symbol operator-() const;
+		virtual const std::string& Name() const;
 
-		std::optional<bool> Compare(const Symbol &other) const;
+		bool operator==(const Symbol& other) const;
 
-		const std::string &Name() const;
+		virtual bool ExtendAddSub(Expression<OPERATOR_TYPE_ADD_SUB>& exp);
+		virtual bool ExtendMulDiv(Expression<OPERATOR_TYPE_MUL_DIV>& exp);
+		virtual bool ExtendPowerRoot(Expression<OPERATOR_TYPE_POWER_ROOT>& exp);
+		virtual bool ExtendLogarithm(Expression<OPERATOR_TYPE_LOGARITHM>& exp);
 
-		const Symbol &operator=(const Symbol &right);
-
-		bool operator==(const Symbol &other) const;
-
-		bool EqualZero() const override;
-		bool EqualPositiveOne() const override;
-		bool EqualNegativeOne() const override;
-
-		virtual bool ExtendAddSub(Expression<OPERATOR_TYPE_ADD_SUB> &exp);
-		virtual bool ExtendMulDiv(Expression<OPERATOR_TYPE_MUL_DIV> &exp);
-		virtual bool ExtendPowerRoot(Expression<OPERATOR_TYPE_POWER_ROOT> &exp);
-		virtual bool ExtendLogarithm(Expression<OPERATOR_TYPE_LOGARITHM> &exp);
+		virtual std::shared_ptr<Symbol> GetClone() const;
 
 	public:
 		template<typename SubstitutionType>
-		void SetSubstitution(const SubstitutionType &substitution) {
+		void SetSubstitution(const SubstitutionType& substitution) {
 			m_substitution = std::make_shared<SubstitutionType>(substitution);
 		}
 
@@ -60,33 +51,56 @@ namespace expression {
 		std::string m_name;
 
 	};
-
-	class SymbolManager {
+	
+	class SymbolWrapper : public Atom {
 	public:
-		static SymbolManager &GetInstance();
+		SymbolWrapper(const SymbolWrapper &prototype);
+		SymbolWrapper(const std::shared_ptr<Symbol> inner, OPERATOR_TYPE_FLAG flag);
+		SymbolWrapper(const std::shared_ptr<Symbol> inner, bool isUnSigned = true, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_NONE);
 
-		template<typename SYMBOL = Symbol>
-		Symbol &GetSymbol(const std::string& name) {
-			if (m_symbols.find(name) == m_symbols.cend()) {
-				m_symbols.insert(std::make_pair(name, std::make_unique<SYMBOL>(name)));
-			}
-			return *m_symbols[name];
+		const std::string GetString(uint8_t radix = LITERAL_DEFAULT_RADIX) const override;
+
+		bool IsEqual(const Node& other, bool ignoreSigned = false, bool ignoreOperator = false) const override;
+
+		SymbolWrapper operator-() const;
+
+		std::optional<bool> Compare(const SymbolWrapper &other) const;
+
+		const std::string &Name() const;
+
+		const SymbolWrapper& operator=(const SymbolWrapper& right);
+
+		bool operator==(const SymbolWrapper& other) const;
+
+		bool EqualZero() const override;
+		bool EqualPositiveOne() const override;
+		bool EqualNegativeOne() const override;
+
+		bool ExtendAddSub(Expression<OPERATOR_TYPE_ADD_SUB>& exp);
+		bool ExtendMulDiv(Expression<OPERATOR_TYPE_MUL_DIV>& exp);
+		bool ExtendPowerRoot(Expression<OPERATOR_TYPE_POWER_ROOT>& exp);
+		bool ExtendLogarithm(Expression<OPERATOR_TYPE_LOGARITHM>& exp);
+
+		template<typename SubstitutionType>
+		void SetSubstitution(const SubstitutionType& substitution) {
+			m_inner->SetSubstitution(substitution);
 		}
+
+		void SetSubstitution();
+
+		std::shared_ptr<Node> GetSubstitution() const;
 	private:
-		SymbolManager() {}
-	private:
-		std::map<std::string, std::unique_ptr<Symbol>> m_symbols;
+		std::shared_ptr<Symbol> m_inner;
 	};
+
 }
 
-#define SYMBOL(name) SymbolManager::GetInstance().GetSymbol(name)
+#define SYMBOL_A SymbolWrapper(std::make_shared<Symbol>("a"))
+#define SYMBOL_B SymbolWrapper(std::make_shared<Symbol>("b"))
+#define SYMBOL_C SymbolWrapper(std::make_shared<Symbol>("c"))
 
-#define SYMBOL_A SYMBOL("a")
-#define SYMBOL_B SYMBOL("b")
-#define SYMBOL_C SYMBOL("c")
-
-#define SYMBOL_X SYMBOL("x")
-#define SYMBOL_Y SYMBOL("y")
-#define SYMBOL_Z SYMBOL("z")
+#define SYMBOL_X SymbolWrapper(std::make_shared<Symbol>("x"))
+#define SYMBOL_Y SymbolWrapper(std::make_shared<Symbol>("y"))
+#define SYMBOL_Z SymbolWrapper(std::make_shared<Symbol>("z"))
 
 #endif

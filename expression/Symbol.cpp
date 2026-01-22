@@ -4,36 +4,11 @@ namespace expression {
 	Symbol::Symbol(const expression::Symbol &prototype) {
 		*this = prototype;
 	}
-	Symbol::Symbol(const expression::Symbol &prototype, OPERATOR_TYPE_FLAG flag) {
-		*this = prototype;
-		SetOperator(flag);
-	}
-	Symbol::Symbol(const std::string &name, bool isUnSigned, OPERATOR_TYPE_FLAG flag):
-		Atom(flag), m_name(name){
-		SetUnSigned(isUnSigned);
+	Symbol::Symbol(const std::string &name):
+		 m_name(name){
 	}
 	const std::string Symbol::GetString(uint8_t radix) const {
-		std::stringstream ss;
-		if (IsDisplaySigned()) {
-			ss << "-";
-		}
-		ss << Name();
-		if (m_substitution) {
-			ss << "{" << *m_substitution << "}";
-		}
-		return ss.str();
-	}
-	bool Symbol::IsEqual(const Node& other, bool ignoreSigned, bool ignoreOperator) const {
-		if (!Node::IsEqual(other, ignoreSigned, ignoreOperator)) {
-			return false;
-		}
-		const Symbol& otherSymbol = dynamic_cast<const Symbol&>(other);
-		return Name() == otherSymbol.Name();
-	}
-	Symbol Symbol::operator-() const {
-		Symbol negative(*this);
-		negative.Opposite();
-		return negative;
+		return Name();
 	}
 	std::optional<bool> Symbol::Compare(const Symbol &other) const {
 		if (Name() == other.Name()) {
@@ -44,26 +19,8 @@ namespace expression {
 	const std::string &Symbol::Name() const {
 		return m_name;
 	}
-	const Symbol &Symbol::operator=(const Symbol &right) {
-		Atom::operator=(right);
-		m_name = right.m_name;
-		m_unsigned = right.m_unsigned;
-		m_substitution = right.m_substitution;
-		return *this;
-	}
 	bool Symbol::operator==(const Symbol &other) const {
-		return Atom::operator==(other) &&
-			m_name == other.m_name &&
-			m_unsigned == other.m_unsigned;
-	}
-	bool Symbol::EqualZero() const {
-		return false;
-	}
-	bool Symbol::EqualPositiveOne() const {
-		return false;
-	}
-	bool Symbol::EqualNegativeOne() const {
-		return false;
+		return m_name == other.m_name;
 	}
 	bool Symbol::ExtendAddSub(Expression<OPERATOR_TYPE_ADD_SUB> &exp) {
 		return false;
@@ -77,15 +34,88 @@ namespace expression {
 	bool Symbol::ExtendLogarithm(Expression<OPERATOR_TYPE_LOGARITHM>& exp) {
 		return false;
 	}
+	std::shared_ptr<Symbol> Symbol::GetClone() const {
+		return std::make_shared<Symbol>(*this);
+	}
 	void Symbol::SetSubstitution() {
 		m_substitution.reset();
 	}
 	std::shared_ptr<Node> Symbol::GetSubstitution() const {
 		return m_substitution;
 	}
-	SymbolManager &SymbolManager::GetInstance() {
-		static SymbolManager instance;
-		return instance;
+	SymbolWrapper::SymbolWrapper(const SymbolWrapper &prototype){
+		*this = prototype;
 	}
-
+	SymbolWrapper::SymbolWrapper(const std::shared_ptr<Symbol> inner, OPERATOR_TYPE_FLAG flag):
+		m_inner(inner) {
+		SetOperator(flag);
+	}
+	SymbolWrapper::SymbolWrapper(const std::shared_ptr<Symbol> inner, bool isUnSigned, OPERATOR_TYPE_FLAG flag):
+		Atom(flag), m_inner(inner){
+		SetUnSigned(isUnSigned);
+	}
+	const std::string SymbolWrapper::GetString(uint8_t radix) const {
+		std::stringstream ss;
+		if (IsDisplaySigned()) {
+			ss << "-";
+		}
+		ss << m_inner->GetString();
+		if (m_inner->GetSubstitution()) {
+			ss << "{" << *m_inner->GetSubstitution() << "}";
+		}
+		return ss.str();
+	}
+	bool SymbolWrapper::IsEqual(const Node& other, bool ignoreSigned, bool ignoreOperator) const {
+		if (!Node::IsEqual(other, ignoreSigned, ignoreOperator)) {
+			return false;
+		}
+		const SymbolWrapper &otherWrapper = dynamic_cast<const SymbolWrapper&>(other);
+		return *m_inner == *otherWrapper.m_inner;
+	}
+	SymbolWrapper SymbolWrapper::operator-() const {
+		SymbolWrapper negative(*this);
+		negative.Opposite();
+		return negative;
+	}
+	std::optional<bool> SymbolWrapper::Compare(const SymbolWrapper& other) const {
+		return m_inner->Compare(*other.m_inner);
+	}
+	const std::string &SymbolWrapper::Name() const {
+		return m_inner->Name();
+	}
+	const SymbolWrapper &SymbolWrapper::operator=(const SymbolWrapper& right) {
+		Atom::operator=(right);
+		m_inner = right.m_inner->GetClone();
+		return *this;
+	}
+	bool SymbolWrapper::operator==(const SymbolWrapper& other) const {
+		return Atom::operator==(other) && *m_inner == *other.m_inner;
+	}
+	bool SymbolWrapper::EqualZero() const {
+		return false;
+	}
+	bool SymbolWrapper::EqualPositiveOne() const {
+		return false;
+	}
+	bool SymbolWrapper::EqualNegativeOne() const {
+		return false;
+	}
+	bool SymbolWrapper::SymbolWrapper::ExtendAddSub(Expression<OPERATOR_TYPE_ADD_SUB>& exp) {
+		return m_inner->ExtendAddSub(exp);
+	}
+	bool SymbolWrapper::ExtendMulDiv(Expression<OPERATOR_TYPE_MUL_DIV>& exp) {
+		return m_inner->ExtendMulDiv(exp);
+	}
+	bool SymbolWrapper::ExtendPowerRoot(Expression<OPERATOR_TYPE_POWER_ROOT>& exp) {
+		return m_inner->ExtendPowerRoot(exp);
+	}
+	bool SymbolWrapper::ExtendLogarithm(Expression<OPERATOR_TYPE_LOGARITHM>& exp) {
+		return m_inner->ExtendLogarithm(exp);
+	}
+	void SymbolWrapper::SetSubstitution() {
+		m_inner->SetSubstitution();
+	}
+	std::shared_ptr<Node> SymbolWrapper::GetSubstitution() const {
+		return m_inner->GetSubstitution();
+	}
 }

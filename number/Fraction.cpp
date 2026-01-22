@@ -120,7 +120,7 @@ namespace number {
 	}
 
 	Fraction Fraction::GetReciprocal() const {
-		return Fraction(m_denominator, m_numerator);
+		return Fraction(m_denominator, m_numerator, IsPositive());
 	}
 
 	bool Fraction::IsInteger() const {
@@ -244,28 +244,16 @@ namespace number {
 		return *this > other || *this == other;
 	}
 	Fraction Fraction::operator+(const Fraction &addition) const {
-		if (IsPositive() && addition.IsPositive()) {
-			return Fraction((m_numerator * addition.m_denominator) +
-				(addition.m_numerator * m_denominator),
-				m_denominator * addition.m_denominator);
-		}
-		else if (!addition.IsPositive()) {
-			return Fraction(Integer(m_numerator * addition.m_denominator) -
-				Integer(addition.m_numerator * m_denominator),
-				m_denominator * addition.m_denominator);
-		}
-		else {
-			return Fraction(Integer(addition.m_numerator * m_denominator) -
-				Integer(m_numerator * addition.m_denominator),
-				m_denominator * addition.m_denominator);
-		}
+		return Fraction(Integer(m_numerator * addition.m_denominator, IsPositive()) +
+			Integer(addition.m_numerator * m_denominator, addition.IsPositive()),
+			m_denominator * addition.m_denominator);
 	}
 	Fraction Fraction::operator-(const Fraction &subtrahend) const {
 		return *this + (-subtrahend);
 	}
 	Fraction Fraction::operator*(const Fraction &multiplier) const {
 		return Fraction(m_numerator * multiplier.m_numerator,
-			m_denominator * multiplier.m_denominator);
+			m_denominator * multiplier.m_denominator, IsPositive() == multiplier.IsPositive());
 	}
 	Fraction &Fraction::operator+=(const Fraction &addition) {
 		return *this = *this + addition;
@@ -281,7 +269,7 @@ namespace number {
 	}
 	Fraction Fraction::operator/(const Fraction &divisor) const {
 		assert(!divisor.m_numerator.EqualZero());
-		return *this * Fraction(divisor.m_denominator, divisor.m_numerator);
+		return *this * Fraction(divisor.m_denominator, divisor.m_numerator, divisor.IsPositive());
 	}
 	Fraction Fraction::Power(const number::Integer &exponent) const {
 		return Power(m_numerator, exponent) / Power(m_denominator, exponent);

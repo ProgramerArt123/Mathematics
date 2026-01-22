@@ -6,14 +6,16 @@
 namespace expression {
 	class Imaginary : public Symbol {
 	public:
-		Imaginary(const std::string& name, bool isUnSigned = true, OPERATOR_TYPE_FLAG flag = OPERATOR_TYPE_FLAG_NONE):
-			Symbol(name, isUnSigned, flag){
+		Imaginary(const std::string &name = "i") :
+			Symbol(name){
 
 		}
 		bool ExtendPowerRoot(Expression<OPERATOR_TYPE_POWER_ROOT> &exp) override;
+
+		std::shared_ptr<Symbol> GetClone() const override;
 	};
 }
 
-#define SYMBOL_IMAGINARY SymbolManager::GetInstance().GetSymbol<expression::Imaginary>("i")
+#define SYMBOL_IMAGINARY SymbolWrapper(std::make_shared<expression::Imaginary>("i"))
 
 #endif
