@@ -21,8 +21,8 @@ namespace expression {
 		bool EqualNegativeOne() const override;
 		bool IsDisplaySigned() const override;
 
-		bool AddSubSigned() override;
-		bool MulDivSigned() override;
+		size_t AddSubSigned() override;
+		size_t MulDivSigned() override;
 
 		void Opposite() override;
 

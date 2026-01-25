@@ -25,6 +25,7 @@
 #include "number/Root.h"
 #include "number/Logarithm.h"
 #include "inf/Infinitesimal.h"
+#include "inf/Infinity.h"
 
 
 namespace expression {
@@ -543,6 +544,7 @@ namespace expression {
 
 		friend class expression::Imaginary;
 		friend class inf::Infinitesimal;
+		friend class inf::Infinity;
 
 		friend class Polymorphism;
 		friend class PolymorphismAddSub;

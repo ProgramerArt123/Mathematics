@@ -491,13 +491,14 @@ namespace expression {
 			(OPERATOR_TYPE_FLAG_SUB == left && OPERATOR_TYPE_FLAG_SUB != right) || 
 			(OPERATOR_TYPE_FLAG_SUB != left && OPERATOR_TYPE_FLAG_SUB == right) ?
 			Expression<OPERATOR_TYPE_ADD_SUB>(childLeft, SUB, childRight) : Expression<OPERATOR_TYPE_ADD_SUB>(childLeft, ADD, childRight);
-		child.SetOperator(OPERATOR_TYPE_FLAG_MUL);
-
+		
 		Expression<OPERATOR_TYPE_MUL_DIV> collect;
+
+		collect.AppendChild(child.SetChild());
+		
 		for (auto &common : commons) {
 			collect.AppendNode(common);
 		}
-		collect.AppendChild(child.SetChild());
 
 		return collect;
 	}
@@ -806,9 +807,7 @@ namespace expression {
 		int signedCount = 0;
 		auto node = m_exp.begin();
 		while (node != m_exp.end()) {
-			if (Polymorphism::Visit(*node)->MulDivSigned()) {
-				signedCount++;
-			}
+			signedCount += Polymorphism::Visit(*node)->MulDivSigned();
 			node++;
 		}
 		return signedCount;

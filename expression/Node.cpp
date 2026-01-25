@@ -86,29 +86,29 @@ namespace expression {
 		return false;
 	}
 
-	bool Node::AddSubSigned() {
+	size_t Node::AddSubSigned() {
 		if (IsDisplaySigned()) {
 			Opposite();
 			SetOperator(IsAdd() ? OPERATOR_TYPE_FLAG_SUB : OPERATOR_TYPE_FLAG_ADD);
-			return true;
+			return 1;
 		}
-		return false;
+		return 0;
 	}
 
-	bool Node::MulDivSigned() {
+	size_t Node::MulDivSigned() {
 		if (IsDisplaySigned()) {
 			Opposite();
-			return true;
+			return 1;
 		}
-		return false;
+		return 0;
 	}
 
-	bool Node::PowerRootSigned() {
+	size_t Node::PowerRootSigned() {
 		if (IsDisplaySigned()) {
 			Opposite();
-			return true;
+			return 1;
 		}
-		return false;
+		return 0;
 	}
 
 	void Node::Opposite() {

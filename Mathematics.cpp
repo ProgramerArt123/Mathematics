@@ -34,7 +34,8 @@ using namespace expression;
 #ifdef INF_TEST
 #include "expression/Expression.hpp"
 #include "inf/Infinitesimal.h"
-using namespace expression;
+#include "inf/Infinity.h"
+using namespace inf;
 #endif
 
 int main() {
@@ -346,7 +347,7 @@ int main() {
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
 	}
 	{
-		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(expression::SYMBOL_A, ADD, SYMBOL_B);
+		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(SYMBOL_A, ADD, SYMBOL_B);
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
 	}
 	{
@@ -1070,23 +1071,23 @@ int main() {
 
 	{
 		const number::Integer divisor(2);
-		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(SYMBOL_INFINITESIMAL, DIV, divisor);
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(SYMBOL_INFINITESIMAL, DIV, divisor);
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
 	}
 
 	{
 		inf::Infinitesimal::SetIgnoreLine(number::Fraction(10));
 		const number::Integer divisor(2);
-		std::shared_ptr<Symbol> o = std::make_shared<inf::Infinitesimal>("o", number::Fraction(1, 2));
-		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(o, DIV, divisor);
+		std::shared_ptr<expression::Symbol> o = std::make_shared<inf::Infinitesimal>("o", number::Fraction(1, 2));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o, DIV, divisor);
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
 	}
 
 	{
 		inf::Infinitesimal::SetIgnoreLine(number::Fraction(1, 10));
 		const number::Integer multiplier(2);
-		std::shared_ptr<Symbol> o = std::make_shared<inf::Infinitesimal>("o", number::Fraction(1, 3));
-		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(o, MUL, multiplier);
+		std::shared_ptr<expression::Symbol> o = std::make_shared<inf::Infinitesimal>("o", number::Fraction(1, 3));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o, MUL, multiplier);
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
 	}
 
@@ -1094,45 +1095,241 @@ int main() {
 	{
 		inf::Infinitesimal::SetIgnoreLine(number::Fraction(1, 10));
 		const number::Integer multiplier(2);
-		std::shared_ptr<Symbol> o = std::make_shared<inf::Infinitesimal>("o", number::Fraction(1, 5));
-		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(o, MUL, multiplier, MUL, number::Integer(10));
+		std::shared_ptr<expression::Symbol> o = std::make_shared<inf::Infinitesimal>("o", number::Fraction(1, 5));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o, MUL, multiplier, MUL, number::Integer(10));
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
 	}
 
 	{
 		inf::Infinitesimal::SetIgnoreLine(number::Fraction(1, 100));
 		const number::Integer multiplier(2);
-		std::shared_ptr<Symbol> o = std::make_shared<inf::Infinitesimal>("o", number::Fraction(1, 10));
-		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(o, MUL, multiplier, MUL, number::Integer(10));
+		std::shared_ptr<expression::Symbol> o = std::make_shared<inf::Infinitesimal>("o", number::Fraction(1, 10));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o, MUL, multiplier, MUL, number::Integer(10));
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
 	}
 
 	{
 		inf::Infinitesimal::SetIgnoreLine(number::Fraction(1, 100));
 		const number::Integer multiplier(2);
-		std::shared_ptr<Symbol> o = std::make_shared<inf::Infinitesimal>("o", number::Fraction(1, 3));
-		expression::Expression<OPERATOR_TYPE_MUL_DIV> e0(o, MUL, multiplier, MUL, number::Integer(30));
-		expression::Expression<OPERATOR_TYPE_ADD_SUB> e(number::Integer(123), ADD, e0);
+		std::shared_ptr<expression::Symbol> o = std::make_shared<inf::Infinitesimal>("o", number::Fraction(1, 3));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e0(o, MUL, multiplier, MUL, number::Integer(30));
+		expression::Expression<expression::OPERATOR_TYPE_ADD_SUB> e(number::Integer(123), ADD, e0);
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
 	}
 
 	{
-		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(SYMBOL_INFINITESIMAL, DIV, SYMBOL_INFINITESIMAL);
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(SYMBOL_INFINITESIMAL, DIV, SYMBOL_INFINITESIMAL);
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
 	}
 
 	{
-		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(SYMBOL_INFINITESIMAL, MUL, SYMBOL_INFINITESIMAL);
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(SYMBOL_INFINITESIMAL, MUL, SYMBOL_INFINITESIMAL);
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
 	}
 
 	{
 		inf::Infinitesimal::SetIgnoreLine(number::Fraction(10));
-		expression::Expression<OPERATOR_TYPE_MUL_DIV> e(SYMBOL_INFINITESIMAL, MUL, SYMBOL_INFINITESIMAL);
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(SYMBOL_INFINITESIMAL, MUL, SYMBOL_INFINITESIMAL);
 		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
 	}
 
+	{
+		std::shared_ptr<expression::Symbol> o1 = std::make_shared<inf::Infinitesimal>("o", number::Fraction(2));
+		std::shared_ptr<expression::Symbol> o2 = std::make_shared<inf::Infinitesimal>("o", number::Fraction(3));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o1, MUL, o2);
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		std::shared_ptr<expression::Symbol> o1 = std::make_shared<inf::Infinitesimal>("o", number::Fraction(2));
+		std::shared_ptr<expression::Symbol> o2 = std::make_shared<inf::Infinitesimal>("o", number::Fraction(3, 1, false));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o1, MUL, expression::SymbolWrapper(o2));
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		std::shared_ptr<expression::Symbol> o1 = std::make_shared<inf::Infinitesimal>("o", number::Fraction(2));
+		std::shared_ptr<expression::Symbol> o2 = std::make_shared<inf::Infinitesimal>("o", number::Fraction(3, 1, false));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o1, MUL, -expression::SymbolWrapper(o2));
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		std::shared_ptr<expression::Symbol> o1 = std::make_shared<inf::Infinitesimal>("o", number::Fraction(2));
+		std::shared_ptr<expression::Symbol> o2 = std::make_shared<inf::Infinitesimal>("o", number::Fraction(3, 1, false));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o1, DIV, expression::SymbolWrapper(o2));
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		std::shared_ptr<expression::Symbol> o2 = std::make_shared<inf::Infinitesimal>("o", number::Fraction(3, 1, false));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(number::Integer(1), DIV, expression::SymbolWrapper(o2));
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		const inf::Infinity unit("oo");
+		std::cout << "unit Infinity:" << unit.GetString() << std::endl;
+	}
+
+	{
+		const inf::Infinity addend("oo");
+		std::cout << "Infinity sum:" << (addend + addend).GetString() << std::endl;
+	}
+
+	{
+		const inf::Infinity minuend("oo");
+		const inf::Infinity subtrahend("oo");
+		std::cout << "Infinity difference:" << (minuend - subtrahend).GetString() << std::endl;
+	}
+
+	{
+		const inf::Infinity minuend("oo");
+		const inf::Infinity subtrahend("oo", number::Fraction(1, 2));
+		std::cout << "Infinity difference:" << (minuend - subtrahend).GetString() << std::endl;
+	}
+
+	{
+		const inf::Infinity minuend("oo", number::Integer(1, false));
+		const inf::Infinity subtrahend("oo", number::Fraction(1, 2));
+		std::cout << "Infinity difference:" << (minuend - subtrahend).GetString() << std::endl;
+	}
+
+	{
+		const inf::Infinity dividend("oo", number::Integer(1, false));
+		const inf::Infinity divisor("oo", number::Fraction(1, 2));
+		std::cout << "Infinity quotient:" << dividend / divisor << std::endl;
+	}
+
+	{
+		const number::Integer divisor(2);
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(SYMBOL_INFINITY, DIV, divisor);
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		const number::Integer divisor(2);
+		std::shared_ptr<expression::Symbol> o = std::make_shared<inf::Infinity>("oo", number::Fraction(1, 2));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o, DIV, divisor);
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		const number::Integer multiplier(2);
+		std::shared_ptr<expression::Symbol> o = std::make_shared<inf::Infinity>("oo", number::Fraction(1, 3));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o, MUL, multiplier);
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+
+	{
+		const number::Integer multiplier(2);
+		std::shared_ptr<expression::Symbol> o = std::make_shared<inf::Infinity>("oo", number::Fraction(1, 5));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o, MUL, multiplier, MUL, number::Integer(10));
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		const number::Integer multiplier(2);
+		std::shared_ptr<expression::Symbol> o = std::make_shared<inf::Infinity>("oo", number::Fraction(1, 10));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o, MUL, multiplier, MUL, number::Integer(10));
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		const number::Integer multiplier(2);
+		std::shared_ptr<expression::Symbol> o = std::make_shared<inf::Infinity>("oo", number::Fraction(1, 3));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e0(o, MUL, multiplier, MUL, number::Integer(30));
+		expression::Expression<expression::OPERATOR_TYPE_ADD_SUB> e(number::Integer(123), ADD, e0);
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(SYMBOL_INFINITY, DIV, SYMBOL_INFINITY);
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(SYMBOL_INFINITY, MUL, SYMBOL_INFINITY);
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		std::shared_ptr<expression::Symbol> o1 = std::make_shared<inf::Infinity>("oo", number::Fraction(2));
+		std::shared_ptr<expression::Symbol> o2 = std::make_shared<inf::Infinity>("oo", number::Fraction(3));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o1, MUL, o2);
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		std::shared_ptr<expression::Symbol> o1 = std::make_shared<inf::Infinity>("oo", number::Fraction(2));
+		std::shared_ptr<expression::Symbol> o2 = std::make_shared<inf::Infinity>("oo", number::Fraction(3, 1, false));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o1, MUL, expression::SymbolWrapper(o2));
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		std::shared_ptr<expression::Symbol> o1 = std::make_shared<inf::Infinity>("oo", number::Fraction(2));
+		std::shared_ptr<expression::Symbol> o2 = std::make_shared<inf::Infinity>("oo", number::Fraction(3, 1, false));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o1, MUL, -expression::SymbolWrapper(o2));
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		std::shared_ptr<expression::Symbol> o1 = std::make_shared<inf::Infinity>("oo", number::Fraction(2));
+		std::shared_ptr<expression::Symbol> o2 = std::make_shared<inf::Infinity>("oo", number::Fraction(3, 1, false));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(o1, DIV, expression::SymbolWrapper(o2));
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		std::shared_ptr<expression::Symbol> o2 = std::make_shared<inf::Infinity>("oo", number::Fraction(3, 1, false));
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(number::Integer(1), DIV, expression::SymbolWrapper(o2));
+		e.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+	}
+
+	{
+		std::cout << "derivative:" << std::endl;
+		Infinitesimal::SetIgnoreLine(number::Integer(1));
+		auto exponent = expression::ClosureNumber(number::Integer(2));
+		expression::Expression<expression::OPERATOR_TYPE_ADD_SUB> e0(SYMBOL_X, ADD, SYMBOL_INFINITESIMAL);
+		expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT> e1(e0, POWER, exponent);
+		expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT> e2(SYMBOL_X, POWER, exponent);
+		expression::Expression<expression::OPERATOR_TYPE_ADD_SUB> e3(e1, SUB, e2);
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(e3, DIV, SYMBOL_INFINITESIMAL);
+		expression::SymbolWrapper::SubstitutionOff();
+		auto expands = e.ExpandForwardOutput(std::cout);
+		std::visit([](auto& expand) {
+			auto collects = expand.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+			expression::SymbolWrapper::SubstitutionOn();
+			std::visit([](auto& collect) {
+				collect.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+			}, collects.back());
+		}, expands.back());
+	}
+
+	{
+		std::cout << "derivative:" << std::endl;
+		Infinitesimal::SetIgnoreLine(number::Integer(1));
+		auto exponent = expression::ClosureNumber(number::Integer(3));
+		expression::Expression<expression::OPERATOR_TYPE_ADD_SUB> e0(SYMBOL_X, ADD, SYMBOL_INFINITESIMAL);
+		expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT> e1(e0, POWER, exponent);
+		expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT> e2(SYMBOL_X, POWER, exponent);
+		expression::Expression<expression::OPERATOR_TYPE_ADD_SUB> e3(e1, SUB, e2);
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(e3, DIV, SYMBOL_INFINITESIMAL);
+		expression::SymbolWrapper::SubstitutionOff();
+		auto expands = e.ExpandForwardOutput(std::cout);
+		std::visit([](auto& expand) {
+			auto collects = expand.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+			expression::SymbolWrapper::SubstitutionOn();
+			std::visit([](auto& collect) {
+				collect.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
+				}, collects.back());
+			}, expands.back());
+	}
+
 #endif
+
 	getchar();
 	return 0;
 }

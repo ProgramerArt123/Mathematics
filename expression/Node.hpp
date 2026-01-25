@@ -38,9 +38,9 @@ namespace expression {
 		virtual bool IsDisplaySigned() const;
 
 		virtual bool Signed();
-		virtual bool AddSubSigned();
-		virtual bool MulDivSigned();
-		virtual bool PowerRootSigned();
+		virtual size_t AddSubSigned();
+		virtual size_t MulDivSigned();
+		virtual size_t PowerRootSigned();
 
 		virtual void Opposite();
 

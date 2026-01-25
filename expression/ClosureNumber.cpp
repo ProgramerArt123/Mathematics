@@ -46,8 +46,8 @@ namespace expression {
 		int signedCount = (IsUnSigned() ? 0 : 1) + (Value().IsPositive() ? 0 : 1);
 		return 1 == signedCount % 2;
 	}
-	bool ClosureNumber::AddSubSigned() {
-		int signedCount = (IsUnSigned() ? 0 : 1) + (Value().IsPositive() ? 0 : 1);
+	size_t ClosureNumber::AddSubSigned() {
+		size_t signedCount = (IsUnSigned() ? 0 : 1) + (Value().IsPositive() ? 0 : 1);
 		if (signedCount) {
 			if (!Value().IsPositive()) {
 				Opposite();
@@ -58,12 +58,11 @@ namespace expression {
 			if (1 == signedCount) {
 				SetOperator(IsAdd() ? OPERATOR_TYPE_FLAG_SUB : OPERATOR_TYPE_FLAG_ADD);
 			}
-			return true;
 		}
-		return false;
+		return signedCount;
 	}
-	bool ClosureNumber::MulDivSigned() {
-		int signedCount = (IsUnSigned() ? 0 : 1) + (Value().IsPositive() ? 0 : 1);
+	size_t ClosureNumber::MulDivSigned() {
+		size_t signedCount = (IsUnSigned() ? 0 : 1) + (Value().IsPositive() ? 0 : 1);
 		if (signedCount) {
 			if (!Value().IsPositive()) {
 				Opposite();
@@ -71,9 +70,8 @@ namespace expression {
 			if (!IsUnSigned()) {
 				Opposite();
 			}
-			return true;
 		}
-		return false;
+		return signedCount;
 	}
 	void ClosureNumber::Opposite() {
 		if (!m_value.IsPositive()) {

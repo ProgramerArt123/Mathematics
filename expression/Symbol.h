@@ -13,12 +13,16 @@ namespace expression {
 
 	template<typename OperatorType> class Expression;
 
+	class SymbolWrapper;
+
 	class Symbol {
 	public:
 		Symbol(const expression::Symbol& prototype);
 		Symbol(const std::string& name);
 
 		virtual const std::string GetString(uint8_t radix = LITERAL_DEFAULT_RADIX) const;
+
+		virtual bool IsEqual(const Symbol &other) const;
 
 		std::optional<bool> Compare(const Symbol& other) const;
 
@@ -32,6 +36,15 @@ namespace expression {
 		virtual bool ExtendLogarithm(Expression<OPERATOR_TYPE_LOGARITHM>& exp);
 
 		virtual std::shared_ptr<Symbol> GetClone() const;
+
+		virtual size_t AddSubSigned(SymbolWrapper &wrapper);
+		virtual size_t MulDivSigned(SymbolWrapper& wrapper);
+
+		virtual void Opposite(SymbolWrapper& wrapper);
+
+		bool IsUnSigned() const;
+
+		void SetUnSigned(bool isUnSigned);
 
 	public:
 		template<typename SubstitutionType>
@@ -50,6 +63,7 @@ namespace expression {
 	private:
 		std::string m_name;
 
+		bool m_unsigned = true;
 	};
 	
 	class SymbolWrapper : public Atom {
@@ -76,6 +90,9 @@ namespace expression {
 		bool EqualPositiveOne() const override;
 		bool EqualNegativeOne() const override;
 
+		size_t AddSubSigned() override;
+		size_t MulDivSigned() override;
+
 		bool ExtendAddSub(Expression<OPERATOR_TYPE_ADD_SUB>& exp);
 		bool ExtendMulDiv(Expression<OPERATOR_TYPE_MUL_DIV>& exp);
 		bool ExtendPowerRoot(Expression<OPERATOR_TYPE_POWER_ROOT>& exp);
@@ -89,18 +106,31 @@ namespace expression {
 		void SetSubstitution();
 
 		std::shared_ptr<Node> GetSubstitution() const;
+
+		Symbol& Inner() const;
+
+	public:
+		static bool Substitution();
+
+		static void SubstitutionOn();
+
+		static void SubstitutionOff();
+
 	private:
 		std::shared_ptr<Symbol> m_inner;
+
+	private:
+		static bool substitution_switch;
 	};
 
 }
 
-#define SYMBOL_A SymbolWrapper(std::make_shared<Symbol>("a"))
-#define SYMBOL_B SymbolWrapper(std::make_shared<Symbol>("b"))
-#define SYMBOL_C SymbolWrapper(std::make_shared<Symbol>("c"))
+#define SYMBOL_A expression::SymbolWrapper(std::make_shared<expression::Symbol>("a"))
+#define SYMBOL_B expression::SymbolWrapper(std::make_shared<expression::Symbol>("b"))
+#define SYMBOL_C expression::SymbolWrapper(std::make_shared<expression::Symbol>("c"))
 
-#define SYMBOL_X SymbolWrapper(std::make_shared<Symbol>("x"))
-#define SYMBOL_Y SymbolWrapper(std::make_shared<Symbol>("y"))
-#define SYMBOL_Z SymbolWrapper(std::make_shared<Symbol>("z"))
+#define SYMBOL_X expression::SymbolWrapper(std::make_shared<expression::Symbol>("x"))
+#define SYMBOL_Y expression::SymbolWrapper(std::make_shared<expression::Symbol>("y"))
+#define SYMBOL_Z expression::SymbolWrapper(std::make_shared<expression::Symbol>("z"))
 
 #endif

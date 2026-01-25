@@ -139,13 +139,13 @@ namespace expression {
 
 }
 
-#define ADD OPERATOR_TYPE_ADD()
-#define SUB OPERATOR_TYPE_SUB()
-#define MUL OPERATOR_TYPE_MUL()
-#define DIV OPERATOR_TYPE_DIV()
-#define POWER OPERATOR_TYPE_POWER()
-#define ROOT OPERATOR_TYPE_ROOT()
-#define LOGARITHM OPERATOR_TYPE_LOGARITHM()
+#define ADD expression::OPERATOR_TYPE_ADD()
+#define SUB expression::OPERATOR_TYPE_SUB()
+#define MUL expression::OPERATOR_TYPE_MUL()
+#define DIV expression::OPERATOR_TYPE_DIV()
+#define POWER expression::OPERATOR_TYPE_POWER()
+#define ROOT expression::OPERATOR_TYPE_ROOT()
+#define LOGARITHM expression::OPERATOR_TYPE_LOGARITHM()
 
 
 #endif
