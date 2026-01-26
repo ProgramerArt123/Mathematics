@@ -156,6 +156,7 @@ namespace expression {
 		Expression<OPERATOR_TYPE_MUL_DIV> collect(exp);
 		return collect;
 	}
+	bool Polymorphism::power_root_common_switch = true;
 	std::optional<const Expression<OPERATOR_TYPE_ADD_SUB>> Polymorphism::Reduce() const {
 		return std::nullopt;
 	}
@@ -209,6 +210,15 @@ namespace expression {
 	Node* Polymorphism::Visit(ExpressionNode& node) {
 		return Expression<OPERATOR_TYPE_NONE>::Visit(node);
 	}
+	bool Polymorphism::PowerRootCommon() {
+		return power_root_common_switch;
+	}
+	void Polymorphism::PowerRootCommonOn() {
+		power_root_common_switch = true;
+	}
+	void Polymorphism::PowerRootCommonOff() {
+		power_root_common_switch = false;
+	}
 	PolymorphismAddSub::PolymorphismAddSub(Expression<OPERATOR_TYPE_ADD_SUB> &exp) :m_exp(exp) {
 
 	}
@@ -249,9 +259,9 @@ namespace expression {
 		}
 		return false;
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> PolymorphismAddSub::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+	std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> PolymorphismAddSub::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
 		const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>();
+		return std::nullopt;
 	}
 	bool PolymorphismAddSub::Closure(ClosureNumber &closure) {
 		return false;
@@ -479,7 +489,7 @@ namespace expression {
 		}
 		return false;
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> PolymorphismMulDiv::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+	std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> PolymorphismMulDiv::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
 		const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons) {
 		
 		Expression<OPERATOR_TYPE_MUL_DIV> childLeft = Polymorphism::NodesBuild(leftChildren, OPERATOR_TYPE_FLAG_DIV);
@@ -576,12 +586,12 @@ namespace expression {
 		for (auto& node : nodes) {
 			if (m_exp.IsPower()) {
 				Polymorphism::Visit(node)->SetOperator(
-					Polymorphism::Visit(node)->IsMul() ?
+					!Polymorphism::Visit(node)->IsDiv() ?
 					OPERATOR_TYPE_FLAG_POWER : OPERATOR_TYPE_FLAG_ROOT);
 			}
 			else {
 				Polymorphism::Visit(node)->SetOperator(
-					Polymorphism::Visit(node)->IsMul() ?
+					!Polymorphism::Visit(node)->IsDiv() ?
 					OPERATOR_TYPE_FLAG_ROOT : OPERATOR_TYPE_FLAG_POWER);
 			}
 		}
@@ -995,9 +1005,13 @@ namespace expression {
 	bool PolymorphismPowerRoot::CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) {
 		return false;
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> PolymorphismPowerRoot::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
+	std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> PolymorphismPowerRoot::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
 		const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons) {
 		
+		if (!PowerRootCommon()) {
+			return std::nullopt;
+		}
+
 		Expression<OPERATOR_TYPE_MUL_DIV> childLeft = Polymorphism::NodesBuild(leftChildren, OPERATOR_TYPE_FLAG_ROOT);
 
 		Expression<OPERATOR_TYPE_MUL_DIV> childRight = Polymorphism::NodesBuild(rightChildren, OPERATOR_TYPE_FLAG_ROOT);
@@ -1113,7 +1127,7 @@ namespace expression {
 		}
 		else {
 			if (OPERATOR_TYPE_LEVEL_MUL_DIV == exp.Level()) {
-				return ExpandMulDivDriver(exp);
+				return ExpandMulDivDriver(exp, pos);
 			}
 			else if (OPERATOR_TYPE_LEVEL_ADD_SUB == exp.Level()) {
 				return ExpandAddSubDriver(exp);
@@ -1317,7 +1331,7 @@ namespace expression {
 
 		return expand;
 	}
-	std::optional<typename expression::Expression<OPERATOR_TYPE_MUL_DIV>> PolymorphismPowerRoot::ExpandMulDivDriver(const Polymorphism& exp) const {
+	std::optional<typename expression::Expression<OPERATOR_TYPE_MUL_DIV>> PolymorphismPowerRoot::ExpandMulDivDriver(const Polymorphism& exp, ExpressionNodes::const_iterator pos) const {
 		auto expNodes = exp.BuildPowerRootDriverNodes();
 		if (expNodes.empty()) {
 			return std::nullopt;
@@ -1326,6 +1340,12 @@ namespace expression {
 		expression::Expression<OPERATOR_TYPE_POWER_ROOT> expand;
 
 		expand.AppendNode(m_exp.Front());
+
+		for (auto driver = ++m_exp.begin(); driver != m_exp.end(); ++driver) {
+			if (driver != pos) {
+				expand.AppendNode(*driver);
+			}
+		}
 
 		for (auto node : expNodes) {
 			expand.AppendNode(node);
@@ -1363,9 +1383,9 @@ namespace expression {
 	bool PolymorphismLogarithm::CollectCommonChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) {
 		return false;
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> PolymorphismLogarithm::BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
+	std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> PolymorphismLogarithm::BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
 		const std::vector<ExpressionNodes::const_iterator>& rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode>& commons) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>();
+		return std::nullopt;
 	}
 	bool PolymorphismLogarithm::Closure(ClosureNumber& closure) {
 		return false;

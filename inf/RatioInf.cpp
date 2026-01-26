@@ -59,6 +59,9 @@ namespace inf {
 	bool RatioInf::IsZero() const{
 		return m_degree.EqualZero();
 	}
+	bool RatioInf::IsUnit() const {
+		return m_degree.EqualPositiveOne();
+	}
 	bool RatioInf::IsLeft() const {
 		return IsNegative();
 	}

@@ -5,6 +5,10 @@
 
 #include "number/Fraction.h"
 
+#include "expression/Expression.hpp"
+
+#include "Infinitesimal.h"
+
 namespace inf {
 	class Infinity : public RatioInf {
 	public:
@@ -16,7 +20,11 @@ namespace inf {
 
 		bool ExtendMulDiv(expression::Expression<expression::OPERATOR_TYPE_MUL_DIV>& exp) override;
 
+		bool ExtendPowerRoot(expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT>& exp) override;
+
 		std::shared_ptr<expression::Symbol> GetClone() const override;
+
+		const Infinity& operator=(const Infinity& right);
 
 		bool operator==(const Infinity& other) const;
 
@@ -26,18 +34,28 @@ namespace inf {
 		Infinity& operator-=(const Infinity& subtrahend);
 		number::Fraction operator/(const Infinity& divisor) const;
 
-		Infinity operator*(const number::Fraction& multiplier) const;
+		Infinity operator*(const number::Fraction& multiplicand) const;
 		Infinity operator/(const number::Fraction& divisor) const;
+
+		friend number::Fraction operator*(const Infinitesimal &multiplier, const Infinity &multiplicand);
+		friend number::Fraction operator*(const Infinity& multiplier, const Infinitesimal& multiplicand);
 
 		const Infinity& SetDegree(const number::Fraction& degree);
 
 	private:
 
-		bool Closure(expression::Expression<expression::OPERATOR_TYPE_MUL_DIV>& exp);
+		bool Transform(expression::Expression<expression::OPERATOR_TYPE_MUL_DIV>& exp);
 
 		bool Multiple(expression::Expression<expression::OPERATOR_TYPE_MUL_DIV>& exp);
 
-	
+		bool Infinitesimal(expression::Expression<expression::OPERATOR_TYPE_MUL_DIV>& exp);
+
+		bool Transform(expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT>& exp);
+
+		bool Multiple(expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT>& exp);
+
+		bool Infinitesimal(expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT>& exp);
+
 	};
 }
 

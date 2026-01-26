@@ -16,6 +16,8 @@ namespace inf {
 		
 		std::shared_ptr<expression::Symbol> GetClone() const override;
 
+		const Infinitesimal& operator=(const Infinitesimal& right);
+
 		bool operator==(const Infinitesimal &other) const;
 
 		Infinitesimal operator+(const Infinitesimal &addition) const;

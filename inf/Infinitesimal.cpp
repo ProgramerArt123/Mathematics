@@ -43,6 +43,10 @@ namespace inf {
 	std::shared_ptr<expression::Symbol> Infinitesimal::GetClone() const {
 		return std::make_shared<Infinitesimal>(*this);
 	}
+	const Infinitesimal& Infinitesimal::operator=(const Infinitesimal& right) {
+		m_degree = right.m_degree;
+		return *this;
+	}
 	bool Infinitesimal::operator==(const Infinitesimal& other) const {
 		return m_degree == other.m_degree;
 	}
@@ -138,11 +142,16 @@ namespace inf {
 		ignore_line = Transform(ignore);
 	}
 	bool Infinitesimal::Multiple(expression::Expression<expression::OPERATOR_TYPE_MUL_DIV>& exp) {
+		
 		const std::vector<expression::ExpressionNodes::iterator> symbols = exp.GetAll<expression::SymbolWrapper>();
 		if (symbols.empty()) {
 			return false;
 		}
+		
+		bool allUnit = true;
+
 		number::Fraction coefficient(1);
+		
 		for (auto symbol : symbols) {
 			const expression::SymbolWrapper& otherWrapper = std::get<expression::SymbolWrapper>(*symbol);
 			expression::Symbol& inner = otherWrapper.Inner();
@@ -150,10 +159,15 @@ namespace inf {
 				continue;
 			}
 			Infinitesimal& inf = dynamic_cast<Infinitesimal&>(inner);
-			const number::Fraction& degree = inf.Degree();
-			if (degree.EqualPositiveOne()) {
+
+			if (inf.IsUnit()) {
 				continue;
 			}
+
+			allUnit = false;
+
+			const number::Fraction& degree = inf.Degree();
+			
 			if (otherWrapper.IsDiv()) {
 				coefficient /= degree.GetReciprocal();
 			}
@@ -163,7 +177,7 @@ namespace inf {
 
 			inf.SetDegree(number::Integer(1));
 		}
-		if (coefficient.EqualPositiveOne()) {
+		if (allUnit) {
 			return false;
 		}
 		auto coefficientChild = expression::Expression<expression::OPERATOR_TYPE_ADD_SUB>::Absorb(coefficient);

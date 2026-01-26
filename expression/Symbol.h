@@ -28,6 +28,8 @@ namespace expression {
 
 		virtual const std::string& Name() const;
 
+		const Symbol& operator=(const Symbol& right);
+
 		bool operator==(const Symbol& other) const;
 
 		virtual bool ExtendAddSub(Expression<OPERATOR_TYPE_ADD_SUB>& exp);
@@ -123,14 +125,34 @@ namespace expression {
 		static bool substitution_switch;
 	};
 
+	class SymbolManager {
+	public:
+		static SymbolManager& GetInstance();
+
+		template<typename SYMBOL = Symbol>
+		SymbolWrapper &GetSymbol(const std::string& name) {
+			if (m_symbols.find(name) == m_symbols.cend()) {
+				m_symbols.insert(std::make_pair(name, std::make_shared<SYMBOL>(name)));
+			}
+			return m_symbols.at(name);
+		}
+
+	private:
+		SymbolManager() {}
+	private:
+		std::map<std::string, SymbolWrapper> m_symbols;
+	};
+
 }
 
-#define SYMBOL_A expression::SymbolWrapper(std::make_shared<expression::Symbol>("a"))
-#define SYMBOL_B expression::SymbolWrapper(std::make_shared<expression::Symbol>("b"))
-#define SYMBOL_C expression::SymbolWrapper(std::make_shared<expression::Symbol>("c"))
+#define GET_SYMBOL(name) expression::SymbolManager::GetInstance().GetSymbol(name)
 
-#define SYMBOL_X expression::SymbolWrapper(std::make_shared<expression::Symbol>("x"))
-#define SYMBOL_Y expression::SymbolWrapper(std::make_shared<expression::Symbol>("y"))
-#define SYMBOL_Z expression::SymbolWrapper(std::make_shared<expression::Symbol>("z"))
+#define SYMBOL_A GET_SYMBOL("a")
+#define SYMBOL_B GET_SYMBOL("b")
+#define SYMBOL_C GET_SYMBOL("c")
+
+#define SYMBOL_X GET_SYMBOL("x")
+#define SYMBOL_Y GET_SYMBOL("y")
+#define SYMBOL_Z GET_SYMBOL("z")
 
 #endif

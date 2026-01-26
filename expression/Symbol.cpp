@@ -25,6 +25,12 @@ namespace expression {
 	const std::string &Symbol::Name() const {
 		return m_name;
 	}
+	const Symbol& Symbol::operator=(const Symbol& right) {
+		m_name = right.m_name;
+		m_unsigned = right.m_unsigned;
+		m_substitution = right.m_substitution;
+		return *this;
+	}
 	bool Symbol::operator==(const Symbol &other) const {
 		return m_name == other.m_name && m_unsigned == other.m_unsigned;
 	}
@@ -163,5 +169,9 @@ namespace expression {
 	}
 	void SymbolWrapper::SubstitutionOff() {
 		substitution_switch = false;
+	}
+	SymbolManager &SymbolManager::GetInstance() {
+		static SymbolManager instance;
+		return instance;
 	}
 }

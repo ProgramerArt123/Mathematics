@@ -1297,7 +1297,7 @@ int main() {
 		expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT> e2(SYMBOL_X, POWER, exponent);
 		expression::Expression<expression::OPERATOR_TYPE_ADD_SUB> e3(e1, SUB, e2);
 		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(e3, DIV, SYMBOL_INFINITESIMAL);
-		expression::SymbolWrapper::SubstitutionOff();
+		LOCAL_SUBSTITUTION_SWITCH;
 		auto expands = e.ExpandForwardOutput(std::cout);
 		std::visit([](auto& expand) {
 			auto collects = expand.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
@@ -1317,7 +1317,7 @@ int main() {
 		expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT> e2(SYMBOL_X, POWER, exponent);
 		expression::Expression<expression::OPERATOR_TYPE_ADD_SUB> e3(e1, SUB, e2);
 		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(e3, DIV, SYMBOL_INFINITESIMAL);
-		expression::SymbolWrapper::SubstitutionOff();
+		LOCAL_SUBSTITUTION_SWITCH;
 		auto expands = e.ExpandForwardOutput(std::cout);
 		std::visit([](auto& expand) {
 			auto collects = expand.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
@@ -1326,6 +1326,93 @@ int main() {
 				collect.CollectForwardOutput(std::cout); std::cout << std::endl << std::endl;
 				}, collects.back());
 			}, expands.back());
+	}
+
+	{
+		expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT> a_x(SYMBOL_A, POWER, SYMBOL_X);
+		
+		expression::Expression<expression::OPERATOR_TYPE_NONE>::ExpressionSome a_x_derivative;
+		
+		{
+			std::cout << "(a^x)'=";
+			expression::Expression<expression::OPERATOR_TYPE_ADD_SUB> e0(SYMBOL_X, ADD, SYMBOL_INFINITESIMAL);
+			expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT> e1(SYMBOL_A, POWER, e0);
+			expression::Expression<expression::OPERATOR_TYPE_ADD_SUB> e3(e1, SUB, a_x);
+			expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e(e3, DIV, SYMBOL_INFINITESIMAL);
+			LOCAL_SUBSTITUTION_SWITCH;
+			auto expands = e.ExpandForwardOutput(std::cout);
+			std::visit([&a_x_derivative](auto& expand) {
+				std::cout << "=";
+				LOCAL_POWER_ROOT_COMMON_SWITCH;
+				auto collects = expand.CollectForwardOutput(std::cout);
+				a_x_derivative = collects.back();
+			}, expands.back()); 
+		}
+
+		expression::Expression<expression::OPERATOR_TYPE_ADD_SUB> c(number::Integer(1), ADD, SYMBOL_INFINITESIMAL);
+
+		expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> nb(number::Integer(1), DIV, SYMBOL_INFINITY, DIV, SYMBOL_B);
+		{
+			LOCAL_SUBSTITUTION_SWITCH;
+			std::cout << "nb = ";nb.CollectForwardOutput(std::cout);
+		}
+
+		expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT> d;
+
+		expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT> a;
+
+		{
+			std::cout << "a=e^b=";
+			a = expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT>(c, POWER, SYMBOL_INFINITY, POWER, SYMBOL_B);
+			LOCAL_SUBSTITUTION_SWITCH;
+			a.CollectForwardOutput(std::cout);
+			d = expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT>(a, POWER, nb);
+			auto expands = d.ExpandForwardOutput(std::cout);
+			std::visit([&c](auto& expand) {
+				assert(c == expand);
+			}, expands.back());
+			std::cout << std::endl << "c=" << d << std::endl;
+		}
+		{
+			expression::Expression<expression::OPERATOR_TYPE_ADD_SUB> e0(c, SUB, number::Integer(1));
+			expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e1(e0, DIV, nb);
+			
+			LOCAL_SUBSTITUTION_SWITCH;
+			std::cout << "ln(a)=b="; 
+			expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e2 = e1.Substitution(c, d);
+
+			{
+				auto collects = e2.CollectForwardOutput(std::cout);
+				std::visit([](auto& collect) {
+					auto expands = collect.ExpandForwardOutput(std::cout);
+					std::visit([](auto& expand) {
+						auto collects = expand.CollectForwardOutput(std::cout);
+						std::visit([](auto& collect) {
+							assert(collect.GetString() == "b");
+						}, collects.back());
+					}, expands.back());
+				}, collects.back());
+			}
+			expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> e3 = e2.Substitution(nb, SYMBOL_INFINITESIMAL);
+			
+			std::visit([&](auto& a_x_derivative) {
+				auto e = expression::Expression<expression::OPERATOR_TYPE_MUL_DIV>(a_x_derivative, DIV, a_x);
+				auto collects = e.CollectForwardOutput(std::cout);
+				std::visit([&](auto& collect) {
+					auto e4 = collect.Substitution(SYMBOL_A, a);
+
+					if (e4 == e2) {
+						std::cout << "(a^x)'=a^x * ln(a), When the same infinitesimal used" << std::endl;
+					}
+
+					if (e4 == e3) {
+						std::cout << "(a^x)'=a^x * ln(a), When different infinitesimals used" << std::endl;
+					}
+
+				}, collects.back());
+			}, a_x_derivative);
+
+		}
 	}
 
 #endif

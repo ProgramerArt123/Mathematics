@@ -15,11 +15,13 @@ namespace inf {
 
 		void Opposite(expression::SymbolWrapper& wrapper) override;
 
-		bool operator==(const RatioInf&other) const;
+		bool operator==(const RatioInf& other) const;
 
 		bool IsPositive() const;
 		bool IsNegative() const;
 		bool IsZero() const;
+
+		bool IsUnit() const;
 
 		bool IsLeft() const;
 		bool IsRight() const;

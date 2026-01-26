@@ -308,10 +308,10 @@ namespace expression {
 			return forwards;
 		}
 
-		Expression<OperatorType> Substitution(const SymbolWrapper &source, const ExpressionNode &destination) const {
+		Expression<OperatorType> Substitution(const ExpressionNode &source, const ExpressionNode &destination) {
 			Expression<OperatorType> magnitude(*this);
-			magnitude.ForeachNodes([&source, &destination](ExpressionNodes::iterator itor) {
-				if (source.IsEqual(*Visit(*itor), true)) {
+			magnitude.ForeachNodes([&](ExpressionNodes::iterator itor) {
+				if (Visit(source)->IsEqual(*Visit(*itor), false, true)) {
 					OPERATOR_TYPE_FLAG flag = Visit(*itor)->Flag();
 					*itor = destination;
 					Visit(*itor)->Substitution(flag);
@@ -437,6 +437,7 @@ namespace expression {
 			opposite.Opposite();
 			return opposite;
 		}
+
 
 		static Expression<OPERATOR_TYPE_ADD_SUB> Absorb(const number::Fraction &number) {
 			const Expression<OPERATOR_TYPE_MUL_DIV> reduction(number::Integer(number.ReductionNumerator(), number.IsPositive()),
@@ -1191,7 +1192,7 @@ namespace expression {
 		virtual bool Cancel() = 0;
 		virtual std::vector<ExpressionNodes::iterator> GetChildren() = 0;
 		virtual bool CollectCommonChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) = 0;
-		virtual Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
+		virtual std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
 			const std::vector<ExpressionNodes::const_iterator>& rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode>& commons) = 0;
 
 		virtual bool Closure(ClosureNumber& closure) = 0;
@@ -1233,6 +1234,15 @@ namespace expression {
 		static const Node* Visit(const ExpressionNode& node);
 
 		static Node* Visit(ExpressionNode& node);
+
+		static bool PowerRootCommon();
+
+		static void PowerRootCommonOn();
+
+		static void PowerRootCommonOff();
+
+	private:
+		static bool power_root_common_switch;
 	};
 
 	class PolymorphismAddSub : public Polymorphism {
@@ -1242,7 +1252,7 @@ namespace expression {
 		bool Cancel() override;
 		std::vector<ExpressionNodes::iterator> GetChildren() override;
 		bool CollectCommonChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-		Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
+		std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
 			const std::vector<ExpressionNodes::const_iterator>& rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode>& commons) override;
 
 		bool Closure(ClosureNumber& closure) override;
@@ -1292,7 +1302,7 @@ namespace expression {
 		bool Cancel() override;
 		std::vector<ExpressionNodes::iterator> GetChildren() override;
 		bool CollectCommonChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-		Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
+		std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
 			const std::vector<ExpressionNodes::const_iterator>& rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode>& commons) override;
 
 		bool Closure(ClosureNumber& closure) override;
@@ -1362,7 +1372,7 @@ namespace expression {
 		bool Cancel() override;
 		std::vector<ExpressionNodes::iterator> GetChildren() override;
 		bool CollectCommonChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-		Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
+		std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
 			const std::vector<ExpressionNodes::const_iterator>& rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode>& commons) override;
 
 		bool Closure(ClosureNumber& closure) override;
@@ -1417,7 +1427,7 @@ namespace expression {
 
 		std::optional<typename expression::Expression<OPERATOR_TYPE_MUL_DIV>> ExpandAddSubDriver(const Polymorphism& exp) const;
 
-		std::optional<typename expression::Expression<OPERATOR_TYPE_MUL_DIV>> ExpandMulDivDriver(const Polymorphism& exp) const;
+		std::optional<typename expression::Expression<OPERATOR_TYPE_MUL_DIV>> ExpandMulDivDriver(const Polymorphism& exp, ExpressionNodes::const_iterator pos) const;
 	private:
 		static bool CancelRoot(const ExpressionNode& one, const ExpressionNode& other);
 		static std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> CancelLogarithm(const ExpressionNode& base, const ExpressionNode& mixture);
@@ -1434,7 +1444,7 @@ namespace expression {
 		bool Cancel() override;
 		std::vector<ExpressionNodes::iterator> GetChildren() override;
 		bool CollectCommonChild(std::vector<ExpressionNodes::iterator>& exps, std::vector<ExpressionNodes::iterator>::iterator start) override;
-		Expression<OPERATOR_TYPE_MUL_DIV> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
+		std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> BuildCommon(const std::vector<ExpressionNodes::const_iterator>& leftChildren,
 			const std::vector<ExpressionNodes::const_iterator>& rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode>& commons) override;
 
 		bool Closure(ClosureNumber& closure) override;
@@ -1478,6 +1488,24 @@ namespace expression {
 	private:
 		Expression<OPERATOR_TYPE_LOGARITHM>& m_exp;
 	};
+
+	class LocalSwitch {
+	public:
+		LocalSwitch(const std::function<void()> on, const std::function<void()> off) :
+			m_on(on), m_off(off) {
+			m_off();
+		}
+		~LocalSwitch() {
+			m_on();
+		}
+	private:
+		const std::function<void()> m_on;
+		const std::function<void()> m_off;
+	};
 }
+
+#define LOCAL_SUBSTITUTION_SWITCH expression::LocalSwitch local_substitution_switch(expression::SymbolWrapper::SubstitutionOn, expression::SymbolWrapper::SubstitutionOff);
+
+#define LOCAL_POWER_ROOT_COMMON_SWITCH expression::LocalSwitch local_power_root_common_switch(expression::Polymorphism::PowerRootCommonOn, expression::Polymorphism::PowerRootCommonOff);
 
 #endif
