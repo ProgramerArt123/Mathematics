@@ -47,7 +47,7 @@ namespace expression {
 	}
 
 	const std::string OPERATOR_TYPE_NONE::OutPutString(size_t pos) const {
-		//assert(0 == pos);
+		assert(0 == pos);
 		return "";
 	}
 
@@ -150,7 +150,7 @@ namespace expression {
 	}
 
 	const std::string OPERATOR_TYPE_POWER::OutPutString(size_t pos) const {
-		//assert(pos);
+		assert(pos);
 		return "^";
 	}
 
@@ -168,7 +168,7 @@ namespace expression {
 
 	const std::string OPERATOR_TYPE_ROOT::OutPutString(size_t pos) const {
 		assert(pos);
-		return "@";
+		return "&";
 	}
 
 	OPERATOR_TYPE_FLAG OPERATOR_TYPE_ROOT::GetFlag() const {
@@ -185,7 +185,7 @@ namespace expression {
 
 	const std::string OPERATOR_TYPE_LOGARITHM::OutPutString(size_t pos) const {
 		assert(pos);
-		return "#";
+		return "|";
 	}
 
 	OPERATOR_TYPE_FLAG OPERATOR_TYPE_LOGARITHM::GetFlag() const {

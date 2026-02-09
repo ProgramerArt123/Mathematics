@@ -15,10 +15,7 @@ namespace expression {
 	}
 	std::optional<bool> Symbol::Compare(const Symbol &other) const {
 		if (Name() == other.Name()) {
-			if (m_unsigned == other.m_unsigned) {
-				return std::nullopt;
-			}
-			return m_unsigned < other.m_unsigned;
+			return std::nullopt;
 		}
 		return Name() < other.Name();
 	}
@@ -27,12 +24,12 @@ namespace expression {
 	}
 	const Symbol& Symbol::operator=(const Symbol& right) {
 		m_name = right.m_name;
-		m_unsigned = right.m_unsigned;
 		m_substitution = right.m_substitution;
+		m_lock = right.m_lock;
 		return *this;
 	}
 	bool Symbol::operator==(const Symbol &other) const {
-		return m_name == other.m_name && m_unsigned == other.m_unsigned;
+		return m_name == other.m_name;
 	}
 	bool Symbol::ExtendAddSub(Expression<OPERATOR_TYPE_ADD_SUB> &exp) {
 		return false;
@@ -49,29 +46,22 @@ namespace expression {
 	std::shared_ptr<Symbol> Symbol::GetClone() const {
 		return std::make_shared<Symbol>(*this);
 	}
-	size_t Symbol::AddSubSigned(SymbolWrapper& wrapper) {
-		return 0;
-	}
-	size_t Symbol::MulDivSigned(SymbolWrapper& wrapper) {
-		return 0;
-	}
-	void Symbol::Opposite(SymbolWrapper& wrapper) {
-		m_unsigned = !m_unsigned;
-		wrapper.SetUnSigned(IsUnSigned());
-	}
-	bool Symbol::IsUnSigned() const {
-		return m_unsigned;
-	}
-	void Symbol::SetUnSigned(bool isUnSigned) {
-		m_unsigned = isUnSigned;
-	}
 	void Symbol::SetSubstitution() {
 		m_substitution.reset();
 	}
 	std::shared_ptr<Node> Symbol::GetSubstitution() const {
+		if (IsLock()) {
+			return nullptr;
+		}
 		return m_substitution;
 	}
-	bool SymbolWrapper::substitution_switch = true;
+	bool Symbol::IsLock() const {
+		return m_lock;
+	}
+	void Symbol::SetLock(bool isLock) {
+		m_lock = isLock;
+	}
+	std::function<bool(const SymbolWrapper &)> SymbolWrapper::substitution_condition = std::function<bool(const SymbolWrapper&)>();
 	SymbolWrapper::SymbolWrapper(const SymbolWrapper &prototype){
 		*this = prototype;
 	}
@@ -82,7 +72,6 @@ namespace expression {
 	SymbolWrapper::SymbolWrapper(const std::shared_ptr<Symbol> inner, bool isUnSigned, OPERATOR_TYPE_FLAG flag):
 		Atom(flag), m_inner(inner){
 		SetUnSigned(isUnSigned);
-		m_inner->SetUnSigned(IsUnSigned());
 	}
 	const std::string SymbolWrapper::GetString(uint8_t radix) const {
 		std::stringstream ss;
@@ -116,7 +105,6 @@ namespace expression {
 	const SymbolWrapper &SymbolWrapper::operator=(const SymbolWrapper& right) {
 		Atom::operator=(right);
 		m_inner = right.m_inner->GetClone();
-		m_inner->SetUnSigned(IsUnSigned());
 		return *this;
 	}
 	bool SymbolWrapper::operator==(const SymbolWrapper& other) const {
@@ -132,10 +120,27 @@ namespace expression {
 		return false;
 	}
 	size_t SymbolWrapper::AddSubSigned() {
-		return m_inner->AddSubSigned(*this);
+		size_t signedCount = (IsUnSigned() ? 0 : 1);
+		if (signedCount) {
+			if (!IsUnSigned()) {
+				Opposite();
+			}
+			if (1 == signedCount) {
+				SetOperator(IsAdd() ?
+					expression::OPERATOR_TYPE_FLAG_SUB :
+					expression::OPERATOR_TYPE_FLAG_ADD);
+			}
+		}
+		return signedCount;
 	}
 	size_t SymbolWrapper::MulDivSigned() {
-		return m_inner->MulDivSigned(*this);
+		int signedCount = (IsUnSigned() ? 0 : 1);
+		if (signedCount) {
+			if (!IsUnSigned()) {
+				Opposite();
+			}
+		}
+		return signedCount;
 	}
 	bool SymbolWrapper::SymbolWrapper::ExtendAddSub(Expression<OPERATOR_TYPE_ADD_SUB>& exp) {
 		return m_inner->ExtendAddSub(exp);
@@ -149,8 +154,14 @@ namespace expression {
 	bool SymbolWrapper::ExtendLogarithm(Expression<OPERATOR_TYPE_LOGARITHM>& exp) {
 		return m_inner->ExtendLogarithm(exp);
 	}
-	void SymbolWrapper::SetSubstitution() {
+	void SymbolWrapper::ResetSubstitution() {
 		m_inner->SetSubstitution();
+	}
+	bool SymbolWrapper::IsLock() const {
+		return m_inner->IsLock();
+	}
+	void SymbolWrapper::SetLock(bool isLock) {
+		m_inner->SetLock(isLock);
 	}
 	std::shared_ptr<Node> SymbolWrapper::GetSubstitution() const {
 		if (!Substitution()) {
@@ -161,17 +172,13 @@ namespace expression {
 	Symbol &SymbolWrapper::Inner() const {
 		return *m_inner;
 	}
-	bool SymbolWrapper::Substitution() {
-		return substitution_switch;
+	bool SymbolWrapper::Substitution() const{
+		if (!substitution_condition) {
+			return true;
+		}
+		return substitution_condition(*this);
 	}
-	void SymbolWrapper::SubstitutionOn() {
-		substitution_switch = true;
-	}
-	void SymbolWrapper::SubstitutionOff() {
-		substitution_switch = false;
-	}
-	SymbolManager &SymbolManager::GetInstance() {
-		static SymbolManager instance;
-		return instance;
+	void SymbolWrapper::SetSubstitutionCondition(std::function<bool(const SymbolWrapper&)> condition) {
+		substitution_condition = condition;
 	}
 }

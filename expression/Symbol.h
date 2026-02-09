@@ -39,15 +39,6 @@ namespace expression {
 
 		virtual std::shared_ptr<Symbol> GetClone() const;
 
-		virtual size_t AddSubSigned(SymbolWrapper &wrapper);
-		virtual size_t MulDivSigned(SymbolWrapper& wrapper);
-
-		virtual void Opposite(SymbolWrapper& wrapper);
-
-		bool IsUnSigned() const;
-
-		void SetUnSigned(bool isUnSigned);
-
 	public:
 		template<typename SubstitutionType>
 		void SetSubstitution(const SubstitutionType& substitution) {
@@ -58,6 +49,10 @@ namespace expression {
 
 		std::shared_ptr<Node> GetSubstitution() const;
 
+		bool IsLock() const;
+
+		void SetLock(bool isLock);
+
 	protected:
 
 		std::shared_ptr<Node> m_substitution;
@@ -65,7 +60,7 @@ namespace expression {
 	private:
 		std::string m_name;
 
-		bool m_unsigned = true;
+		bool m_lock = false;
 	};
 	
 	class SymbolWrapper : public Atom {
@@ -105,54 +100,47 @@ namespace expression {
 			m_inner->SetSubstitution(substitution);
 		}
 
-		void SetSubstitution();
+		void ResetSubstitution();
+
+		bool IsLock() const;
+
+		void SetLock(bool isLock);
 
 		std::shared_ptr<Node> GetSubstitution() const;
 
 		Symbol& Inner() const;
 
 	public:
-		static bool Substitution();
+		bool Substitution() const;
 
-		static void SubstitutionOn();
-
-		static void SubstitutionOff();
+		static void SetSubstitutionCondition(std::function<bool(const SymbolWrapper&)> condition = std::function<bool(const SymbolWrapper&)>());
 
 	private:
 		std::shared_ptr<Symbol> m_inner;
 
 	private:
-		static bool substitution_switch;
+		static std::function<bool(const SymbolWrapper &)> substitution_condition;
 	};
 
-	class SymbolManager {
+	class LocalSwitch {
 	public:
-		static SymbolManager& GetInstance();
-
-		template<typename SYMBOL = Symbol>
-		SymbolWrapper &GetSymbol(const std::string& name) {
-			if (m_symbols.find(name) == m_symbols.cend()) {
-				m_symbols.insert(std::make_pair(name, std::make_shared<SYMBOL>(name)));
-			}
-			return m_symbols.at(name);
+		LocalSwitch(const std::function<void()> on, const std::function<void()> off) :
+			m_on(on), m_off(off) {
+			m_off();
 		}
-
+		~LocalSwitch() {
+			m_on();
+		}
 	private:
-		SymbolManager() {}
-	private:
-		std::map<std::string, SymbolWrapper> m_symbols;
+		const std::function<void()> m_on;
+		const std::function<void()> m_off;
 	};
-
 }
 
-#define GET_SYMBOL(name) expression::SymbolManager::GetInstance().GetSymbol(name)
+#define LOCAL_SYMBOL_SUBSTITUTION_CONDITION(condition) expression::LocalSwitch local_substitution_condition(std::bind(&expression::SymbolWrapper::SetSubstitutionCondition, std::function<bool(const SymbolWrapper&)>()), std::bind(&expression::SymbolWrapper::SetSubstitutionCondition, condition));
 
-#define SYMBOL_A GET_SYMBOL("a")
-#define SYMBOL_B GET_SYMBOL("b")
-#define SYMBOL_C GET_SYMBOL("c")
+#define LOCAL_SYMBOL_SUBSTITUTION(symbol, substitution) expression::LocalSwitch local_substitution_##symbol (std::bind(&expression::SymbolWrapper::ResetSubstitution, &symbol), std::bind(&expression::SymbolWrapper::SetSubstitution<decltype(substitution)>, &symbol, substitution));
 
-#define SYMBOL_X GET_SYMBOL("x")
-#define SYMBOL_Y GET_SYMBOL("y")
-#define SYMBOL_Z GET_SYMBOL("z")
+#define LOCAL_SYMBOL_LOCK(symbol) expression::LocalSwitch local_lock_##symbol (std::bind(&expression::SymbolWrapper::SetLock, &symbol, false), std::bind(&expression::SymbolWrapper::SetLock, &symbol, true));
 
 #endif

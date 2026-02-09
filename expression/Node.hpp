@@ -17,7 +17,7 @@ namespace expression {
 		const Node &operator=(const Node &right);
 		bool operator==(const Node &other) const;
 		const OPERATOR_TYPE &Operator() const;
-		OPERATOR_TYPE_LEVEL Level() const;
+		OPERATOR_TYPE_LEVEL OperatorLevel() const;
 		OPERATOR_TYPE_FLAG Flag() const;
 		bool IsNone() const;
 		bool IsAdd() const;
@@ -54,13 +54,13 @@ namespace expression {
 		bool IsUnSigned() const;
 
 		void SetUnSigned(bool isUnSigned);
-
-
+		
 	protected:
 
 		std::unique_ptr<OPERATOR_TYPE> m_operator;
 
 		bool m_unsigned = true;
+
 	};
 }
 

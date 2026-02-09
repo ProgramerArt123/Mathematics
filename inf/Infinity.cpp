@@ -1,13 +1,14 @@
 #include "expression/ClosureNumber.hpp"
 #include "expression/Expression.hpp"
+#include "expression/SymbolManager.h"
 
 #include "Infinitesimal.h"
 
 #include "Infinity.h"
 
 namespace inf {
-	Infinity::Infinity(const std::string& name, const number::Fraction& degree) :
-		RatioInf(name) {
+	Infinity::Infinity(const number::Fraction& degree) :
+		RatioInf(INFINITY_NAME) {
 		SetDegree(degree);
 	}
 
@@ -35,25 +36,31 @@ namespace inf {
 	}
 
 	bool Infinity::ExtendMulDiv(expression::Expression<expression::OPERATOR_TYPE_MUL_DIV>& exp) {
+		if (IsLock()) {
+			return false;
+		}
 		if (Multiple(exp)) {
 			return true;
 		}
-		if (Transform(exp)) {
+		if (Infinitesimal(exp)) {
 			return true;
 		}
-		if (Infinitesimal(exp)) {
+		if (Transform(exp)) {
 			return true;
 		}
 		return false;
 	}
 	bool Infinity::ExtendPowerRoot(expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT>& exp) {
+		if (IsLock()) {
+			return false;
+		}
 		if (Multiple(exp)) {
 			return true;
 		}
-		if (Transform(exp)) {
+		if (Infinitesimal(exp)) {
 			return true;
 		}
-		if (Infinitesimal(exp)) {
+		if (Transform(exp)) {
 			return true;
 		}
 		return false;
@@ -70,12 +77,9 @@ namespace inf {
 	}
 
 	Infinity Infinity::operator+(const Infinity& addition) const {
-		Infinity sum(Name());
+		Infinity sum;
 
-		number::Fraction signDegree = IsUnSigned() ? Degree() : -Degree();
-		number::Fraction additionDegree = addition.IsUnSigned() ? addition.Degree() : -addition.Degree();
-
-		sum.SetDegree(signDegree + additionDegree);
+		sum.SetDegree(Degree() + addition.Degree());
 
 		return sum;
 	}
@@ -84,12 +88,9 @@ namespace inf {
 		return *this;
 	}
 	Infinity Infinity::operator-(const Infinity& subtrahend) const {
-		Infinity difference(Name());
+		Infinity difference;
 
-		number::Fraction signDegree = IsUnSigned() ? Degree() : -Degree();
-		number::Fraction subtrahendDegree = subtrahend.IsUnSigned() ? subtrahend.Degree() : -subtrahend.Degree();
-
-		difference.SetDegree(signDegree - subtrahendDegree);
+		difference.SetDegree(Degree() - subtrahend.Degree());
 
 		return difference;
 	}
@@ -98,26 +99,20 @@ namespace inf {
 		return *this;
 	}
 	number::Fraction Infinity::operator/(const Infinity& divisor) const {
-		number::Fraction signDegree = IsUnSigned() ? Degree() : -Degree();
-		number::Fraction divisorDegree = divisor.IsUnSigned() ? divisor.Degree() : -divisor.Degree();
-		return signDegree / divisorDegree;
+		return Degree() / divisor.Degree();
 	}
 	Infinity Infinity::operator*(const number::Fraction& multiplier) const {
-		Infinity product(Name());
+		Infinity product;
 
-		number::Fraction signDegree = IsUnSigned() ? Degree() : -Degree();
-
-		product.SetDegree(signDegree * multiplier);
+		product.SetDegree(Degree() * multiplier);
 
 		return product;
 	}
 	Infinity Infinity::operator/(const number::Fraction& divisor) const {
-		Infinity quotient(Name(), number::Integer(0));
+		Infinity quotient(number::Integer(0));
 
-		number::Fraction signDegree = IsUnSigned() ? Degree() : -Degree();
-
-		if (!signDegree.EqualZero() && !divisor.EqualZero()) {
-			quotient.SetDegree(signDegree / divisor);
+		if (!Degree().EqualZero() && !divisor.EqualZero()) {
+			quotient.SetDegree(Degree() / divisor);
 		}
 		
 		return quotient;
@@ -135,13 +130,13 @@ namespace inf {
 		return multiplier.Degree() * multiplicand.Degree().GetReciprocal();
 	}
 	const Infinity& Infinity::SetDegree(const number::Fraction& degree) {
-		m_degree = RatioInf::Transform(degree);
+		m_degree = degree;
 		return *this;
 	}
 	bool Infinity::Transform(expression::Expression<expression::OPERATOR_TYPE_MUL_DIV>& exp) {
-		const std::string& name = Name();
+
 		const std::optional<expression::ExpressionNodes::iterator> infItor = exp.GetFirst<expression::SymbolWrapper>(
-			[&name](const expression::SymbolWrapper& node) {return name == node.Name(); });
+			[](const expression::SymbolWrapper& node) {return INFINITY_NAME == node.Name(); });
 		if (!infItor) {
 			return false;
 		}
@@ -150,18 +145,18 @@ namespace inf {
 
 		if (symbol.IsDiv()) {
 			Infinity& infinity = dynamic_cast<Infinity&>(symbol.Inner());
-			expression::SymbolWrapper infinitesimal(std::make_shared<inf::Infinitesimal>("o", infinity.Degree()));
+			expression::SymbolWrapper infinitesimal(std::make_shared<inf::Infinitesimal>(infinity.Degree()));
 			infinitesimal.SetOperator(expression::OPERATOR_TYPE_FLAG_MUL);
-			exp.AddSymbol(infinitesimal);
+			exp.AppendNode(infinitesimal);
 			exp.RemoveNode(infItor.value());
-			expression::Polymorphism::Visit(exp.Front())->SetOperator(expression::OPERATOR_TYPE_FLAG_NONE);
 			return true;
 		}
 
 		return false;
 	}
 	bool Infinity::Multiple(expression::Expression<expression::OPERATOR_TYPE_MUL_DIV>& exp) {
-		const std::vector<expression::ExpressionNodes::iterator> symbols = exp.GetAll<expression::SymbolWrapper>();
+		const std::vector<expression::ExpressionNodes::iterator> symbols = exp.GetAll<expression::SymbolWrapper>(
+			[](const expression::SymbolWrapper& symbol) {return symbol.Name() == INFINITY_NAME; });
 		if (symbols.empty()) {
 			return false;
 		}
@@ -170,11 +165,8 @@ namespace inf {
 		number::Fraction coefficient(1);
 
 		for (auto symbol : symbols) {
-			const expression::SymbolWrapper& otherWrapper = std::get<expression::SymbolWrapper>(*symbol);
-			expression::Symbol& inner = otherWrapper.Inner();
-			if (typeid(inner) != typeid(Infinity)) {
-				continue;
-			}
+			const expression::SymbolWrapper& wrapper = std::get<expression::SymbolWrapper>(*symbol);
+			expression::Symbol& inner = wrapper.Inner();
 
 			Infinity& inf = dynamic_cast<Infinity&>(inner);
 
@@ -186,7 +178,7 @@ namespace inf {
 
 			const number::Fraction& degree = inf.Degree();
 			
-			if (otherWrapper.IsDiv()) {
+			if (wrapper.IsDiv()) {
 				coefficient /= degree;
 			}
 			else {
@@ -204,15 +196,15 @@ namespace inf {
 		return true;
 	}
 	bool Infinity::Infinitesimal(expression::Expression<expression::OPERATOR_TYPE_MUL_DIV>& exp) {
-		const std::string& name = Name();
+
 		const std::optional<expression::ExpressionNodes::iterator> infinityItor = exp.GetFirst<expression::SymbolWrapper>(
-			[&name](const expression::SymbolWrapper& node) {return name == node.Name(); });
+			[](const expression::SymbolWrapper& node) {return INFINITY_NAME == node.Name(); });
 		if (!infinityItor) {
 			return false;
 		}
 
 		const std::optional<expression::ExpressionNodes::iterator> infinitesimalItor = exp.GetFirst<expression::SymbolWrapper>(
-			[&name](const expression::SymbolWrapper& node) {return "o" == node.Name(); });
+			[](const expression::SymbolWrapper& node) {return INFINITESIMAL_NAME == node.Name(); });
 		if (!infinitesimalItor) {
 			return false;
 		}
@@ -233,16 +225,15 @@ namespace inf {
 			exp.RemoveNode(infinitesimalItor.value());
 			exp.RemoveNode(infinityItor.value());
 
-			expression::Polymorphism::Visit(exp.Front())->SetOperator(expression::OPERATOR_TYPE_FLAG_NONE);
 			return true;
 		}
 
 		return false;
 	}
 	bool Infinity::Transform(expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT>& exp) {
-		const std::string& name = Name();
+
 		const std::optional<expression::ExpressionNodes::iterator> infItor = exp.GetFirst<expression::SymbolWrapper>(
-			[&name](const expression::SymbolWrapper& node) {return name == node.Name(); });
+			[](const expression::SymbolWrapper& node) {return INFINITY_NAME == node.Name(); });
 		if (!infItor) {
 			return false;
 		}
@@ -251,9 +242,9 @@ namespace inf {
 
 		if (symbol.IsRoot()) {
 			Infinity& infinity = dynamic_cast<Infinity&>(symbol.Inner());
-			expression::SymbolWrapper infinitesimal(std::make_shared<inf::Infinitesimal>("o", infinity.Degree()));
+			expression::SymbolWrapper infinitesimal(std::make_shared<inf::Infinitesimal>(infinity.Degree()));
 			infinitesimal.SetOperator(expression::OPERATOR_TYPE_FLAG_POWER);
-			exp.AddSymbol(infinitesimal);
+			exp.AppendNode(infinitesimal);
 			exp.RemoveNode(infItor.value());
 			expression::Polymorphism::Visit(exp.Front())->SetOperator(expression::OPERATOR_TYPE_FLAG_NONE);
 			return true;
@@ -262,23 +253,26 @@ namespace inf {
 		return false;
 	}
 	bool Infinity::Multiple(expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT>& exp) {
-		const std::vector<expression::ExpressionNodes::iterator> symbols = exp.GetAll<expression::SymbolWrapper>();
+		const std::vector<expression::ExpressionNodes::iterator> symbols = exp.GetAll<expression::SymbolWrapper>(
+			[](const expression::SymbolWrapper& symbol) {return symbol.Name() == INFINITY_NAME; });
 		if (symbols.empty()) {
 			return false;
 		}
+		bool allUnit = true;
 		number::Fraction exponent(1);
 		for (auto symbol : symbols) {
-			const expression::SymbolWrapper& otherWrapper = std::get<expression::SymbolWrapper>(*symbol);
-			expression::Symbol& inner = otherWrapper.Inner();
-			if (typeid(inner) != typeid(Infinity)) {
+			const expression::SymbolWrapper& wrapper = std::get<expression::SymbolWrapper>(*symbol);
+			expression::Symbol& inner = wrapper.Inner();
+			if (wrapper.IsNone()) {
 				continue;
 			}
 			Infinity& inf = dynamic_cast<Infinity&>(inner);
-			const number::Fraction& degree = inf.Degree();
-			if (degree.EqualPositiveOne()) {
+			if (inf.IsUnit()) {
 				continue;
 			}
-			if (otherWrapper.IsRoot()) {
+			allUnit = false;
+			const number::Fraction& degree = inf.Degree();
+			if (wrapper.IsRoot()) {
 				exponent /= degree;
 			}
 			else {
@@ -287,7 +281,7 @@ namespace inf {
 
 			inf.SetDegree(number::Integer(1));
 		}
-		if (exponent.EqualPositiveOne()) {
+		if (allUnit) {
 			return false;
 		}
 		auto exponentChild = expression::Expression<expression::OPERATOR_TYPE_ADD_SUB>::Absorb(exponent);
@@ -296,15 +290,15 @@ namespace inf {
 		return true;
 	}
 	bool Infinity::Infinitesimal(expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT>& exp) {
-		const std::string& name = Name();
+
 		const std::optional<expression::ExpressionNodes::iterator> infinityItor = exp.GetFirst<expression::SymbolWrapper>(
-			[&name](const expression::SymbolWrapper& node) {return name == node.Name(); });
+			[](const expression::SymbolWrapper& node) {return INFINITY_NAME == node.Name(); });
 		if (!infinityItor) {
 			return false;
 		}
 
 		const std::optional<expression::ExpressionNodes::iterator> infinitesimalItor = exp.GetFirst<expression::SymbolWrapper>(
-			[&name](const expression::SymbolWrapper& node) {return "o" == node.Name(); });
+			[](const expression::SymbolWrapper& node) {return INFINITESIMAL_NAME == node.Name(); });
 		if (!infinitesimalItor) {
 			return false;
 		}

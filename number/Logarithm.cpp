@@ -44,10 +44,10 @@ namespace number {
 	}
 	const std::string Logarithm::GetString(uint8_t radix) const {
 		if (!IsFraction()) {
-			return m_reduction_power.GetString(radix) + "#" + m_reduction_base.GetString(radix);
+			return m_reduction_power.GetString(radix) + "|" + m_reduction_base.GetString(radix);
 		}
 		else {
-			return m_reduction_coefficient.GetString(radix) + "{" + m_reduction_power.GetString(radix) + "#" + m_reduction_base.GetString(radix) + "}";
+			return m_reduction_coefficient.GetString(radix) + "{" + m_reduction_power.GetString(radix) + "|" + m_reduction_base.GetString(radix) + "}";
 		}
 	}
 	bool Logarithm::EqualZero() const {

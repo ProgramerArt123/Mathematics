@@ -5,14 +5,19 @@
 
 #include "number/Fraction.h"
 
-#include "expression/Expression.hpp"
-
 #include "Infinitesimal.h"
+
+#define INFINITY_NAME "oo"
+
+namespace expression {
+	template<typename OperatorType>
+	class Expression;
+}
 
 namespace inf {
 	class Infinity : public RatioInf {
 	public:
-		Infinity(const std::string& name = "oo", const number::Fraction& degree = number::Integer(1));
+		Infinity(const number::Fraction& degree = number::Integer(1));
 	
 		const std::string GetString(uint8_t radix = LITERAL_DEFAULT_RADIX) const override;
 
@@ -58,7 +63,5 @@ namespace inf {
 
 	};
 }
-
-#define SYMBOL_INFINITY expression::SymbolWrapper(std::make_shared<inf::Infinity>("oo"))
 
 #endif

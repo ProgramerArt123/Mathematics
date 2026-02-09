@@ -37,7 +37,7 @@ namespace expression {
 	const OPERATOR_TYPE& Node::Operator() const {
 		return *m_operator;
 	}
-	OPERATOR_TYPE_LEVEL Node::Level() const {
+	OPERATOR_TYPE_LEVEL Node::OperatorLevel() const {
 		return m_operator->GetLevel();
 	}
 	OPERATOR_TYPE_FLAG Node::Flag() const {
@@ -136,6 +136,4 @@ namespace expression {
 	{
 		m_unsigned = isUnSigned;
 	}
-
-
 }

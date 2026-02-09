@@ -4,159 +4,793 @@
 
 
 namespace expression {
-	Expression<OPERATOR_TYPE_POWER_ROOT> Power(const number::Complex &number, const number::Complex &exponent) {
+	Expression<OPERATOR_TYPE_POWER_ROOT> Power(const number::Complex& number, const number::Complex& exponent) {
 		return Expression<OPERATOR_TYPE_POWER_ROOT>(Expression<OPERATOR_TYPE_POWER_ROOT>::Absorb(number), POWER,
 			Expression<OPERATOR_TYPE_POWER_ROOT>::Absorb(exponent));
 	}
-	Expression<OPERATOR_TYPE_POWER_ROOT> Power(const expression::ClosureNumber &number, const expression::ClosureNumber &exponent) {
+	Expression<OPERATOR_TYPE_POWER_ROOT> Power(const expression::ClosureNumber& number, const expression::ClosureNumber& exponent) {
 		return Expression<OPERATOR_TYPE_POWER_ROOT>(number.Value(), POWER, exponent.Value());
 	}
-	Expression<OPERATOR_TYPE_POWER_ROOT> Root(const expression::ClosureNumber &number, const expression::ClosureNumber &exponent) {
+	Expression<OPERATOR_TYPE_POWER_ROOT> Root(const expression::ClosureNumber& number, const expression::ClosureNumber& exponent) {
 		return Expression<OPERATOR_TYPE_POWER_ROOT>(number.Value(), ROOT, exponent.Value());
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &addition) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, ADD, addition);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& addendOne, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &addition){
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, ADD, addition);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& addendOne, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &addition) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, ADD, addition);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& addendOne, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &addition) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, ADD, addition);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& addendOne, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &addition) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, ADD, addition);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& addendOne, const expression::SymbolWrapper& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &addition) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, ADD, addition);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& addendOne, const expression::ClosureNumber& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &addition) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, ADD, addition);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& addendOne, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &addition) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, ADD, addition);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& addendOne, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &addition) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, ADD, addition);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& addendOne, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-
-	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &subtrahend) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, SUB, subtrahend);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& addendOne, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &subtrahend) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, SUB, subtrahend);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& addendOne, const expression::SymbolWrapper& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &subtrahend) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, SUB, subtrahend);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& addendOne, const expression::ClosureNumber& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &subtrahend) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, SUB, subtrahend);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& addendOne, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &subtrahend) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, SUB, subtrahend);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& addendOne, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &subtrahend) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, SUB, subtrahend);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& addendOne, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &subtrahend) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, SUB, subtrahend);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& addendOne, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &subtrahend) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, SUB, subtrahend);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& addendOne, const expression::SymbolWrapper& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &subtrahend) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, SUB, subtrahend);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& addendOne, const expression::ClosureNumber& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &multiplier) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, MUL, multiplier);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& addendOne, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &multiplier) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, MUL, multiplier);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& addendOne, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &multiplier) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, MUL, multiplier);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& addendOne, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &multiplier) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, MUL, multiplier);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& addendOne, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &multiplier) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, MUL, multiplier);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& addendOne, const expression::SymbolWrapper& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &multiplier) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, MUL, multiplier);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& addendOne, const expression::ClosureNumber& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &multiplier) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, MUL, multiplier);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::SymbolWrapper& addendOne, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &multiplier) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, MUL, multiplier);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::SymbolWrapper& addendOne, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &multiplier) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, MUL, multiplier);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::SymbolWrapper& addendOne, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &divisor) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, DIV, divisor);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::SymbolWrapper& addendOne, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &divisor) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, DIV, divisor);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::SymbolWrapper& addendOne, const expression::SymbolWrapper& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &divisor) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, DIV, divisor);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::SymbolWrapper& addendOne, const expression::ClosureNumber& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &divisor) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, DIV, divisor);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::ClosureNumber& addendOne, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &divisor) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, DIV, divisor);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::ClosureNumber& addendOne, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &divisor) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, DIV, divisor);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::ClosureNumber& addendOne, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_ADD_SUB> &divisor) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, DIV, divisor);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::ClosureNumber& addendOne, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_MUL_DIV> &divisor) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, DIV, divisor);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::ClosureNumber& addendOne, const expression::SymbolWrapper& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &number, const expression::Expression<OPERATOR_TYPE_POWER_ROOT> &divisor) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, DIV, divisor);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::ClosureNumber& addendOne, const expression::ClosureNumber& addendOther) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(addendOne, ADD, addendOther);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::ClosureNumber &addition) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, ADD, addition);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& minuend, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
 	}
-
-	Expression<OPERATOR_TYPE_ADD_SUB> operator+(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::ClosureNumber &addition) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, ADD, addition);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& minuend, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
 	}
-
-	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::ClosureNumber &subtrahend) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, SUB, subtrahend);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& minuend, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
 	}
-	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::ClosureNumber &subtrahend) {
-		return Expression<OPERATOR_TYPE_ADD_SUB>(number, SUB, subtrahend);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& minuend, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
 	}
-
-	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::ClosureNumber &multiplier) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, MUL, multiplier);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& minuend, const expression::SymbolWrapper& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::ClosureNumber &multiplier) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, MUL, multiplier);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& minuend, const expression::ClosureNumber& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
 	}
-	
-	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB> &number, const expression::ClosureNumber &divisor) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, DIV, divisor);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& minuend, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
 	}
-	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &number, const expression::ClosureNumber &divisor) {
-		return Expression<OPERATOR_TYPE_MUL_DIV>(number, DIV, divisor);
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& minuend, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
 	}
-
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& minuend, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& minuend, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& minuend, const expression::SymbolWrapper& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& minuend, const expression::ClosureNumber& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& minuend, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& minuend, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& minuend, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& minuend, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& minuend, const expression::SymbolWrapper& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& minuend, const expression::ClosureNumber& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& minuend, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& minuend, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& minuend, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& minuend, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& minuend, const expression::SymbolWrapper& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& minuend, const expression::ClosureNumber& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::SymbolWrapper& minuend, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::SymbolWrapper& minuend, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::SymbolWrapper& minuend, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::SymbolWrapper& minuend, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::SymbolWrapper& minuend, const expression::SymbolWrapper& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::SymbolWrapper& minuend, const expression::ClosureNumber& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::ClosureNumber& minuend, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::ClosureNumber& minuend, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::ClosureNumber& minuend, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::ClosureNumber& minuend, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::ClosureNumber& minuend, const expression::SymbolWrapper& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_ADD_SUB> operator-(const expression::ClosureNumber& minuend, const expression::ClosureNumber& subtrahend) {
+		return Expression<OPERATOR_TYPE_ADD_SUB>(minuend, SUB, subtrahend);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& multiplicand, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& multiplicand, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& multiplicand, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& multiplicand, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& multiplicand, const expression::SymbolWrapper& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& multiplicand, const expression::ClosureNumber& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& multiplicand, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& multiplicand, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& multiplicand, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& multiplicand, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& multiplicand, const expression::SymbolWrapper& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& multiplicand, const expression::ClosureNumber& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& multiplicand, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& multiplicand, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& multiplicand, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& multiplicand, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& multiplicand, const expression::SymbolWrapper& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& multiplicand, const expression::ClosureNumber& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& multiplicand, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& multiplicand, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& multiplicand, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& multiplicand, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& multiplicand, const expression::SymbolWrapper& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& multiplicand, const expression::ClosureNumber& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::SymbolWrapper& multiplicand, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::SymbolWrapper& multiplicand, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::SymbolWrapper& multiplicand, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::SymbolWrapper& multiplicand, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::SymbolWrapper& multiplicand, const expression::SymbolWrapper& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::SymbolWrapper& multiplicand, const expression::ClosureNumber& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::ClosureNumber& multiplicand, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::ClosureNumber& multiplicand, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::ClosureNumber& multiplicand, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::ClosureNumber& multiplicand, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::ClosureNumber& multiplicand, const expression::SymbolWrapper& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator*(const expression::ClosureNumber& multiplicand, const expression::ClosureNumber& multiplier) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(multiplicand, MUL, multiplier);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& dividend, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& dividend, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& dividend, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& dividend, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& dividend, const expression::SymbolWrapper& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& dividend, const expression::ClosureNumber& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& dividend, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& dividend, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& dividend, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& dividend, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& dividend, const expression::SymbolWrapper& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& dividend, const expression::ClosureNumber& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& dividend, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& dividend, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& dividend, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& dividend, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& dividend, const expression::SymbolWrapper& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& dividend, const expression::ClosureNumber& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& dividend, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& dividend, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& dividend, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& dividend, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& dividend, const expression::SymbolWrapper& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& dividend, const expression::ClosureNumber& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::SymbolWrapper& dividend, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::SymbolWrapper& dividend, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::SymbolWrapper& dividend, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::SymbolWrapper& dividend, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::SymbolWrapper& dividend, const expression::SymbolWrapper& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::SymbolWrapper& dividend, const expression::ClosureNumber& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::ClosureNumber& dividend, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::ClosureNumber& dividend, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::ClosureNumber& dividend, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::ClosureNumber& dividend, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::ClosureNumber& dividend, const expression::SymbolWrapper& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_MUL_DIV> operator/(const expression::ClosureNumber& dividend, const expression::ClosureNumber& divisor) {
+		return Expression<OPERATOR_TYPE_MUL_DIV>(dividend, DIV, divisor);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& base, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& base, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& base, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& base, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& base, const expression::SymbolWrapper& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& base, const expression::ClosureNumber& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& base, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& base, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& base, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& base, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& base, const expression::SymbolWrapper& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& base, const expression::ClosureNumber& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& base, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& base, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& base, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& base, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& base, const expression::SymbolWrapper& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& base, const expression::ClosureNumber& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& base, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& base, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& base, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& base, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& base, const expression::SymbolWrapper& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& base, const expression::ClosureNumber& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::SymbolWrapper& base, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::SymbolWrapper& base, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::SymbolWrapper& base, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::SymbolWrapper& base, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::SymbolWrapper& base, const expression::SymbolWrapper& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::SymbolWrapper& base, const expression::ClosureNumber& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::ClosureNumber& base, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::ClosureNumber& base, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::ClosureNumber& base, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::ClosureNumber& base, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::ClosureNumber& base, const expression::SymbolWrapper& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator^(const expression::ClosureNumber& base, const expression::ClosureNumber& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(base, POWER, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& power, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& power, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& power, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& power, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& power, const expression::SymbolWrapper& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& power, const expression::ClosureNumber& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& power, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& power, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& power, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& power, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& power, const expression::SymbolWrapper& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& power, const expression::ClosureNumber& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& power, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& power, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& power, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& power, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& power, const expression::SymbolWrapper& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& power, const expression::ClosureNumber& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& power, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& power, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& power, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& power, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& power, const expression::SymbolWrapper& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& power, const expression::ClosureNumber& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::SymbolWrapper& power, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::SymbolWrapper& power, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::SymbolWrapper& power, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::SymbolWrapper& power, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::SymbolWrapper& power, const expression::SymbolWrapper& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::SymbolWrapper& power, const expression::ClosureNumber& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::ClosureNumber& power, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::ClosureNumber& power, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::ClosureNumber& power, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::ClosureNumber& power, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::ClosureNumber& power, const expression::SymbolWrapper& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_POWER_ROOT> operator&(const expression::ClosureNumber& power, const expression::ClosureNumber& exponent) {
+		return Expression<OPERATOR_TYPE_POWER_ROOT>(power, ROOT, exponent);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& power, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& power, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& power, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& power, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& power, const expression::SymbolWrapper& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_ADD_SUB>& power, const expression::ClosureNumber& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& power, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& power, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& power, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& power, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& power, const expression::SymbolWrapper& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_MUL_DIV>& power, const expression::ClosureNumber& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& power, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& power, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& power, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& power, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& power, const expression::SymbolWrapper& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& power, const expression::ClosureNumber& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& power, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& power, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& power, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& power, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& power, const expression::SymbolWrapper& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::Expression<OPERATOR_TYPE_LOGARITHM>& power, const expression::ClosureNumber& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::SymbolWrapper& power, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::SymbolWrapper& power, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::SymbolWrapper& power, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::SymbolWrapper& power, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::SymbolWrapper& power, const expression::SymbolWrapper& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::SymbolWrapper& power, const expression::ClosureNumber& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::ClosureNumber& power, const expression::Expression<OPERATOR_TYPE_ADD_SUB>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::ClosureNumber& power, const expression::Expression<OPERATOR_TYPE_MUL_DIV>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::ClosureNumber& power, const expression::Expression<OPERATOR_TYPE_POWER_ROOT>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::ClosureNumber& power, const expression::Expression<OPERATOR_TYPE_LOGARITHM>& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::ClosureNumber& power, const expression::SymbolWrapper& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
+	Expression<OPERATOR_TYPE_LOGARITHM> operator|(const expression::ClosureNumber& power, const expression::ClosureNumber& base) {
+		return Expression<OPERATOR_TYPE_LOGARITHM>(power, LOGARITHM, base);
+	}
 	Expression<OPERATOR_TYPE_MUL_DIV> Collect(const expression::Expression<OPERATOR_TYPE_MUL_DIV> &exp, size_t count) {
 		Expression<OPERATOR_TYPE_MUL_DIV> collect(exp);
 		return collect;
 	}
-	bool Polymorphism::power_root_common_switch = true;
+	bool Polymorphism::CollectCommon() {
+		std::vector<ExpressionNodes::iterator> exps = GetChildren();
+
+		if (2 > exps.size()) {
+			return false;
+		}
+		for (auto itor = exps.begin(); itor != exps.end(); ++itor) {
+			if (CollectCommonChild(exps, itor)) {
+				exps.erase(itor);
+				return true;
+			}
+		}
+		return false;
+	}
+	bool Polymorphism::CollectPair() {
+		return false;
+	}
 	std::optional<const Expression<OPERATOR_TYPE_ADD_SUB>> Polymorphism::Reduce() const {
 		return std::nullopt;
 	}
@@ -167,6 +801,20 @@ namespace expression {
 		return std::nullopt;
 	}
 	bool Polymorphism::Signed() {
+		return false;
+	}
+	bool Polymorphism::Compare(const ExpressionNode& previous, const ExpressionNode& next) {
+		OPERATOR_TYPE_FLAG previousFlag = Visit(previous)->Flag();
+		OPERATOR_TYPE_FLAG nextFlag = Visit(next)->Flag();
+		if (previousFlag != nextFlag) {
+			return previousFlag < nextFlag;
+		}
+
+		auto compare = CompareNode(previous, next);
+		if (compare.has_value()) {
+			return compare.value();
+		}
+
 		return false;
 	}
 	template<typename ChildOperatorType>
@@ -210,14 +858,63 @@ namespace expression {
 	Node* Polymorphism::Visit(ExpressionNode& node) {
 		return Expression<OPERATOR_TYPE_NONE>::Visit(node);
 	}
-	bool Polymorphism::PowerRootCommon() {
-		return power_root_common_switch;
-	}
-	void Polymorphism::PowerRootCommonOn() {
-		power_root_common_switch = true;
-	}
-	void Polymorphism::PowerRootCommonOff() {
-		power_root_common_switch = false;
+	std::optional<bool> Polymorphism::CompareNode(const ExpressionNode& one, const ExpressionNode& other) {
+
+		size_t oneType = one.index();
+		size_t otherType = other.index();
+		if (oneType != otherType) {
+			return oneType < otherType;
+		}
+
+		size_t previousSize = Visit(one)->Size();
+		size_t nextSize = Visit(other)->Size();
+		if (previousSize != nextSize) {
+			return previousSize < nextSize;
+		}
+
+		{
+			auto compare = CompareTypeNode<expression::ClosureNumber>(one, other);
+			if (compare.has_value()) {
+				return compare.value();
+			}
+		}
+
+		{
+			auto compare = CompareTypeNode<expression::SymbolWrapper>(one, other);
+			if (compare.has_value()) {
+				return compare.value();
+			}
+		}
+
+		{
+			auto compare = CompareTypeNode<expression::Expression<OPERATOR_TYPE_ADD_SUB>>(one, other);
+			if (compare.has_value()) {
+				return compare.value();
+			}
+		}
+
+		{
+			auto compare = CompareTypeNode<expression::Expression<OPERATOR_TYPE_MUL_DIV>>(one, other);
+			if (compare.has_value()) {
+				return compare.value();
+			}
+		}
+
+		{
+			auto compare = CompareTypeNode<expression::Expression<OPERATOR_TYPE_POWER_ROOT>>(one, other);
+			if (compare.has_value()) {
+				return compare.value();
+			}
+		}
+
+		{
+			auto compare = CompareTypeNode<expression::Expression<OPERATOR_TYPE_LOGARITHM>>(one, other);
+			if (compare.has_value()) {
+				return compare.value();
+			}
+		}
+
+		return std::nullopt;
 	}
 	PolymorphismAddSub::PolymorphismAddSub(Expression<OPERATOR_TYPE_ADD_SUB> &exp) :m_exp(exp) {
 
@@ -239,22 +936,20 @@ namespace expression {
 		return false;
 	}
 	std::vector<ExpressionNodes::iterator> PolymorphismAddSub::GetChildren(){
-		std::vector<ExpressionNodes::iterator> exps;
-		std::vector<ExpressionNodes::iterator> symbols = m_exp.GetAll<expression::SymbolWrapper>();
-		exps.insert(exps.end(), symbols.begin(), symbols.end());
-		std::vector<ExpressionNodes::iterator> divs = m_exp.GetAll<expression::Expression<OPERATOR_TYPE_MUL_DIV>>();
-		exps.insert(exps.end(), divs.begin(), divs.end());
-		std::vector<ExpressionNodes::iterator> roots = m_exp.GetAll<expression::Expression<OPERATOR_TYPE_POWER_ROOT>>();
-		exps.insert(exps.end(), roots.begin(), roots.end());
-		std::vector<ExpressionNodes::iterator> logarithms = m_exp.GetAll<expression::Expression<OPERATOR_TYPE_LOGARITHM>>();
-		exps.insert(exps.end(), logarithms.begin(), logarithms.end());
-		return exps;
+		return m_exp.GetAll<expression::SymbolWrapper, expression::Expression<OPERATOR_TYPE_MUL_DIV>, 
+			expression::Expression<OPERATOR_TYPE_POWER_ROOT>, expression::Expression<OPERATOR_TYPE_LOGARITHM>>();
 	}
 	bool PolymorphismAddSub::CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) {
 		if (CollectCommonChildFull(exps, start)) {
 			return true;
 		}
 		if (CollectCommonChildPartial(exps, start)) {
+			return true;
+		}
+		return false;
+	}
+	bool PolymorphismAddSub::CollectPair() {
+		if (CollectCommonDenominator()) {
 			return true;
 		}
 		return false;
@@ -326,6 +1021,70 @@ namespace expression {
 		}
 		return nodes;
 	}
+	std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> PolymorphismAddSub::CommonDenominator(const Expression<OPERATOR_TYPE_MUL_DIV>& one, const Expression<OPERATOR_TYPE_MUL_DIV>& other) {
+		auto &oneBack = one.Back();
+		auto &otherBack = other.Back();
+		if (Visit(oneBack)->IsDiv() || Visit(otherBack)->IsDiv()) {
+			Expression<OPERATOR_TYPE_MUL_DIV> oneNumerator;
+			Expression<OPERATOR_TYPE_MUL_DIV> oneDenominator;
+			for (const auto &node : one) {
+				if (Visit(node)->IsDiv()) {
+					oneDenominator.AppendNode(node, OPERATOR_TYPE_FLAG_MUL);
+				}
+				else {
+					oneNumerator.AppendNode(node);
+				}
+			}
+
+			Expression<OPERATOR_TYPE_MUL_DIV> otherNumerator;
+			Expression<OPERATOR_TYPE_MUL_DIV> otherDenominator;
+			for (const auto& node : other) {
+				if (Visit(node)->IsDiv()) {
+					otherDenominator.AppendNode(node, OPERATOR_TYPE_FLAG_MUL);
+				}
+				else {
+					otherNumerator.AppendNode(node);
+				}
+			}
+
+			Expression<OPERATOR_TYPE_MUL_DIV> newOneNumerator;
+			Expression<OPERATOR_TYPE_MUL_DIV> newOtherNumerator;
+			Expression<OPERATOR_TYPE_MUL_DIV> commonDenominator;
+
+			if (!oneDenominator.IsEmpty() && !otherDenominator.IsEmpty()) {
+				newOneNumerator = oneNumerator * otherDenominator;
+				newOtherNumerator = otherNumerator * oneDenominator;
+				commonDenominator = oneDenominator * otherDenominator;
+			}
+			else if (!oneDenominator.IsEmpty()) {
+				newOneNumerator = oneNumerator;
+				newOtherNumerator = otherNumerator * oneDenominator;
+				commonDenominator = oneDenominator;
+			}
+			else {
+				newOneNumerator = oneNumerator * otherDenominator;
+				newOtherNumerator = otherNumerator;
+				commonDenominator = otherDenominator;
+			}
+
+			
+			size_t oneSignedCount = (one.IsUnSigned() ? 0 : 1) + (one.IsSub() ? 1 : 0);
+			
+			newOneNumerator.SetUnSigned(oneSignedCount % 2 == 0);
+			newOneNumerator.SetOperator(OPERATOR_TYPE_FLAG_ADD);
+
+			size_t otherSignedCount = (other.IsUnSigned() ? 0 : 1) + (other.IsSub() ? 1 : 0);
+			
+			newOtherNumerator.SetUnSigned(otherSignedCount % 2 == 0);
+			newOtherNumerator.SetOperator(OPERATOR_TYPE_FLAG_ADD);
+
+			commonDenominator.SetUnSigned(true);
+			commonDenominator.SetOperator(OPERATOR_TYPE_FLAG_ADD);
+
+			return (newOneNumerator + newOtherNumerator) / commonDenominator;
+		}
+		return std::nullopt;
+	}
 	bool PolymorphismAddSub::Signed() {
 		if (NodesSigned()) {
 			return true;
@@ -333,6 +1092,20 @@ namespace expression {
 		if (FrontNodeSigned()) {
 			return true;
 		}
+		return false;
+	}
+	bool PolymorphismAddSub::Compare(const ExpressionNode& previous, const ExpressionNode& next) {
+		auto compare = CompareNode(previous, next);
+		if (compare.has_value()) {
+			return compare.value();
+		}
+
+		OPERATOR_TYPE_FLAG previousFlag = Visit(previous)->Flag();
+		OPERATOR_TYPE_FLAG nextFlag = Visit(next)->Flag();
+		if (previousFlag != nextFlag) {
+			return previousFlag < nextFlag;
+		}
+		
 		return false;
 	}
 	Expression<OPERATOR_TYPE_MUL_DIV> PolymorphismAddSub::GetCommonAdpter(const ExpressionNode* node)
@@ -441,6 +1214,9 @@ namespace expression {
 		}
 		return false;
 	}
+	bool PolymorphismAddSub::CollectCommonDenominator() {
+		return Polymorphism::CollectPair<OPERATOR_TYPE_ADD_SUB, OPERATOR_TYPE_MUL_DIV>(m_exp, PolymorphismAddSub::CommonDenominator);
+	}
 	PolymorphismMulDiv::PolymorphismMulDiv(Expression<OPERATOR_TYPE_MUL_DIV> &exp) :
 		m_exp(exp) {
 	}
@@ -468,12 +1244,7 @@ namespace expression {
 		return false;
 	}
 	std::vector<ExpressionNodes::iterator> PolymorphismMulDiv::GetChildren(){
-		std::vector<ExpressionNodes::iterator> exps;
-		std::vector<ExpressionNodes::iterator> symbols = m_exp.GetAll<expression::SymbolWrapper>();
-		exps.insert(exps.end(), symbols.begin(), symbols.end());
-		std::vector<ExpressionNodes::iterator> roots = m_exp.GetAll<expression::Expression<OPERATOR_TYPE_POWER_ROOT>>();
-		exps.insert(exps.end(), roots.begin(), roots.end());
-		return exps;
+		return m_exp.GetAll<expression::SymbolWrapper, expression::Expression<OPERATOR_TYPE_POWER_ROOT>>();
 	}
 	bool PolymorphismMulDiv::CollectCommonChild(std::vector<ExpressionNodes::iterator> &exps, std::vector<ExpressionNodes::iterator>::iterator start) {
 		expression::Expression<OPERATOR_TYPE_POWER_ROOT> left = GetCommonAdpter(&**start);
@@ -486,6 +1257,12 @@ namespace expression {
 				exps.erase(index);
 				return true;
 			}
+		}
+		return false;
+	}
+	bool PolymorphismMulDiv::CollectPair() {
+		if (CollectChangeBase()) {
+			return true;
 		}
 		return false;
 	}
@@ -502,6 +1279,8 @@ namespace expression {
 			(OPERATOR_TYPE_FLAG_SUB != left && OPERATOR_TYPE_FLAG_SUB == right) ?
 			Expression<OPERATOR_TYPE_ADD_SUB>(childLeft, SUB, childRight) : Expression<OPERATOR_TYPE_ADD_SUB>(childLeft, ADD, childRight);
 		
+		child.SetOperator(OPERATOR_TYPE_FLAG_MUL);
+
 		Expression<OPERATOR_TYPE_MUL_DIV> collect;
 
 		collect.AppendChild(child.SetChild());
@@ -674,6 +1453,40 @@ namespace expression {
 		Expression<OPERATOR_TYPE_POWER_ROOT> exp(symbol, POWER, number::Integer(1));
 		exp.SetOperator(symbol.Flag());
 		return exp;
+	}
+	std::optional<Expression<OPERATOR_TYPE_LOGARITHM>> PolymorphismMulDiv::ChangeBase(const Expression<OPERATOR_TYPE_LOGARITHM>& one, const Expression<OPERATOR_TYPE_LOGARITHM>& other) {
+		if (!Visit(one.Back())->IsEqual(*Visit(other.Back()))) {
+			return std::nullopt;
+		}
+		if ((one.IsDiv() && other.IsDiv()) || (!one.IsDiv() && !other.IsDiv())) {
+			return std::nullopt;
+		}
+
+		Expression<OPERATOR_TYPE_LOGARITHM> power;
+		Expression<OPERATOR_TYPE_LOGARITHM> base;
+
+		for (auto node = one.begin(); node != std::prev(one.end()); ++node) {
+			if (!one.IsDiv()) {
+				power.AppendNode(*node);
+			}
+			else {
+				base.AppendNode(*node);
+			}
+		}
+
+		for (auto node = other.begin(); node != std::prev(other.end()); ++node) {
+			if (!other.IsDiv()) {
+				power.AppendNode(*node);
+			}
+			else {
+				base.AppendNode(*node);
+			}
+		}
+
+		auto changeBase = power | base;
+		changeBase.SetOperator(OPERATOR_TYPE_FLAG_MUL);
+
+		return changeBase;
 	}
 	bool PolymorphismMulDiv::MulClosure() {
 		std::vector<ExpressionNodes::iterator> closures = m_exp.GetAll<expression::ClosureNumber>();
@@ -896,6 +1709,9 @@ namespace expression {
 		}
 		return count;
 	}
+	bool PolymorphismMulDiv::CollectChangeBase() {
+		return Polymorphism::CollectPair<OPERATOR_TYPE_MUL_DIV, OPERATOR_TYPE_LOGARITHM>(m_exp, PolymorphismMulDiv::ChangeBase);
+	}
 	PolymorphismPowerRoot::PolymorphismPowerRoot(Expression<OPERATOR_TYPE_POWER_ROOT> &exp) :
 		m_exp(exp) {
 
@@ -1008,10 +1824,6 @@ namespace expression {
 	std::optional<Expression<OPERATOR_TYPE_MUL_DIV>> PolymorphismPowerRoot::BuildCommon(const std::vector<ExpressionNodes::const_iterator> &leftChildren,
 		const std::vector<ExpressionNodes::const_iterator> &rightChildren, OPERATOR_TYPE_FLAG right, const std::list<ExpressionNode> &commons) {
 		
-		if (!PowerRootCommon()) {
-			return std::nullopt;
-		}
-
 		Expression<OPERATOR_TYPE_MUL_DIV> childLeft = Polymorphism::NodesBuild(leftChildren, OPERATOR_TYPE_FLAG_ROOT);
 
 		Expression<OPERATOR_TYPE_MUL_DIV> childRight = Polymorphism::NodesBuild(rightChildren, OPERATOR_TYPE_FLAG_ROOT);
@@ -1130,7 +1942,7 @@ namespace expression {
 				return ExpandMulDivDriver(exp, pos);
 			}
 			else if (OPERATOR_TYPE_LEVEL_ADD_SUB == exp.Level()) {
-				return ExpandAddSubDriver(exp);
+				return ExpandAddSubDriver(exp, pos);
 			}
 		}
 		return std::nullopt;
@@ -1306,7 +2118,7 @@ namespace expression {
 
 		return expand;
 	}
-	std::optional<typename expression::Expression<OPERATOR_TYPE_MUL_DIV>> PolymorphismPowerRoot::ExpandAddSubDriver(const Polymorphism& exp) const {
+	std::optional<typename expression::Expression<OPERATOR_TYPE_MUL_DIV>> PolymorphismPowerRoot::ExpandAddSubDriver(const Polymorphism& exp, ExpressionNodes::const_iterator pos) const {
 		
 		auto expNodes = exp.BuildPowerRootDriverNodes();
 		if (expNodes.empty()) {
@@ -1321,6 +2133,11 @@ namespace expression {
 			OPERATOR_TYPE_FLAG flag = Polymorphism::Visit(node)->Flag();
 
 			cross.AppendNode(m_exp.Front());
+			for (auto driver = ++m_exp.begin(); driver != m_exp.end(); ++driver) {
+				if (driver != pos) {
+					cross.AppendNode(*driver);
+				}
+			}
 
 			cross.AppendNode(node);
 			Polymorphism::Visit(cross.Back())->SetOperator(OPERATOR_TYPE_FLAG_POWER);
@@ -1331,6 +2148,7 @@ namespace expression {
 
 		return expand;
 	}
+	
 	std::optional<typename expression::Expression<OPERATOR_TYPE_MUL_DIV>> PolymorphismPowerRoot::ExpandMulDivDriver(const Polymorphism& exp, ExpressionNodes::const_iterator pos) const {
 		auto expNodes = exp.BuildPowerRootDriverNodes();
 		if (expNodes.empty()) {
@@ -1486,6 +2304,9 @@ namespace expression {
 				expression::ClosureNumber(1)), m_exp.Flag());
 			return Expression<OPERATOR_TYPE_ADD_SUB>(expression::ClosureNumber(0), ADD, reduction);
 		}
+	}
+	bool PolymorphismLogarithm::Compare(const ExpressionNode& previous, const ExpressionNode& next) {
+		return false;
 	}
 	bool PolymorphismLogarithm::LogarithmClosure() {
 		return m_exp.ForeachClosure(OPERATOR_TYPE_FLAG_LOGARITHM,

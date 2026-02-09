@@ -3,11 +3,13 @@
 
 #include "Symbol.h"
 
+#define IMAGINARY_NAME "i"
+
 namespace expression {
 	class Imaginary : public Symbol {
 	public:
-		Imaginary(const std::string &name = "i") :
-			Symbol(name){
+		Imaginary() :
+			Symbol(IMAGINARY_NAME){
 
 		}
 		bool ExtendPowerRoot(Expression<OPERATOR_TYPE_POWER_ROOT> &exp) override;
@@ -15,7 +17,5 @@ namespace expression {
 		std::shared_ptr<Symbol> GetClone() const override;
 	};
 }
-
-#define SYMBOL_IMAGINARY SymbolWrapper(std::make_shared<expression::Imaginary>("i"))
 
 #endif

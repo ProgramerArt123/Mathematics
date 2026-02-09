@@ -3,16 +3,20 @@
 
 #include "RatioInf.h"
 
+#define INFINITESIMAL_NAME "o"
+
 namespace inf {
 	class Infinitesimal : public RatioInf {
 	public:
-		Infinitesimal(const std::string &name = "o", const number::Fraction& degree = number::Integer(1));
+		Infinitesimal(const number::Fraction& degree = number::Integer(1));
 
 		const std::string GetString(uint8_t radix = LITERAL_DEFAULT_RADIX) const override;
 
 		bool IsEqual(const Symbol &other) const override;
 
 		bool ExtendMulDiv(expression::Expression<expression::OPERATOR_TYPE_MUL_DIV> &exp) override;
+
+		bool ExtendPowerRoot(expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT>& exp) override;
 		
 		std::shared_ptr<expression::Symbol> GetClone() const override;
 
@@ -37,13 +41,17 @@ namespace inf {
 
 	private:
 
+		bool Transform(expression::Expression<expression::OPERATOR_TYPE_MUL_DIV>& exp);
+
 		bool Multiple(expression::Expression<expression::OPERATOR_TYPE_MUL_DIV>& exp);
+
+		bool Transform(expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT>& exp);
+
+		bool Multiple(expression::Expression<expression::OPERATOR_TYPE_POWER_ROOT>& exp);
 
 	private:
 		static number::Fraction ignore_line;
 	};
 }
-
-#define SYMBOL_INFINITESIMAL expression::SymbolWrapper(std::make_shared<inf::Infinitesimal>("o"))
 
 #endif
